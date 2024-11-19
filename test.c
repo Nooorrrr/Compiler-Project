@@ -22,7 +22,7 @@ INSTRUCTION {
         C = A- 1;
          C = A- 1;
     }
-    FOR (i = 0 : 1 : 10) {
-        X= X + 1;
-    }
+ FOR (INTEGER I = 0 : 1 : 10) {
+    X = X + 1;
+}
 }

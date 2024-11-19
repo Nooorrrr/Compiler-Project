@@ -6,10 +6,11 @@ void yyerror(const char *s);  // Déclaration de la fonction d'erreur
 %}
 
 %token VAR_GLOBAL DECLARATION INSTRUCTION INTEGER FLOAT CHAR CONST IF ELSE FOR READ WRITE
-%token IDENTIFIER NUMBER
+%token IDENTIFIER NUMBERINTPOS NUMBERINTNEG NUMBERFLOATPOS NUMBERFLOATNEG
 %token AND OR NOT EQUAL NEQ GTE LTE GT LT
-%token LBRACE RBRACE LPAREN RPAREN LBRACKET RBRACKET SEMICOLON COMMA ASSIGN
+%token LBRACE RBRACE LPAREN RPAREN LBRACKET RBRACKET SEMICOLON COMMA ASSIGN QUOTE COLON
 %token PLUS MINUS MULT DIV
+%token TEXT
 
 %left PLUS MINUS    // Définir les priorités des opérateurs
 %left MULT DIV
@@ -18,6 +19,7 @@ void yyerror(const char *s);  // Déclaration de la fonction d'erreur
 %nonassoc NOT
 
 %%
+
 
 /* Règles de la grammaire */
 program:
@@ -32,7 +34,7 @@ varGloballist:
 declaration:
     type listevariable SEMICOLON               // Déclaration d'une variable simple
     | CONST type IDENTIFIER ASSIGN expressionarithmetic  SEMICOLON // Déclaration de constante
-    | type IDENTIFIER LBRACKET NUMBER RBRACKET SEMICOLON;
+    | type IDENTIFIER LBRACKET NUMBERINTPOS RBRACKET SEMICOLON; //tab ou chaine de caractere
     ;
 
 listevariable:
@@ -48,21 +50,25 @@ type:
 
 
 declarationlist:
-    declaration declarationlist
+    affectation declarationlist
     | /* Vide */
     ;
 
-declaration:
+affectation:
     IDENTIFIER ASSIGN expressionarithmetic SEMICOLON
 ;
 expressionarithmetic:
     IDENTIFIER
-    |LPAREN expressionarithmetic RPAREN
-    | NUMBER                            // Nombre
+    | LPAREN expressionarithmetic RPAREN
+    | NUMBERINTPOS
+    | NUMBERINTNEG 
+    | NUMBERFLOATNEG
+    | NUMBERFLOATPOS
     | expressionarithmetic PLUS expressionarithmetic        // Addition
     | expressionarithmetic MINUS expressionarithmetic       // Soustraction
     | expressionarithmetic MULT expressionarithmetic        // Multiplication
-    | expressionarithmetic DIV expressionarithmetic         // Division
+    | expressionarithmetic DIV expressionarithmetic  
+
     ;
 
 expressionlogic:                  
@@ -85,15 +91,36 @@ statements:
 
 // a revoir keml kima rahoum
 statement:
-    declaration
-    | IF LPAREN expressionlogic RPAREN LBRACE statements RBRACE  ELSE LBRACE statements RBRACE  // Condition IF
-    | FOR LPAREN statement expressionlogic SEMICOLON statement RPAREN statement  // Boucle FOR
+    affectation
+    | IF LPAREN expressionlogic RPAREN LBRACE statements RBRACE  ELSE LBRACE statements RBRACE  // Condition IF // Boucle FOR avec pas 
+    | FOR LPAREN initialisation COLON fortext RPAREN LBRACE statements RBRACE
     | READ LPAREN IDENTIFIER RPAREN SEMICOLON  // Instruction READ
     | WRITE LPAREN expressionwrite RPAREN SEMICOLON  // Instruction WRITE
     ;
 
+fortext:
+      NUMBER COLON NUMBER     
+    |  NUMBER COLON IDENTIFIER   
+    |  IDENTIFIER COLON IDENTIFIER     
+    | IDENTIFIER COLON NUMBER     
+;
+
+
+initialisation:
+  |INTEGER IDENTIFIER ASSIGN expressionarithmetic
+  |IDENTIFIER ASSIGN expressionarithmetic
+  
+;
+NUMBER:
+    NUMBERINTPOS
+    |NUMBERINTNEG;
+
+
 expressionwrite:
-    //mezel mdrtha
+    IDENTIFIER
+    |TEXT 
+    |TEXT COMMA expressionwrite
+    |IDENTIFIER COMMA expressionwrite
     ;
 
 %%

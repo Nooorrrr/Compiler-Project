@@ -21,12 +21,14 @@
 "READ"               { return READ; }
 "WRITE"              { return WRITE; }
 
-"%%"[^\n]*           { /* Commentaire, on ignore */ }
+"%%"[^\n]*           {  }
 
 [A-Z][a-z0-9]{0,7}   { return IDENTIFIER; }
 
-[+-]?[0-9]+              { return NUMBER; }
-[+-]?[0-9]+\.[0-9]+      { return NUMBER; }
+[+]?[0-9]+              { return NUMBERINTPOS; }
+[+]?[0-9]+\.[0-9]+      { return NUMBERFLOATPOS; }
+"-"[0-9]+              { return NUMBERINTNEG; }
+"-"[0-9]+\.[0-9]+      { return NUMBERFLOATNEG; }
 "&&"                 { return AND; }
 "\|\|"               { return OR; }
 "!"                  { return NOT; }
@@ -36,6 +38,7 @@
 "<="                 { return LTE; }
 ">"                  { return GT; }
 "<"                  { return LT; }
+"\""                   { return QUOTE; }   // Règle pour le guillemet
 
 "+"                   { return PLUS; }   
 "-"                   { return MINUS; } 
@@ -49,12 +52,14 @@
 "["                  { return LBRACKET; }
 "]"                  { return RBRACKET; }
 ";"                  { return SEMICOLON; }
+"\:"                   { return COLON;}
 ","                  { return COMMA; }
 "="                  { return ASSIGN; }
+\"[^\n\t]*\"  { return TEXT; }
 
 [ \t]                { /* Ignorer les espaces et les tabulations */ }
 [\n]                 { yylineno++; }
-.                    { printf("Erreur lexical à la ligne %d: Caractère inattendu: %s\n", yylineno, yytext); exit(1); }
+.                    { printf("Erreur lexical à la ligne %d: entite inconnu: %s\n", yylineno, yytext); exit(1); }
 
 %%
 
