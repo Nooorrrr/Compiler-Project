@@ -2,15 +2,18 @@
 
 VAR_GLOBAL {
     INTEGER Q;
-    INTEGER Q, Z, T;
+    INTEGER Q, Z, T;%%     affectations    
     INTEGER Q, Z, T;
     FLOAT X,L;
     CHAR X[8];
     CONST INTEGER Z = 5;
 }
 
-DECLARATION {
-    A= (X + 2) * Y;
+
+DECLARATION { %%affectations
+    FLOAT X,L;
+    CHAR X[8];
+    CONST INTEGER Z = 5;
 }
 
 INSTRUCTION {
@@ -24,5 +27,10 @@ INSTRUCTION {
     }
  FOR (INTEGER I = 0 : 1 : 10) {
     X = X + 1;
+    READ(A);
+    WRITE("hi");
+    WRITE("hii",A,"hi");
+    WRITE("hii",A,"hi,");
+
 }
 }

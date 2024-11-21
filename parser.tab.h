@@ -89,13 +89,12 @@ extern int yydebug;
     SEMICOLON = 290,               /* SEMICOLON  */
     COMMA = 291,                   /* COMMA  */
     ASSIGN = 292,                  /* ASSIGN  */
-    QUOTE = 293,                   /* QUOTE  */
-    COLON = 294,                   /* COLON  */
-    PLUS = 295,                    /* PLUS  */
-    MINUS = 296,                   /* MINUS  */
-    MULT = 297,                    /* MULT  */
-    DIV = 298,                     /* DIV  */
-    TEXT = 299                     /* TEXT  */
+    COLON = 293,                   /* COLON  */
+    PLUS = 294,                    /* PLUS  */
+    MINUS = 295,                   /* MINUS  */
+    MULT = 296,                    /* MULT  */
+    DIV = 297,                     /* DIV  */
+    TEXT = 298                     /* TEXT  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif

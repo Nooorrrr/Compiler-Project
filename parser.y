@@ -8,7 +8,7 @@ void yyerror(const char *s);  // Déclaration de la fonction d'erreur
 %token VAR_GLOBAL DECLARATION INSTRUCTION INTEGER FLOAT CHAR CONST IF ELSE FOR READ WRITE
 %token IDENTIFIER NUMBERINTPOS NUMBERINTNEG NUMBERFLOATPOS NUMBERFLOATNEG
 %token AND OR NOT EQUAL NEQ GTE LTE GT LT
-%token LBRACE RBRACE LPAREN RPAREN LBRACKET RBRACKET SEMICOLON COMMA ASSIGN QUOTE COLON
+%token LBRACE RBRACE LPAREN RPAREN LBRACKET RBRACKET SEMICOLON COMMA ASSIGN COLON
 %token PLUS MINUS MULT DIV
 %token TEXT
 
@@ -23,7 +23,7 @@ void yyerror(const char *s);  // Déclaration de la fonction d'erreur
 
 /* Règles de la grammaire */
 program:
-    VAR_GLOBAL LBRACE varGloballist RBRACE DECLARATION LBRACE declarationlist RBRACE INSTRUCTION LBRACE statements RBRACE
+    VAR_GLOBAL LBRACE varGloballist RBRACE DECLARATION LBRACE varGloballist RBRACE INSTRUCTION LBRACE statements RBRACE
     ;
 
 varGloballist:
@@ -49,10 +49,7 @@ type:
     ;
 
 
-declarationlist:
-    affectation declarationlist
-    | /* Vide */
-    ;
+
 
 affectation:
     IDENTIFIER ASSIGN expressionarithmetic SEMICOLON
@@ -107,8 +104,7 @@ fortext:
 
 
 initialisation:
-  |INTEGER IDENTIFIER ASSIGN expressionarithmetic
-  |IDENTIFIER ASSIGN expressionarithmetic
+  IDENTIFIER ASSIGN expressionarithmetic
   
 ;
 NUMBER:
