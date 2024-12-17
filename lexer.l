@@ -1,7 +1,7 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
-#include "parser.tab.h" 
+#include "parser.tab.h"  
 %}
 
 %option noyywrap
@@ -21,14 +21,15 @@
 "READ"               { return READ; }
 "WRITE"              { return WRITE; }
 
-"%%"[^\n]*           {  }
+"%%"[^\n]*           { /* Ignore comments */ }
 
-[A-Z][a-z0-9]{0,7}   { return IDENTIFIER; }
+[A-Z][a-z0-9]{0,7}   { return IDENTIFIER; } 
 
-[+]?[0-9]+              { return NUMBERINTPOS; }
-[+]?[0-9]+\.[0-9]+      { return NUMBERFLOATPOS; }
-"-"[0-9]+              { return NUMBERINTNEG; }
-"-"[0-9]+\.[0-9]+      { return NUMBERFLOATNEG; }
+[+]?[0-9]+           { return NUMBERINTPOS; }  
+[+]?[0-9]+\.[0-9]+   { return NUMBERFLOATPOS; }  
+"-"[0-9]+            { return NUMBERINTNEG; }  
+"-"[0-9]+\.[0-9]+    { return NUMBERFLOATNEG; }
+
 "&&"                 { return AND; }
 "\|\|"               { return OR; }
 "!"                  { return NOT; }
@@ -39,10 +40,10 @@
 ">"                  { return GT; }
 "<"                  { return LT; }
 
-"+"                   { return PLUS; }   
-"-"                   { return MINUS; } 
-"*"                   { return MULT; }   
-"/"                   { return DIV; }    
+"+"                  { return PLUS; }
+"-"                  { return MINUS; }
+"*"                  { return MULT; }
+"/"                  { return DIV; }
 
 "{"                  { return LBRACE; }
 "}"                  { return RBRACE; }
@@ -51,14 +52,20 @@
 "["                  { return LBRACKET; }
 "]"                  { return RBRACKET; }
 ";"                  { return SEMICOLON; }
-"\:"                   { return COLON;}
+"\:"                 { return COLON; }
 ","                  { return COMMA; }
 "="                  { return ASSIGN; }
-\"[^\n\t\"]*\"  { return TEXT; }
+\"[^\n\t\"]*\"       { return TEXT; }  
 
-[ \t]                { /* Ignorer les espaces et les tabulations */ }
-[\n]                 { yylineno++; }
-.                    { printf("Erreur lexical à la ligne %d: entite inconnu: %s\n", yylineno, yytext); exit(1); }
+[ \t]                { /* Ignore spaces and tabs */ }
+[\n]                 { yylineno++; } 
+.                    { printf("Erreur lexical Ã  la ligne %d: entitÃ© inconnue: %s\n", yylineno, yytext); exit(1); }  // Handle unknown characters
 
 %%
 
+int main(int argc, char *argv[]) {
+    yylex();  // Call the lexer
+    printf("Token: %d\n", yylval); // Or whatever token information you want to print
+    return 0;
+
+}

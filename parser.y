@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "lex.yy.h"  // Inclure le fichier généré par Flex
+#include "TS.h"  // Inclure la table des symboles
 void yyerror(const char *s);  // Déclaration de la fonction d'erreur
 %}
 
@@ -27,14 +28,39 @@ program:
     ;
 
 varGloballist:
-    varGloballist declaration
+    varGloballist declarat
     | /* Vide */
     ;
 
-declaration:
+declarat:
     type listevariable SEMICOLON               // Déclaration d'une variable simple
-    | CONST type IDENTIFIER ASSIGN expressionarithmetic  SEMICOLON // Déclaration de constante
-    | type IDENTIFIER LBRACKET NUMBERINTPOS RBRACKET SEMICOLON; //tab ou chaine de caractere
+        {
+            // Ajouter à la table des symboles
+            for (int i = 0; i < $2; i++) {
+                if (rechercher(Tab, $2[i].name) == NULL) {
+                    inserer(Tab, $2[i].name, $1, 0, 0.0f, 0, 0);
+                } else {
+                    yyerror("Variable déjà déclarée.");
+                }
+            }
+
+        }
+    | CONST type IDENTIFIER ASSIGN expressionarithmetic SEMICOLON // Déclaration de constante
+        {
+            if (rechercher(Tab, $3) == NULL) {
+                inserer(Tab, $3, $2, 1, $5, 0, 0);
+            } else {
+                yyerror("Constante déjà déclarée.");
+            }
+        }
+    | type IDENTIFIER LBRACKET NUMBERINTPOS RBRACKET SEMICOLON; // Tableau ou chaîne
+        {
+            if (rechercher(Tab, $2) == NULL) {
+                inserer(Tab, $2, $1, 0, 0.0f, 1, $4);
+            } else {
+                yyerror("Tableau déjà déclaré.");
+            }
+        }
     ;
 
 listevariable:
@@ -48,25 +74,57 @@ type:
     | CHAR
     ;
 
-
-
-
 affectation:
     IDENTIFIER ASSIGN expressionarithmetic SEMICOLON
+        {
+            TableEntry *entry = rechercher(Tab, $1);
+            if (entry == NULL) {
+                yyerror("Variable non déclarée.");
+            } else {
+                // Mettre à jour la valeur de la variable
+                entry->value = $3;
+            }
+        }
 ;
+
 expressionarithmetic:
     IDENTIFIER
+        {
+            TableEntry *entry = rechercher(Tab, $1);
+            if (entry == NULL) {
+                yyerror("Variable non déclarée dans l'expression.");
+                $$ = 0;  // Valeur par défaut en cas d'erreur
+            } else {
+                $$ = entry->value;  // Récupérer la valeur de la variable
+            }
+        }
     | LPAREN expressionarithmetic RPAREN
+        { $$ = $2; }  // Parenthèses, la valeur est celle de l'expression à l'intérieur
     | NUMBERINTPOS
-    | NUMBERINTNEG 
-    | NUMBERFLOATNEG
+        { $$ = $1; }
+    | NUMBERINTNEG
+        { $$ = $1; }
     | NUMBERFLOATPOS
-    | expressionarithmetic PLUS expressionarithmetic        // Addition
-    | expressionarithmetic MINUS expressionarithmetic       // Soustraction
-    | expressionarithmetic MULT expressionarithmetic        // Multiplication
-    | expressionarithmetic DIV expressionarithmetic  
-
-    ;
+        { $$ = $1; }
+    | NUMBERFLOATNEG
+        { $$ = $1; }
+    | expressionarithmetic PLUS expressionarithmetic
+        { $$ = $1 + $3; }
+    | expressionarithmetic MINUS expressionarithmetic
+        { $$ = $1 - $3; }
+    | expressionarithmetic MULT expressionarithmetic
+        { $$ = $1 * $3; }
+    | expressionarithmetic DIV expressionarithmetic
+        {
+            int droite=atoi($3);
+            if (droite == 0) {
+                yyerror("Division par zéro.");
+                $$ = 0;  // Valeur par défaut en cas d'erreur
+            } else {
+                $$ = $1 / $3;
+            }
+        }
+;
 
 expressionlogic:                  
     | LPAREN expressionlogic RPAREN          // Parenthèses
@@ -86,13 +144,31 @@ statements:
     | statements statement
     ;
 
-// a revoir keml kima rahoum
 statement:
     affectation
-    | IF LPAREN expressionlogic RPAREN LBRACE statements RBRACE  ELSE LBRACE statements RBRACE  // Condition IF // Boucle FOR avec pas 
+    | IF LPAREN expressionlogic RPAREN LBRACE statements RBRACE ELSE LBRACE statements RBRACE  // Condition IF
+        {
+            // Logique pour IF
+        }
     | FOR LPAREN initialisation COLON fortext RPAREN LBRACE statements RBRACE
+        {
+            // Logique pour FOR
+        }
     | READ LPAREN IDENTIFIER RPAREN SEMICOLON  // Instruction READ
+        {
+            // Logique pour READ
+            TableEntry *entry = rechercher(Tab, $3);
+            if (entry == NULL) {
+                yyerror("Variable non déclarée.");
+            } else {
+                // Lire la valeur et la stocker dans la variable
+            }
+        }
     | WRITE LPAREN expressionwrite RPAREN SEMICOLON  // Instruction WRITE
+        {
+            // Logique pour WRITE
+            // Afficher la valeur de l'expression
+        }
     ;
 
 fortext:
@@ -102,11 +178,10 @@ fortext:
     | IDENTIFIER COLON NUMBER     
 ;
 
-
 initialisation:
   IDENTIFIER ASSIGN expressionarithmetic
-  
 ;
+
 NUMBER:
     NUMBERINTPOS
     |NUMBERINTNEG;
