@@ -39,6 +39,8 @@ void insererValeurTableau(TableEntry *entry, int index, Value val);
 
 // Fonction de recherche dans la table des symboles
 TableEntry* rechercher(TableEntry table[], const char entite[]);
+void modifierVariable(char *nomVariable, Value nouvelleValeur);
+void modifierValeurTableau(char *nomTableau, int index, Value nouvelleValeur);
 
 // Fonction pour vérifier si la table est pleine
 int estPleine(TableEntry table[]);

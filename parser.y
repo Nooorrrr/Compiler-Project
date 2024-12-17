@@ -1,28 +1,27 @@
-%{
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "lex.yy.h"  // Inclure le fichier généré par Flex
-#include "TS.h"  // Inclure la table des symboles
+#include "TS.h"      // Inclure la table des symboles
+
 void yyerror(const char *s);  // Déclaration de la fonction d'erreur
-%}
 
-%token VAR_GLOBAL DECLARATION INSTRUCTION INTEGER FLOAT CHAR CONST IF ELSE FOR READ WRITE
-%token IDENTIFIER NUMBERINTPOS NUMBERINTNEG NUMBERFLOATPOS NUMBERFLOATNEG
-%token AND OR NOT EQUAL NEQ GTE LTE GT LT
-%token LBRACE RBRACE LPAREN RPAREN LBRACKET RBRACKET SEMICOLON COMMA ASSIGN COLON
-%token PLUS MINUS MULT DIV
-%token TEXT
-
-%left PLUS MINUS    // Définir les priorités des opérateurs
-%left MULT DIV
-%left AND OR
-%left EQUAL NEQ GT LT GTE LTE
-%nonassoc NOT
+// Fonction pour vérifier la compatibilité des types lors d'une affectation
+int typesCompatibles(const char *typeVar, Value val) {
+    if (strcmp(typeVar, "INTEGER") == 0 && (val.floatValue == 0)) {
+        return 1;  // INTEGER peut accepter un int ou un float
+    } else if (strcmp(typeVar, "FLOAT") == 0 && (val.intValue == 0)) {
+        return 1;  // FLOAT peut accepter un float
+    } else if (strcmp(typeVar, "CHAR") == 0 && (val.intValue >= 0 && val.intValue <= 255)) {
+        return 1;  // CHAR peut accepter un char
+    }
+    return 0;
+}
 
 %%
 
-
 /* Règles de la grammaire */
+
 program:
     VAR_GLOBAL LBRACE varGloballist RBRACE DECLARATION LBRACE varGloballist RBRACE INSTRUCTION LBRACE statements RBRACE
     ;
@@ -33,9 +32,8 @@ varGloballist:
     ;
 
 declarat:
-    type listevariable SEMICOLON               // Déclaration d'une variable simple
+    type listevariable SEMICOLON  // Déclaration d'une variable simple
         {
-            // Ajouter à la table des symboles
             for (int i = 0; i < $2; i++) {
                 if (rechercher(Tab, $2[i].name) == NULL) {
                     inserer(Tab, $2[i].name, $1, 0, 0.0f, 0, 0);
@@ -43,9 +41,8 @@ declarat:
                     yyerror("Variable déjà déclarée.");
                 }
             }
-
         }
-    | CONST type IDENTIFIER ASSIGN expressionarithmetic SEMICOLON // Déclaration de constante
+    | CONST type IDENTIFIER ASSIGN expressionarithmetic SEMICOLON  // Déclaration de constante
         {
             if (rechercher(Tab, $3) == NULL) {
                 inserer(Tab, $3, $2, 1, $5, 0, 0);
@@ -53,7 +50,7 @@ declarat:
                 yyerror("Constante déjà déclarée.");
             }
         }
-    | type IDENTIFIER LBRACKET NUMBERINTPOS RBRACKET SEMICOLON; // Tableau ou chaîne
+    | type IDENTIFIER LBRACKET NUMBERINTPOS RBRACKET SEMICOLON;  // Déclaration de tableau
         {
             if (rechercher(Tab, $2) == NULL) {
                 inserer(Tab, $2, $1, 0, 0.0f, 1, $4);
@@ -64,9 +61,8 @@ declarat:
     ;
 
 listevariable:
-    listevariable COMMA IDENTIFIER 
+    listevariable COMMA IDENTIFIER
     | IDENTIFIER;
-
 
 type:
     INTEGER
@@ -81,8 +77,11 @@ affectation:
             if (entry == NULL) {
                 yyerror("Variable non déclarée.");
             } else {
-                // Mettre à jour la valeur de la variable
-                entry->value = $3;
+                if (!typesCompatibles(entry->type, $3)) {
+                    yyerror("Type de l'expression incompatible avec la variable.");
+                } else {
+                    entry->value = $3;
+                }
             }
         }
 ;
@@ -93,13 +92,13 @@ expressionarithmetic:
             TableEntry *entry = rechercher(Tab, $1);
             if (entry == NULL) {
                 yyerror("Variable non déclarée dans l'expression.");
-                $$ = 0;  // Valeur par défaut en cas d'erreur
+                $$ = (Value){.intValue = 0};  // Valeur par défaut en cas d'erreur
             } else {
                 $$ = entry->value;  // Récupérer la valeur de la variable
             }
         }
     | LPAREN expressionarithmetic RPAREN
-        { $$ = $2; }  // Parenthèses, la valeur est celle de l'expression à l'intérieur
+        { $$ = $2; }
     | NUMBERINTPOS
         { $$ = $1; }
     | NUMBERINTNEG
@@ -116,28 +115,27 @@ expressionarithmetic:
         { $$ = $1 * $3; }
     | expressionarithmetic DIV expressionarithmetic
         {
-            int droite=atoi($3);
-            if (droite == 0) {
+            if ($3.intValue == 0 || $3.floatValue == 0) {
                 yyerror("Division par zéro.");
-                $$ = 0;  // Valeur par défaut en cas d'erreur
+                $$ = (Value){.intValue = 0};  // Valeur par défaut en cas d'erreur
             } else {
                 $$ = $1 / $3;
             }
         }
 ;
 
-expressionlogic:                  
-    | LPAREN expressionlogic RPAREN          // Parenthèses
-    | NOT expressionlogic                     // Négation logique
-    | expressionlogic AND expressionlogic         // Et logique
-    | expressionlogic OR expressionlogic          // Ou logique
-    | expressionlogic EQUAL expressionlogic       // Égalité
-    | expressionlogic NEQ expressionlogic         // Différence
-    | expressionarithmetic LT expressionarithmetic          // Inférieur
-    | expressionarithmetic LTE expressionarithmetic         // Inférieur ou égal
-    | expressionarithmetic GT expressionarithmetic          // Supérieur
-    | expressionarithmetic GTE expressionarithmetic         // Supérieur ou égal
-    ;
+expressionlogic:
+    | LPAREN expressionlogic RPAREN
+    | NOT expressionlogic
+    | expressionlogic AND expressionlogic
+    | expressionlogic OR expressionlogic
+    | expressionlogic EQUAL expressionlogic
+    | expressionlogic NEQ expressionlogic
+    | expressionarithmetic LT expressionarithmetic
+    | expressionarithmetic LTE expressionarithmetic
+    | expressionarithmetic GT expressionarithmetic
+    | expressionarithmetic GTE expressionarithmetic
+;
 
 statements:
     statement
@@ -146,17 +144,12 @@ statements:
 
 statement:
     affectation
-    | IF LPAREN expressionlogic RPAREN LBRACE statements RBRACE ELSE LBRACE statements RBRACE  // Condition IF
-        {
-            // Logique pour IF
-        }
+    | IF LPAREN expressionlogic RPAREN LBRACE statements RBRACE ELSE LBRACE statements RBRACE
+        { /* Logique pour IF */ }
     | FOR LPAREN initialisation COLON fortext RPAREN LBRACE statements RBRACE
+        { /* Logique pour FOR */ }
+    | READ LPAREN IDENTIFIER RPAREN SEMICOLON
         {
-            // Logique pour FOR
-        }
-    | READ LPAREN IDENTIFIER RPAREN SEMICOLON  // Instruction READ
-        {
-            // Logique pour READ
             TableEntry *entry = rechercher(Tab, $3);
             if (entry == NULL) {
                 yyerror("Variable non déclarée.");
@@ -164,40 +157,36 @@ statement:
                 // Lire la valeur et la stocker dans la variable
             }
         }
-    | WRITE LPAREN expressionwrite RPAREN SEMICOLON  // Instruction WRITE
-        {
-            // Logique pour WRITE
-            // Afficher la valeur de l'expression
-        }
-    ;
+    | WRITE LPAREN expressionwrite RPAREN SEMICOLON
+        { /* Logique pour WRITE */ }
+;
 
 fortext:
-      NUMBER COLON NUMBER     
-    |  NUMBER COLON IDENTIFIER   
-    |  IDENTIFIER COLON IDENTIFIER     
-    | IDENTIFIER COLON NUMBER     
+    NUMBER COLON NUMBER
+    | NUMBER COLON IDENTIFIER
+    | IDENTIFIER COLON IDENTIFIER
+    | IDENTIFIER COLON NUMBER
 ;
 
 initialisation:
-  IDENTIFIER ASSIGN expressionarithmetic
+    IDENTIFIER ASSIGN expressionarithmetic
 ;
 
 NUMBER:
     NUMBERINTPOS
-    |NUMBERINTNEG;
-
+    | NUMBERINTNEG;
 
 expressionwrite:
     IDENTIFIER
-    |TEXT 
-    |TEXT COMMA expressionwrite
-    |IDENTIFIER COMMA expressionwrite
-    ;
+    | TEXT
+    | TEXT COMMA expressionwrite
+    | IDENTIFIER COMMA expressionwrite
+;
 
 %%
 
 void yyerror(const char *s) {
-    extern int yylineno;  // Déclarer yylineno qui est utilisé par flex pour suivre les numéros de ligne
+    extern int yylineno;
     fprintf(stderr, "Erreur à la ligne %d: %s\n", yylineno, s);
 }
 
