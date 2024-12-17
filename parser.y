@@ -8,10 +8,10 @@ void yyerror(const char *s);  // Déclaration de la fonction d'erreur
 
 // Fonction pour vérifier la compatibilité des types lors d'une affectation
 int typesCompatibles(const char *typeVar, Value val) {
-    if (strcmp(typeVar, "INTEGER") == 0 && (val.floatValue == 0)) {
-        return 1;  // INTEGER peut accepter un int ou un float
-    } else if (strcmp(typeVar, "FLOAT") == 0 && (val.intValue == 0)) {
-        return 1;  // FLOAT peut accepter un float
+    if (strcmp(typeVar, "FLOAT") == 0 && (val.floatValue == 0)) {
+        return 1;  // FLOAT peut accepter un int ou un float
+    } else if (strcmp(typeVar, "INTEGER") == 0 && (val.intValue == 0)) {
+        return 1;  // INTEGER peut accepter un INTEGER
     } else if (strcmp(typeVar, "CHAR") == 0 && (val.intValue >= 0 && val.intValue <= 255)) {
         return 1;  // CHAR peut accepter un char
     }
