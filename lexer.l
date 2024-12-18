@@ -4,7 +4,7 @@
 #include "parser.tab.h"  
 %}
 
-%option noyywrap
+%option header-file="lex.yy.h"
 
 %%
 
@@ -59,13 +59,8 @@
 
 [ \t]                { /* Ignore spaces and tabs */ }
 [\n]                 { yylineno++; } 
-.                    { printf("Erreur lexical Ã  la ligne %d: entitÃ© inconnue: %s\n", yylineno, yytext); exit(1); }  // Handle unknown characters
+.                    { printf("Erreur lexical à la ligne %d: entité inconnue: %s\n", yylineno, yytext); exit(1); }  // Handle unknown characters
 
 %%
 
-int main(int argc, char *argv[]) {
-    yylex();  // Call the lexer
-    printf("Token: %d\n", yylval); // Or whatever token information you want to print
-    return 0;
 
-}
