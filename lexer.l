@@ -29,6 +29,7 @@
 [+]?[0-9]+\.[0-9]+      { return NUMBERFLOATPOS; }
 "-"[0-9]+              { return NUMBERINTNEG; }
 "-"[0-9]+\.[0-9]+      { return NUMBERFLOATNEG; }
+[A-Za-z]                {return caractere;}
 "&&"                 { return AND; }
 "\|\|"               { return OR; }
 "!"                  { return NOT; }

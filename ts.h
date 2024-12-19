@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+
+
 // Structure représentant une entrée dans la table des symboles
 typedef struct {
     int state;          

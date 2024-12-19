@@ -2,9 +2,6 @@
 
 // Déclaration des tables
 TableEntry Tab[1000];    // Table des IDF et CONST
-TableEntry TabM[40];     // Table des mots-clés
-TableEntry TabS[40];     // Table des séparateurs
-
 
 void initialiserTable(TableEntry *table, int taille) {
     for (int i = 0; i < taille; i++) {
@@ -92,7 +89,7 @@ void afficherTable(TableEntry *table, int taille) {
     printf("+-----------------+------------+----------+-------+-------+-------+-------+\n");
 }
 
-// Fonction main pour tester
+/* Fonction main pour tester
 int main() {
     // Initialisation de la table des symboles
     initialisation();
@@ -106,4 +103,4 @@ int main() {
     afficherTable(Tab, 1000);
 
     return 0;
-}
+}*/

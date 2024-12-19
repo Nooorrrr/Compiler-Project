@@ -54,54 +54,66 @@ extern int yydebug;
     YYEOF = 0,                     /* "end of file"  */
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
-    VAR_GLOBAL = 258,              /* VAR_GLOBAL  */
-    DECLARATION = 259,             /* DECLARATION  */
-    INSTRUCTION = 260,             /* INSTRUCTION  */
-    INTEGER = 261,                 /* INTEGER  */
-    FLOAT = 262,                   /* FLOAT  */
-    CHAR = 263,                    /* CHAR  */
-    CONST = 264,                   /* CONST  */
-    IF = 265,                      /* IF  */
-    ELSE = 266,                    /* ELSE  */
-    FOR = 267,                     /* FOR  */
-    READ = 268,                    /* READ  */
-    WRITE = 269,                   /* WRITE  */
-    IDENTIFIER = 270,              /* IDENTIFIER  */
-    NUMBERINTPOS = 271,            /* NUMBERINTPOS  */
-    NUMBERINTNEG = 272,            /* NUMBERINTNEG  */
-    NUMBERFLOATPOS = 273,          /* NUMBERFLOATPOS  */
-    NUMBERFLOATNEG = 274,          /* NUMBERFLOATNEG  */
-    AND = 275,                     /* AND  */
-    OR = 276,                      /* OR  */
-    NOT = 277,                     /* NOT  */
-    EQUAL = 278,                   /* EQUAL  */
-    NEQ = 279,                     /* NEQ  */
-    GTE = 280,                     /* GTE  */
-    LTE = 281,                     /* LTE  */
-    GT = 282,                      /* GT  */
-    LT = 283,                      /* LT  */
-    LBRACE = 284,                  /* LBRACE  */
-    RBRACE = 285,                  /* RBRACE  */
-    LPAREN = 286,                  /* LPAREN  */
-    RPAREN = 287,                  /* RPAREN  */
-    LBRACKET = 288,                /* LBRACKET  */
-    RBRACKET = 289,                /* RBRACKET  */
-    SEMICOLON = 290,               /* SEMICOLON  */
-    COMMA = 291,                   /* COMMA  */
-    ASSIGN = 292,                  /* ASSIGN  */
-    COLON = 293,                   /* COLON  */
-    PLUS = 294,                    /* PLUS  */
-    MINUS = 295,                   /* MINUS  */
-    MULT = 296,                    /* MULT  */
-    DIV = 297,                     /* DIV  */
-    TEXT = 298                     /* TEXT  */
+    NUMBERINTPOS = 258,            /* NUMBERINTPOS  */
+    NUMBERINTNEG = 259,            /* NUMBERINTNEG  */
+    NUMBERFLOATPOS = 260,          /* NUMBERFLOATPOS  */
+    NUMBERFLOATNEG = 261,          /* NUMBERFLOATNEG  */
+    IDENTIFIER = 262,              /* IDENTIFIER  */
+    caractere = 263,               /* caractere  */
+    VAR_GLOBAL = 264,              /* VAR_GLOBAL  */
+    DECLARATION = 265,             /* DECLARATION  */
+    INSTRUCTION = 266,             /* INSTRUCTION  */
+    INTEGER = 267,                 /* INTEGER  */
+    FLOAT = 268,                   /* FLOAT  */
+    CHAR = 269,                    /* CHAR  */
+    CONST = 270,                   /* CONST  */
+    IF = 271,                      /* IF  */
+    ELSE = 272,                    /* ELSE  */
+    FOR = 273,                     /* FOR  */
+    READ = 274,                    /* READ  */
+    WRITE = 275,                   /* WRITE  */
+    AND = 276,                     /* AND  */
+    OR = 277,                      /* OR  */
+    NOT = 278,                     /* NOT  */
+    EQUAL = 279,                   /* EQUAL  */
+    NEQ = 280,                     /* NEQ  */
+    GTE = 281,                     /* GTE  */
+    LTE = 282,                     /* LTE  */
+    GT = 283,                      /* GT  */
+    LT = 284,                      /* LT  */
+    LBRACE = 285,                  /* LBRACE  */
+    RBRACE = 286,                  /* RBRACE  */
+    LPAREN = 287,                  /* LPAREN  */
+    RPAREN = 288,                  /* RPAREN  */
+    LBRACKET = 289,                /* LBRACKET  */
+    RBRACKET = 290,                /* RBRACKET  */
+    SEMICOLON = 291,               /* SEMICOLON  */
+    COMMA = 292,                   /* COMMA  */
+    ASSIGN = 293,                  /* ASSIGN  */
+    COLON = 294,                   /* COLON  */
+    PLUS = 295,                    /* PLUS  */
+    MINUS = 296,                   /* MINUS  */
+    MULT = 297,                    /* MULT  */
+    DIV = 298,                     /* DIV  */
+    TEXT = 299                     /* TEXT  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef int YYSTYPE;
+union YYSTYPE
+{
+#line 13 "parser.y"
+
+    int entier;        // Pour les entiers
+    float flottant;    // Pour les nombres flottants
+    char* chaine;      // Pour les chaînes de caractères
+
+#line 114 "parser.tab.h"
+
+};
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif

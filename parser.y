@@ -2,11 +2,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "lex.yy.h"  // Inclure le fichier généré par Flex
+#include "ts.h"      // Inclure le fichier d'en-tête de la table de symboles
+
+extern int scope;  // Déclaration de la variable scope
+extern TableEntry Tab[1000];  // Table des identifiants et constantes
+int scope = 0;  // Initialisation de scope
 void yyerror(const char *s);  // Déclaration de la fonction d'erreur
+
 %}
+%union {
+    int entier;        // Pour les entiers
+    float flottant;    // Pour les nombres flottants
+    char* chaine;      // Pour les chaînes de caractères
+}
+ 
+
+%token <entier> NUMBERINTPOS NUMBERINTNEG
+%token <flottant> NUMBERFLOATPOS NUMBERFLOATNEG
+%token <chaine> IDENTIFIER caractere
+%type <chaine> type
 
 %token VAR_GLOBAL DECLARATION INSTRUCTION INTEGER FLOAT CHAR CONST IF ELSE FOR READ WRITE
-%token IDENTIFIER NUMBERINTPOS NUMBERINTNEG NUMBERFLOATPOS NUMBERFLOATNEG
 %token AND OR NOT EQUAL NEQ GTE LTE GT LT
 %token LBRACE RBRACE LPAREN RPAREN LBRACKET RBRACKET SEMICOLON COMMA ASSIGN COLON
 %token PLUS MINUS MULT DIV
@@ -20,7 +36,6 @@ void yyerror(const char *s);  // Déclaration de la fonction d'erreur
 
 %%
 
-
 /* Règles de la grammaire */
 program:
     VAR_GLOBAL LBRACE varGloballist RBRACE DECLARATION LBRACE varGloballist RBRACE INSTRUCTION LBRACE statements RBRACE
@@ -32,53 +47,80 @@ varGloballist:
     ;
 
 declaration:
-    type listevariable SEMICOLON               // Déclaration d'une variable simple
-    | CONST type IDENTIFIER ASSIGN expressionarithmetic  SEMICOLON // Déclaration de constante
-    | type IDENTIFIER LBRACKET NUMBERINTPOS RBRACKET SEMICOLON; //tab ou chaine de caractere
+    type listevariable SEMICOLON 
+    | type IDENTIFIER LBRACKET NUMBERINTPOS RBRACKET SEMICOLON {
+           if (rechercher($2) != NULL) {
+            yyerror("Variable déjà déclarée.");
+        } else {
+          inserer($2, $1, 0, scope, 0, $4, 1);
+        }
+    }
+    | CONST type IDENTIFIER ASSIGN NUMBERINTPOS SEMICOLON {
+         if (rechercher($3) != NULL) {
+            yyerror("Variable déjà déclarée.");
+        } else {
+           inserer($3, $2, $5, scope, 1, 0, 0);
+        }
+    } 
+    | CONST type IDENTIFIER ASSIGN NUMBERINTNEG SEMICOLON {
+        if (rechercher($3) != NULL) {
+            yyerror("Variable déjà déclarée.");
+        } else {
+           inserer($3, $2, $5, scope, 1, 0, 0);
+        }
+    } 
+    | CONST type IDENTIFIER ASSIGN NUMBERFLOATPOS SEMICOLON {
+        if (rechercher($3) != NULL) {
+            yyerror("Variable déjà déclarée.");
+        } else {
+           inserer($3, $2, $5, scope, 1, 0, 0);
+        }
+    }
+    | CONST type IDENTIFIER ASSIGN NUMBERFLOATNEG SEMICOLON {
+        if (rechercher($3) != NULL) {
+            yyerror("Variable déjà déclarée.");
+        } else {
+           inserer($3, $2, $5, scope, 1, 0, 0);
+        }
+    }
     ;
 
 listevariable:
-    listevariable COMMA IDENTIFIER 
-    | IDENTIFIER;
-
-
-type:
-    INTEGER
-    | FLOAT
-    | CHAR
+    listevariable COMMA IDENTIFIER
+    | IDENTIFIER
     ;
 
-
-
+type:
+    INTEGER { $$ = "INTEGER"; }
+    | FLOAT { $$ = "FLOAT"; }
+    | CHAR { $$ = "CHAR"; }
+    ;
 
 affectation:
     IDENTIFIER ASSIGN expressionarithmetic SEMICOLON
 ;
+
 expressionarithmetic:
     IDENTIFIER
     | LPAREN expressionarithmetic RPAREN
-    | NUMBERINTPOS
-    | NUMBERINTNEG 
-    | NUMBERFLOATNEG
-    | NUMBERFLOATPOS
-    | expressionarithmetic PLUS expressionarithmetic        // Addition
-    | expressionarithmetic MINUS expressionarithmetic       // Soustraction
-    | expressionarithmetic MULT expressionarithmetic        // Multiplication
-    | expressionarithmetic DIV expressionarithmetic  
-
+    | NUMBER
+    | expressionarithmetic PLUS expressionarithmetic
+    | expressionarithmetic MINUS expressionarithmetic
+    | expressionarithmetic MULT expressionarithmetic
+    | expressionarithmetic DIV expressionarithmetic
     ;
 
-expressionlogic:                  
-    | LPAREN expressionlogic RPAREN          // Parenthèses
-    | NOT expressionlogic                     // Négation logique
-    | expressionlogic AND expressionlogic         // Et logique
-    | expressionlogic OR expressionlogic          // Ou logique
-    | expressionlogic EQUAL expressionlogic       // Égalité
-    | expressionlogic NEQ expressionlogic         // Différence
-    | expressionarithmetic LT expressionarithmetic          // Inférieur
-    | expressionarithmetic LTE expressionarithmetic         // Inférieur ou égal
-    | expressionarithmetic GT expressionarithmetic          // Supérieur
-    | expressionarithmetic GTE expressionarithmetic         // Supérieur ou égal
+expressionlogic:
+    | LPAREN expressionlogic RPAREN
+    | NOT expressionlogic
+    | expressionlogic AND expressionlogic
+    | expressionlogic OR expressionlogic
+    | expressionlogic EQUAL expressionlogic
+    | expressionlogic NEQ expressionlogic
+    | expressionarithmetic LT expressionarithmetic
+    | expressionarithmetic LTE expressionarithmetic
+    | expressionarithmetic GT expressionarithmetic
+    | expressionarithmetic GTE expressionarithmetic
     ;
 
 statements:
@@ -86,43 +128,45 @@ statements:
     | statements statement
     ;
 
-// a revoir keml kima rahoum
 statement:
     affectation
-    | IF LPAREN expressionlogic RPAREN LBRACE statements RBRACE  ELSE LBRACE statements RBRACE  // Condition IF // Boucle FOR avec pas 
+    | IF LPAREN expressionlogic RPAREN LBRACE statements RBRACE ELSE LBRACE statements RBRACE
     | FOR LPAREN initialisation COLON fortext RPAREN LBRACE statements RBRACE
-    | READ LPAREN IDENTIFIER RPAREN SEMICOLON  // Instruction READ
-    | WRITE LPAREN expressionwrite RPAREN SEMICOLON  // Instruction WRITE
+    | READ LPAREN IDENTIFIER RPAREN SEMICOLON
+    | WRITE LPAREN expressionwrite RPAREN SEMICOLON
     ;
 
 fortext:
-      NUMBER COLON NUMBER     
-    |  NUMBER COLON IDENTIFIER   
-    |  IDENTIFIER COLON IDENTIFIER     
-    | IDENTIFIER COLON NUMBER     
+    NUMBERINT COLON NUMBERINT
+    | NUMBERINT COLON IDENTIFIER
+    | IDENTIFIER COLON IDENTIFIER
+    | IDENTIFIER COLON NUMBERINT
 ;
-
 
 initialisation:
-  IDENTIFIER ASSIGN expressionarithmetic
-  
+    IDENTIFIER ASSIGN expressionarithmetic
 ;
-NUMBER:
-    NUMBERINTPOS
-    |NUMBERINTNEG;
 
+NUMBERINT:
+    NUMBERINTPOS
+    | NUMBERINTNEG;
+
+NUMBER:
+    NUMBERINT
+    | NUMBERFLOATPOS
+    | NUMBERFLOATNEG;
 
 expressionwrite:
     IDENTIFIER
-    |TEXT 
-    |TEXT COMMA expressionwrite
-    |IDENTIFIER COMMA expressionwrite
+    | TEXT
+    | TEXT COMMA expressionwrite
+    | IDENTIFIER COMMA expressionwrite
     ;
 
 %%
 
 void yyerror(const char *s) {
-    extern int yylineno;  // Déclarer yylineno qui est utilisé par flex pour suivre les numéros de ligne
+    extern int yylineno;
     fprintf(stderr, "Erreur à la ligne %d: %s\n", yylineno, s);
 }
 
@@ -138,8 +182,10 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    initialisation();
     yyin = f;
-    yyparse();  // Appeler le parseur
+    yyparse();
+    afficherTable(Tab, 1000);
     fclose(f);
     return 0;
 }
