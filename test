@@ -1,5 +1,3 @@
-
-
 VAR_GLOBAL {
     INTEGER Q;
     INTEGER Q, Z, T;
@@ -10,11 +8,14 @@ VAR_GLOBAL {
 }
 
 DECLARATION {
-    A= (X + 2) * Y;
+    INTEGER Q;
 }
 
 INSTRUCTION {
-     C = A- 1;
+    A = (X + 2) * Y;
+   
+    WRITE(A);
+    C = A - 1;
     IF ((A > B) && (A > B)){
         C = A + 1;
          C = A- 1;
@@ -22,7 +23,7 @@ INSTRUCTION {
         C = A- 1;
          C = A- 1;
     }
- FOR (INTEGER I = 0 : 1 : 10) {
+ FOR (I = 0 : 1 : 10) {
     X = X + 1;
 }
 }

@@ -201,10 +201,16 @@ void yyfree ( void *  );
 
 /* Begin user sect3 */
 
-#define YY_FLEX_LEX_COMPAT
+#define yywrap() (/*CONSTCOND*/1)
+#define YY_SKIP_YYWRAP
+
 extern int yylineno;
 
-extern char yytext[];
+extern char *yytext;
+#ifdef yytext_ptr
+#undef yytext_ptr
+#endif
+#define yytext_ptr yytext
 
 #ifdef YY_HEADER_EXPORT_START_CONDITIONS
 #define INITIAL 0
@@ -464,6 +470,6 @@ extern int yylex (void);
 #line 64 "lexer.l"
 
 
-#line 468 "lex.yy.h"
+#line 474 "lex.yy.h"
 #undef yyIN_HEADER
 #endif /* yyHEADER_H */

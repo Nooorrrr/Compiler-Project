@@ -55,11 +55,11 @@ extern int yydebug;
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
     VAR_GLOBAL = 258,              /* VAR_GLOBAL  */
-    LBRACE = 259,                  /* LBRACE  */
-    RBRACE = 260,                  /* RBRACE  */
-    DECLARATION = 261,             /* DECLARATION  */
-    INSTRUCTION = 262,             /* INSTRUCTION  */
-    SEMICOLON = 263,               /* SEMICOLON  */
+    DECLARATION = 259,             /* DECLARATION  */
+    INSTRUCTION = 260,             /* INSTRUCTION  */
+    INTEGER = 261,                 /* INTEGER  */
+    FLOAT = 262,                   /* FLOAT  */
+    CHAR = 263,                    /* CHAR  */
     CONST = 264,                   /* CONST  */
     IF = 265,                      /* IF  */
     ELSE = 266,                    /* ELSE  */
@@ -89,37 +89,19 @@ extern int yydebug;
     SEMICOLON = 290,               /* SEMICOLON  */
     COMMA = 291,                   /* COMMA  */
     ASSIGN = 292,                  /* ASSIGN  */
-    QUOTE = 293,                   /* QUOTE  */
-    COLON = 294,                   /* COLON  */
-    PLUS = 295,                    /* PLUS  */
-    MINUS = 296,                   /* MINUS  */
-    MULT = 297,                    /* MULT  */
-    DIV = 298,                     /* DIV  */
-    TEXT = 299                     /* TEXT  */
+    COLON = 293,                   /* COLON  */
+    PLUS = 294,                    /* PLUS  */
+    MINUS = 295,                   /* MINUS  */
+    MULT = 296,                    /* MULT  */
+    DIV = 297,                     /* DIV  */
+    TEXT = 298                     /* TEXT  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-union YYSTYPE
-{
-#line 30 "parser.y"
-
-    int intValue;
-    float floatValue;
-    char charValue;
-    char* stringValue;
-    struct {
-        char* type;
-        Value value;
-    } expressionValue;
-    IdentifierList identList;
-
-#line 101 "parser.tab.h"
-
-};
-typedef union YYSTYPE YYSTYPE;
+typedef int YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif
