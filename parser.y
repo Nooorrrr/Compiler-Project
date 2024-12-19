@@ -27,17 +27,12 @@ int typesCompatible(const char* type1, const char* type2);
 
 %}
 
-%union {
-    int intValue;
-    float floatValue;
-    char charValue;
-    char* stringValue;
-    struct {
-        char* type;
-        Value value;
-    } expressionValue;
-    IdentifierList identList;
-}
+%token VAR_GLOBAL DECLARATION INSTRUCTION INTEGER FLOAT CHAR CONST IF ELSE FOR READ WRITE
+%token IDENTIFIER NUMBERINTPOS NUMBERINTNEG NUMBERFLOATPOS NUMBERFLOATNEG
+%token AND OR NOT EQUAL NEQ GTE LTE GT LT
+%token LBRACE RBRACE LPAREN RPAREN LBRACKET RBRACKET SEMICOLON COMMA ASSIGN QUOTE COLON
+%token PLUS MINUS MULT DIV
+%token TEXT
 
 %token VAR_GLOBAL LBRACE RBRACE DECLARATION INSTRUCTION SEMICOLON
 %token CONST ASSIGN LBRACKET RBRACKET COMMA INTEGER FLOAT CHAR LPAREN RPAREN
@@ -52,7 +47,7 @@ int typesCompatible(const char* type1, const char* type2);
 %%
 
 program:
-    declarations instructions
+    VAR_GLOBAL LBRACE varGloballist RBRACE DECLARATION LBRACE declarationlist RBRACE INSTRUCTION LBRACE statements RBRACE
     ;
 
 declarations:
@@ -88,8 +83,9 @@ instructions:
     | instructions instruction
     ;
 
-instruction:
-    affectation
+declarationlist:
+    affectation declarationlist
+    | /* Vide */
     ;
 
 affectation:
@@ -123,10 +119,69 @@ affectation:
     ;
 
 expressionarithmetic:
-    NUMBERINTPOS { $$ = $1; }
-    | NUMBERINTNEG { $$ = $1; }
-    | NUMBERFLOATPOS { $$ = $1; }
-    | NUMBERFLOATNEG { $$ = $1; }
+    IDENTIFIER
+    | LPAREN expressionarithmetic RPAREN
+    | NUMBERINTPOS
+    | NUMBERINTNEG 
+    | NUMBERFLOATNEG
+    | NUMBERFLOATPOS
+    | expressionarithmetic PLUS expressionarithmetic        // Addition
+    | expressionarithmetic MINUS expressionarithmetic       // Soustraction
+    | expressionarithmetic MULT expressionarithmetic        // Multiplication
+    | expressionarithmetic DIV expressionarithmetic  
+
+    ;
+
+expressionlogic:                  
+    | LPAREN expressionlogic RPAREN          // Parenthèses
+    | NOT expressionlogic                     // Négation logique
+    | expressionlogic AND expressionlogic         // Et logique
+    | expressionlogic OR expressionlogic          // Ou logique
+    | expressionlogic EQUAL expressionlogic       // Égalité
+    | expressionlogic NEQ expressionlogic         // Différence
+    | expressionarithmetic LT expressionarithmetic          // Inférieur
+    | expressionarithmetic LTE expressionarithmetic         // Inférieur ou égal
+    | expressionarithmetic GT expressionarithmetic          // Supérieur
+    | expressionarithmetic GTE expressionarithmetic         // Supérieur ou égal
+    ;
+
+statements:
+    statement
+    | statements statement
+    ;
+
+// a revoir keml kima rahoum
+statement:
+    affectation
+    | IF LPAREN expressionlogic RPAREN LBRACE statements RBRACE  ELSE LBRACE statements RBRACE  // Condition IF // Boucle FOR avec pas 
+    | FOR LPAREN initialisation COLON fortext RPAREN LBRACE statements RBRACE
+    | READ LPAREN IDENTIFIER RPAREN SEMICOLON  // Instruction READ
+    | WRITE LPAREN expressionwrite RPAREN SEMICOLON  // Instruction WRITE
+    ;
+
+fortext:
+      NUMBER COLON NUMBER     
+    |  NUMBER COLON IDENTIFIER   
+    |  IDENTIFIER COLON IDENTIFIER     
+    | IDENTIFIER COLON NUMBER     
+;
+
+
+initialisation:
+  |INTEGER IDENTIFIER ASSIGN expressionarithmetic
+  |IDENTIFIER ASSIGN expressionarithmetic
+  
+;
+NUMBER:
+    NUMBERINTPOS
+    |NUMBERINTNEG;
+
+
+expressionwrite:
+    IDENTIFIER
+    |TEXT 
+    |TEXT COMMA expressionwrite
+    |IDENTIFIER COMMA expressionwrite
     ;
 
 %%

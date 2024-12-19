@@ -39,6 +39,7 @@
 "<="                 { return LTE; }
 ">"                  { return GT; }
 "<"                  { return LT; }
+"\""                   { return QUOTE; }   // Règle pour le guillemet
 
 "+"                  { return PLUS; }
 "-"                  { return MINUS; }
@@ -55,7 +56,7 @@
 "\:"                 { return COLON; }
 ","                  { return COMMA; }
 "="                  { return ASSIGN; }
-\"[^\n\t\"]*\"       { return TEXT; }  
+\"[^\n\t]*\"  { return TEXT; }
 
 [ \t]                { /* Ignore spaces and tabs */ }
 [\n]                 { yylineno++; } 
