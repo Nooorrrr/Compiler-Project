@@ -239,7 +239,7 @@ expression:
         // Si les deux sont des entiers
         $$.type = "INTEGER";
         $$.value.ival = $1.value.ival + $3.value.ival;
-        printf("%d",$$.value.ival);
+      
     }
     else if (strcmp($1.type,"FLOAT")==0|| strcmp($3.type,"FLOAT")==0) {
         // Si l'un des opérandes est un FLOAT
@@ -369,6 +369,15 @@ type:
     ;
 
 expressionlogic:
+
+expression EQUAL expression{
+        if (strcmp($1.type, $3.type) != 0) {
+            yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
+            return 0;
+        }
+        $$.type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
+    }
+    |
     LPAREN expressionlogic RPAREN {
         // Copier le contenu de la sous-expression dans l'expression actuelle
         $$.type = $2.type;
@@ -459,8 +468,10 @@ statement:
         }
     }
     | FOR LPAREN init_for BOUCLESEPARATOR expression BOUCLESEPARATOR expression RPAREN LBRACE statements RBRACE {
-        // Vérifier la validité des types dans la boucle
-        // Par exemple, vérifier que le type de la variable utilisée dans la boucle est compatible avec la condition
+      if (strcmp($5.type, "INTEGER") != 0||strcmp($7.type, "INTEGER") != 0) {
+        yyerror("Le pas de la boucle doit être un entier.");
+        return 0;
+    }
     }
     | READ LPAREN IDENTIFIER RPAREN SEMICOLON {
         if (rechercher($3) == NULL) {

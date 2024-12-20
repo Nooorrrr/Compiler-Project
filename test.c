@@ -9,18 +9,19 @@ VAR_GLOBAL {
 }
 
 DECLARATION { %% local variables
-   INTEGER N;
+   INTEGER N,I;
    CONST INTEGER Min = 1;
    CHAR Z;
 }
 
 INSTRUCTION {
-    A = Max - Min;
-    C = 'G';
+     
+    A = Max - C;
+    
     N=20/3;
     Y=4*A;
     
-    IF ((A > Min) || (C == 'G')) {
+    IF ((A > Min) ) {
         Q = A + Max;
         Y = Y / 2;
     } ELSE {
@@ -29,24 +30,11 @@ INSTRUCTION {
     }
 
     FOR (I = 0 : 2 : 20) {
-        Y = Y + I;
+        Y = Y + Y;
         IF (I + 2 == 0) {
             A = A + I;
         }
     }
     
-    WHILE (Y < MAX) {
-        Y = Y + 1;
-    }
     
-    SWITCH (A) {
-        CASE 10:
-            Q = A + 1;
-            BREAK;
-        CASE 20:
-            Q = A + 2;
-            BREAK;
-        DEFAULT:
-            Q = A;
-    }
 }

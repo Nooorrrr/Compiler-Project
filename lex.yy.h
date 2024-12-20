@@ -2,7 +2,7 @@
 #define yyHEADER_H 1
 #define yyIN_HEADER 1
 
-#line 6 "lex.yy.h"
+#line 5 "lex.yy.h"
 
 #define  YY_INT_ALIGNED short int
 
@@ -224,7 +224,7 @@ extern char *yytext;
  */
 #include <unistd.h>
 #endif
-
+    
 #ifndef YY_EXTRA_TYPE
 #define YY_EXTRA_TYPE void *
 #endif
@@ -470,6 +470,6 @@ extern int yylex (void);
 #line 73 "lexer.l"
 
 
-#line 474 "lex.yy.h"
+#line 473 "lex.yy.h"
 #undef yyIN_HEADER
 #endif /* yyHEADER_H */
