@@ -171,10 +171,20 @@ affectation:
             return 0;
         }
 
-        // Effectuer la modification de la valeur
-        modifierValeur($1, &($3.value), varEntry->type);
+        // Modification de la valeur en fonction du type
+        if (strcmp(varEntry->type, "INTEGER") == 0) {
+            varEntry->val.ival = $3.value.ival;  // Affecter un entier
+        } else if (strcmp(varEntry->type, "FLOAT") == 0) {
+            varEntry->val.fval = $3.value.fval;  // Affecter un flottant
+        } else if (strcmp(varEntry->type, "CHAR") == 0) {
+            varEntry->val.cval = $3.value.cval;  // Affecter un caractère
+        } else {
+            yyerror("Type inconnu pour l'affectation.");
+            return 0;
+        }
     }
 ;
+
 
 // Expression générale (affectation ou arithmétique)
 expression:
@@ -218,9 +228,11 @@ expression:
         }
        $$.type = $1.type;
          if($$.type =="FLOAT"){
-            $$.value.fval= $1.value.fval - $3.value.fval;
+            $$.value.fval= $1.value.fval +$3.value.fval;
          }else{
-             $$.value.ival = $1.value.ival - $3.value.ival ;
+
+             $$.value.ival = $1.value.ival + $3.value.ival ;
+            int a=$$.value.ival;
          }
     }
     | expression MINUS expression {
@@ -248,9 +260,9 @@ expression:
         }
        $$.type = $1.type;
          if($$.type =="FLOAT"){
-            $$.value.fval= $1.value.fval - $3.value.fval;
+            $$.value.fval= $1.value.fval *$3.value.fval;
          }else{
-             $$.value.ival = $1.value.ival - $3.value.ival ;
+             $$.value.ival = $1.value.ival*$3.value.ival ;
          }
     }
     | expression DIV expression {
@@ -263,9 +275,9 @@ expression:
         }
        $$.type = $1.type;
          if($$.type =="FLOAT"){
-            $$.value.fval= $1.value.fval - $3.value.fval;
+            $$.value.fval= $1.value.fval / $3.value.fval;
          }else{
-             $$.value.ival = $1.value.ival - $3.value.ival ;
+             $$.value.ival = $1.value.ival /$3.value.ival ;
          }
     }
    

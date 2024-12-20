@@ -16,10 +16,10 @@ DECLARATION { %%affectations
 }
 
 INSTRUCTION {
-    A=N;
+    A=N+N;
   
    D="h";
-    D=B;
+    B=D;
  
      
     IF ((A > B) && (A > B)){
