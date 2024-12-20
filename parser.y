@@ -56,13 +56,11 @@ void yyerror(const char *s);  // Déclaration de la fonction d'erreur
 %token<car> CARACTERE
 %type <entier> NUMBERINT 
 %type <flottant> NUMBERFLOAT
-
-
-
+%type <exprari> init_for
 
 %token VAR_GLOBAL DECLARATION INSTRUCTION INTEGER FLOAT CHAR CONST IF ELSE FOR READ WRITE
 %token AND OR NOT EQUAL NEQ GTE LTE GT LT
-%token LBRACE RBRACE LPAREN RPAREN LBRACKET RBRACKET SEMICOLON COMMA ASSIGN COLON
+%token LBRACE RBRACE LPAREN RPAREN LBRACKET RBRACKET SEMICOLON COMMA ASSIGN BOUCLESEPARATOR
 %token PLUS MINUS MULT DIV
 %token TEXT
 
@@ -82,7 +80,9 @@ program:
 varGloballist:
     varGloballist declaration
     | /* Vide */
-    ;declaration:
+    ;
+
+declaration:
     type listevariable SEMICOLON {
         for (int i = 0; i < $2.count; i++) {
             if (rechercher($2.variables[i]) != NULL) {
@@ -104,9 +104,7 @@ varGloballist:
             yyerror("Variable déjà déclarée.");
             return 0;
         } else {
-           
-            inserer($3, $2,$5, scope, 0, 0, 1);  // Insérer la constante entière
-  
+            inserer($3, $2, $5, scope, 0, 0, 1);  // Insérer la constante entière
         }
     }
     | CONST type IDENTIFIER ASSIGN NUMBERFLOAT SEMICOLON {
@@ -117,7 +115,7 @@ varGloballist:
             inserer($3, $2, $5, scope, 0, 0, 1);  // Insérer la constante flottante
         }
     }
-     | CONST type IDENTIFIER ASSIGN CARACTERE SEMICOLON {
+    | CONST type IDENTIFIER ASSIGN CARACTERE SEMICOLON {
         if (rechercher($3) != NULL) {
             yyerror("Variable déjà déclarée.");
             return 0;
@@ -126,30 +124,29 @@ varGloballist:
         }
     }
     | type IDENTIFIER LBRACKET NUMBERINTPOS RBRACKET SEMICOLON {
-           if (rechercher($2) != NULL) {
+        if (rechercher($2) != NULL) {
             yyerror("Variable déjà déclarée.");
             return 0;
         } else {
             inserer($2, $1, 0, scope, 0, $4, 1);
         }
-    };
+    }
+    ;
 
 listevariable:
     listevariable COMMA IDENTIFIER {
         $$ = $1;  // Copier la liste précédente
-        $$ .count++;  // Incrémenter le nombre d'éléments
-        $$ .variables = realloc($$.variables, sizeof(char*) * $$ .count);
-        $$ .variables[$$.count - 1] = $3;  // Ajouter la nouvelle variable
+        $$.count++;  // Incrémenter le nombre d'éléments
+        $$.variables = realloc($$.variables, sizeof(char*) * $$.count);
+        $$.variables[$$.count - 1] = $3;  // Ajouter la nouvelle variable
     }
     | IDENTIFIER {
-        $$ .count = 1;  // Une seule variable
-        $$ .variables = malloc(sizeof(char*));
-        $$ .variables[0] = $1;
+        $$.count = 1;  // Une seule variable
+        $$.variables = malloc(sizeof(char*));
+        $$.variables[0] = $1;
     }
     ;
-    /*
-*/// Affectation
-// Affectation et expression dans un même bloc
+
 affectation:
     IDENTIFIER ASSIGN expression SEMICOLON {
         // Vérification si la variable est déclarée
@@ -185,8 +182,6 @@ affectation:
     }
 ;
 
-
-// Expression générale (affectation ou arithmétique)
 expression:
     IDENTIFIER {
         TableEntry *entry = rechercher($1);
@@ -226,82 +221,74 @@ expression:
         if($1.type=="CHAR"){
             yyerror("Opération addition avec char.");
         }
-       $$.type = $1.type;
-         if($$.type =="FLOAT"){
+        $$.type = $1.type;
+        if($$.type =="FLOAT"){
             $$.value.fval= $1.value.fval +$3.value.fval;
-         }else{
-
-             $$.value.ival = $1.value.ival + $3.value.ival ;
-            int a=$$.value.ival;
-         }
+        }else{
+            $$.value.ival = $1.value.ival + $3.value.ival ;
+        }
     }
     | expression MINUS expression {
         if (strcmp($1.type, $3.type) != 0) {
             yyerror("Opérandes de types incompatibles pour la soustraction.");
             return 0;
         }
-          if($1.type=="CHAR"){
+        if($1.type=="CHAR"){
             yyerror("Opération addition avec char.");
         }
         $$.type = $1.type;
-         if($$.type =="FLOAT"){
+        if($$.type =="FLOAT"){
             $$.value.fval= $1.value.fval - $3.value.fval;
-         }else{
-             $$.value.ival = $1.value.ival - $3.value.ival ;
-         }
+        }else{
+            $$.value.ival = $1.value.ival - $3.value.ival ;
+        }
     }
     | expression MULT expression {
         if (strcmp($1.type, $3.type) != 0) {
             yyerror("Opérandes de types incompatibles pour la multiplication.");
             return 0;
         }
-          if($1.type=="CHAR"){
+        if($1.type=="CHAR"){
             yyerror("Opération addition avec char.");
         }
-       $$.type = $1.type;
-         if($$.type =="FLOAT"){
+        $$.type = $1.type;
+        if($$.type =="FLOAT"){
             $$.value.fval= $1.value.fval *$3.value.fval;
-         }else{
-             $$.value.ival = $1.value.ival*$3.value.ival ;
-         }
+        }else{
+            $$.value.ival = $1.value.ival*$3.value.ival ;
+        }
     }
     | expression DIV expression {
         if (strcmp($1.type, $3.type) != 0) {
             yyerror("Opérandes de types incompatibles pour la division.");
             return 0;
         }
-          if($1.type=="CHAR"){
+        if($1.type=="CHAR"){
             yyerror("Opération addition avec char.");
         }
-       $$.type = $1.type;
-         if($$.type =="FLOAT"){
+        $$.type = $1.type;
+        if($$.type =="FLOAT"){
             if($3.value.fval==0){
                 yyerror("division sur 0 impossible.");
             }else{
-            $$.value.fval= $1.value.fval / $3.value.fval;
+                $$.value.fval= $1.value.fval / $3.value.fval;
             }
-         }else{
+        }else{
             if($3.value.fval==0){
-              yyerror("division sur 0 impossible.");
+                yyerror("division sur 0 impossible.");
             }else{
-            $$.value.ival = $1.value.ival /$3.value.ival ;
+                $$.value.ival = $1.value.ival /$3.value.ival ;
             }
- 
-         }
+        }
     }
-    |LPAREN expression RPAREN
-    {
+    | LPAREN expression RPAREN {
         // Copier le contenu de la sous-expression dans l'expression actuelle
         $$.type = $2.type;
         $$.variables = $2.variables;
         $$.count = $2.count;
         $$.value = $2.value;
-        
     }
-   
 ;
-
-
 
 type:
     INTEGER { $$ = "INTEGER"; }
@@ -309,17 +296,14 @@ type:
     | CHAR { $$ = "CHAR"; }
     ;
 
-
-
 expressionlogic:
-    LPAREN expressionlogic RPAREN
-    {
+    LPAREN expressionlogic RPAREN {
         // Copier le contenu de la sous-expression dans l'expression actuelle
         $$.type = $2.type;
         $$.variables = $2.variables;
         $$.count = $2.count;
     }
-    |expression LT expression {
+    | expression LT expression {
         if (strcmp($1.type, $3.type) != 0) {
             yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
             return 0;
@@ -369,8 +353,18 @@ expressionlogic:
         }
         $$.type = "BOOLEAN";
     }
-   
 ;
+
+init_for:
+    IDENTIFIER ASSIGN expression {
+        TableEntry *varEntry = rechercher($1);
+        if (varEntry == NULL) {
+            yyerror("Variable non déclarée.");
+            return 0;
+        }
+        $$ = $3;  // Pass the expression value up
+    }
+    ;
 
 statements:
     statement
@@ -378,23 +372,24 @@ statements:
     ;
 
 expressionslogic:
-expressionlogic
-|expressionslogic expressionlogic
+    expressionlogic
+    | expressionslogic expressionlogic
 ;
+
 statement:
     affectation
-    |IF LPAREN expressionslogic RPAREN LBRACE statements RBRACE ELSE LBRACE statements RBRACE {
+    | IF LPAREN expressionslogic RPAREN LBRACE statements RBRACE ELSE LBRACE statements RBRACE {
         // Vérifier que la condition dans IF est de type booléen
         if (strcmp($3.type, "BOOLEAN") != 0) {
             yyerror("La condition de l'instruction IF doit être de type BOOLEAN.");
             return 0;
         }
     }
-    | FOR LPAREN affectation COLON fortext RPAREN LBRACE statements RBRACE {
+    | FOR LPAREN init_for BOUCLESEPARATOR expression BOUCLESEPARATOR expression RPAREN LBRACE statements RBRACE {
         // Vérifier la validité des types dans la boucle
         // Par exemple, vérifier que le type de la variable utilisée dans la boucle est compatible avec la condition
     }
-    |READ LPAREN IDENTIFIER RPAREN SEMICOLON {
+    | READ LPAREN IDENTIFIER RPAREN SEMICOLON {
         if (rechercher($3) == NULL) {
             yyerror("Variable non déclarée.");
             return 0;
@@ -406,142 +401,36 @@ statement:
 ;
 
 expressionwrite:
-    IDENTIFIER {    TableEntry *varEntry = rechercher($1);
-        if (varEntry == NULL) {
-            yyerror("Variable non déclarée.");
-            return 0;
-        }
-        }
-    | TEXT
-    | TEXT COMMA expressionwrite
-    | IDENTIFIER COMMA expressionwrite{
-            TableEntry *varEntry = rechercher($1);
+    IDENTIFIER {
+        TableEntry *varEntry = rechercher($1);
         if (varEntry == NULL) {
             yyerror("Variable non déclarée.");
             return 0;
         }
     }
-    ;
-
-
-
+    | TEXT
+    | TEXT COMMA expressionwrite
+    | IDENTIFIER COMMA expressionwrite {
+        TableEntry *varEntry = rechercher($1);
+        if (varEntry == NULL) {
+            yyerror("Variable non déclarée.");
+            return 0;
+        }
+    }
+;
 
 NUMBERINT:
     NUMBERINTPOS
-    | NUMBERINTNEG;
+    | NUMBERINTNEG
+;
+
 NUMBERFLOAT:
     NUMBERFLOATNEG
-    | NUMBERFLOATPOS;
-
-
-
-fortext:
-    NUMBERINT COLON NUMBERINT
-    | NUMBERINT COLON IDENTIFIER 
-       { TableEntry *varEntry = rechercher($3);
-        if (varEntry == NULL) {
-            yyerror("Variable non déclarée.");
-            return 0;
-        }}
-    | IDENTIFIER COLON IDENTIFIER
-        { TableEntry *varEntry = rechercher($1);
-           TableEntry *varEntry2 = rechercher($3);
-        if (varEntry == NULL || varEntry2==NULL) {
-            yyerror("Variable non déclarée.");
-            return 0;
-        }
-        }
-    | IDENTIFIER COLON NUMBERINT
-       { TableEntry *varEntry = rechercher($1);
-        if (varEntry == NULL) {
-            yyerror("Variable non déclarée.");
-            return 0;
-        }}
+    | NUMBERFLOATPOS
 ;
 %%
-
-;
 
 void yyerror(const char *s) {
     extern int yylineno;
     fprintf(stderr, "Erreur à la ligne %d: %s\n", yylineno, s);
 }
-
-// int main(int argc, char **argv) {
-//     if (argc < 2) {
-//         fprintf(stderr, "Erreur : aucun fichier spécifié.\n");
-//         return 1;
-//     }
-
-//     FILE *f = fopen(argv[1], "r");
-//     if (!f) {
-//         perror("Erreur d'ouverture du fichier");
-//         return 1;
-//     }
-
-//     initialisation();
-//     yyin = f;
-//     yyparse();
-//     afficherTable(Tab, 1000);
-//     fclose(f);
-//     return 0;
-// }
-
-/*listevariable:
-    listevariable COMMA IDENTIFIER
-    | IDENTIFIER 
-    ;*/
-
-/*affectation:
-    IDENTIFIER ASSIGN expressionarithmetic SEMICOLON
-    
-expressionarithmetic:
-    IDENTIFIER
-    | LPAREN expressionarithmetic RPAREN
-    | NUMBER
-    | expressionarithmetic PLUS expressionarithmetic
-    | expressionarithmetic MINUS expressionarithmetic
-    | expressionarithmetic MULT expressionarithmetic
-    | expressionarithmetic DIV expressionarithmetic
-    ;
-
-expressionlogic:
-    | LPAREN expressionlogic RPAREN
-    | NOT expressionlogic
-    | expressionlogic AND expressionlogic
-    | expressionlogic OR expressionlogic
-    | expressionlogic EQUAL expressionlogic
-    | expressionlogic NEQ expressionlogic
-    | expressionarithmetic LT expressionarithmetic
-    | expressionarithmetic LTE expressionarithmetic
-    | expressionarithmetic GT expressionarithmetic
-    | expressionarithmetic GTE expressionarithmetic
-    ;
-
-statements:
-    statement
-    | statements statement
-    ;
-
-statement:
-    affectation
-    | IF LPAREN expressionlogic RPAREN LBRACE statements RBRACE ELSE LBRACE statements RBRACE
-    | FOR LPAREN initialisation COLON fortext RPAREN LBRACE statements RBRACE
-    | READ LPAREN IDENTIFIER RPAREN SEMICOLON
-    | WRITE LPAREN expressionwrite RPAREN SEMICOLON
-    ;
-
-fortext:
-    NUMBERINT COLON NUMBERINT
-    | NUMBERINT COLON IDENTIFIER
-    | IDENTIFIER COLON IDENTIFIER
-    | IDENTIFIER COLON NUMBERINT
-;
-expressionwrite:
-    IDENTIFIER
-    | TEXT
-    | TEXT COMMA expressionwrite
-    | IDENTIFIER COMMA expressionwrite
-    ;
-
-*/
