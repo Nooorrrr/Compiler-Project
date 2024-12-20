@@ -239,7 +239,7 @@ expression:
         char tempVar2[20];
         sprintf(tempVar2, "%d", $1);
         sprintf(tempVar, "t%d", tempCount++);
-        generer("=", tempVar2, NULL, tempVar);
+        generer("=", tempVar2, "", tempVar);
     }
     | NUMBERFLOAT {  // Cas où l'expression est un flottant
         $$.type = "FLOAT";
@@ -250,7 +250,7 @@ expression:
         sprintf(tempVar, "t%d", tempCount++);
         char tempVar2[20];
         sprintf(tempVar2, "%f", $1);
-        generer("=",tempVar2, NULL, tempVar);
+        generer("=",tempVar2, "", tempVar);
     }
     | CARACTERE {  // Cas où l'expression est un caractère
         $$.type = "CHAR";
@@ -260,7 +260,7 @@ expression:
         sprintf(tempVar, "t%d", tempCount++);
               char tempVar2[20];
         sprintf(tempVar2, "%c", $1);
-        generer("=",tempVar2, NULL, tempVar);
+        generer("=",tempVar2, "", tempVar);
 
     }
     | expression PLUS expression {  // Addition

@@ -1398,7 +1398,7 @@ yyreduce:
         char tempVar2[20];
         sprintf(tempVar2, "%d", (yyvsp[0].entier));
         sprintf(tempVar, "t%d", tempCount++);
-        generer("=", tempVar2, NULL, tempVar);
+        generer("=", tempVar2, "", tempVar);
     }
 #line 1404 "parser.tab.c"
     break;
@@ -1414,7 +1414,7 @@ yyreduce:
         sprintf(tempVar, "t%d", tempCount++);
         char tempVar2[20];
         sprintf(tempVar2, "%f", (yyvsp[0].flottant));
-        generer("=",tempVar2, NULL, tempVar);
+        generer("=",tempVar2, "", tempVar);
     }
 #line 1420 "parser.tab.c"
     break;
@@ -1429,7 +1429,7 @@ yyreduce:
         sprintf(tempVar, "t%d", tempCount++);
               char tempVar2[20];
         sprintf(tempVar2, "%c", (yyvsp[0].car));
-        generer("=",tempVar2, NULL, tempVar);
+        generer("=",tempVar2, "", tempVar);
 
     }
 #line 1436 "parser.tab.c"
