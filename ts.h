@@ -28,6 +28,7 @@ extern TableEntry Tab[1000];  // Table des identifiants et constantes
 void initialisation();
 TableEntry* rechercher(const char entite[]);
 void inserer(const char entite[], const char type[], float val, int scope, int isArray, int arraySize, int isConst);
+void modifierValeur(const char idf[], float newValue) ;
 void afficherEnTete();
 void afficherEntree(TableEntry *entry);
 void afficherTable(TableEntry *table, int taille);

@@ -1,18 +1,21 @@
 VAR_GLOBAL {
     INTEGER A,B,C;
     INTEGER Q;  
-    FLOAT X,L;
-    CONST INTEGER Z = 3;
+    FLOAT X;
+    CONST INTEGER Z = 5;
+    CONST INTEGER L = 1;
     
 }
 
 DECLARATION { %%affectations
-   CONST INTEGER N= 6;
-   CHAR Y[8] = "hello";
+   CONST INTEGER N= 4;
+   INTEGER D;
+
 }
 
 INSTRUCTION {
-     C = 1;
+     C = Z+N;
+    D= 15*10;
      
     IF ((A > B) && (A > B)){
         C = A + 1;

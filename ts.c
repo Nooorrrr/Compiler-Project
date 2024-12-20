@@ -89,6 +89,23 @@ void afficherTable(TableEntry *table, int taille) {
     printf("+-----------------+------------+----------+-------+-------+-------+-------+\n");
 }
 
+
+void modifierValeur(const char idf[], float newValue) {
+    TableEntry *entry = rechercher(idf); // Rechercher l'identifiant dans la table
+
+    if (entry != NULL) {
+        if (entry->isConst) {
+            fprintf(stderr, "Erreur : impossible de modifier la valeur de %s car il s'agit d'une constante.\n", idf);
+            return;
+        }
+
+        entry->val = newValue; // Modifier la valeur
+        printf("La valeur de %s a été modifiée avec succès. Nouvelle valeur : %.2f\n", idf, newValue);
+    } else {
+        fprintf(stderr, "Erreur : l'identifiant %s n'existe pas dans la table des symboles.\n", idf);
+    }
+}
+
 /* Fonction main pour tester
 int main() {
     // Initialisation de la table des symboles

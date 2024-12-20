@@ -19,20 +19,33 @@ void yyerror(const char *s);  // Déclaration de la fonction d'erreur
      { char** variables;
        int count; 
     } varList;  // Pour gérer une liste de variables
+
      struct { 
         char* type;    // Le type de l'expression (par exemple: "int", "float")
         char** variables; 
         int count; 
-    } expr;     
-}
- 
+        float value;
+    } exprari;    
 
-%token <entier> NUMBERINTPOS NUMBERINTNEG
+     struct { 
+        char* type;    // Le type de l'expression (par exemple: "int", "float")
+        char** variables; 
+        int count; 
+      
+    } exprlog;    
+}
+
+
+%token <entier> NUMBERINTPOS NUMBERINTNEG 
 %token <flottant> NUMBERFLOATPOS NUMBERFLOATNEG
 %token <chaine> IDENTIFIER caractere
 %type <chaine> type
 %type <varList>  listevariable
-%type <expr> expressionarithmetic expressionlogic
+%type <exprari> expressionarithmetic 
+%type <exprlog> expressionlogic
+
+
+
 
 %token VAR_GLOBAL DECLARATION INSTRUCTION INTEGER FLOAT CHAR CONST IF ELSE FOR READ WRITE
 %token AND OR NOT EQUAL NEQ GTE LTE GT LT
@@ -112,6 +125,7 @@ declaration:
           inserer($3, $2, $5, scope, 1, 0, 0);
         }
     }
+    
     ;
 listevariable:
     listevariable COMMA IDENTIFIER {
@@ -127,69 +141,6 @@ listevariable:
     }
     ;
 
-/*listevariable:
-    listevariable COMMA IDENTIFIER
-    | IDENTIFIER 
-    ;*/
-type:
-    INTEGER { $$ = "INTEGER"; }
-    | FLOAT { $$ = "FLOAT"; }
-    | CHAR { $$ = "CHAR"; }
-    ;
-
-/*affectation:
-    IDENTIFIER ASSIGN expressionarithmetic SEMICOLON
-    
-expressionarithmetic:
-    IDENTIFIER
-    | LPAREN expressionarithmetic RPAREN
-    | NUMBER
-    | expressionarithmetic PLUS expressionarithmetic
-    | expressionarithmetic MINUS expressionarithmetic
-    | expressionarithmetic MULT expressionarithmetic
-    | expressionarithmetic DIV expressionarithmetic
-    ;
-
-expressionlogic:
-    | LPAREN expressionlogic RPAREN
-    | NOT expressionlogic
-    | expressionlogic AND expressionlogic
-    | expressionlogic OR expressionlogic
-    | expressionlogic EQUAL expressionlogic
-    | expressionlogic NEQ expressionlogic
-    | expressionarithmetic LT expressionarithmetic
-    | expressionarithmetic LTE expressionarithmetic
-    | expressionarithmetic GT expressionarithmetic
-    | expressionarithmetic GTE expressionarithmetic
-    ;
-
-statements:
-    statement
-    | statements statement
-    ;
-
-statement:
-    affectation
-    | IF LPAREN expressionlogic RPAREN LBRACE statements RBRACE ELSE LBRACE statements RBRACE
-    | FOR LPAREN initialisation COLON fortext RPAREN LBRACE statements RBRACE
-    | READ LPAREN IDENTIFIER RPAREN SEMICOLON
-    | WRITE LPAREN expressionwrite RPAREN SEMICOLON
-    ;
-
-fortext:
-    NUMBERINT COLON NUMBERINT
-    | NUMBERINT COLON IDENTIFIER
-    | IDENTIFIER COLON IDENTIFIER
-    | IDENTIFIER COLON NUMBERINT
-;
-expressionwrite:
-    IDENTIFIER
-    | TEXT
-    | TEXT COMMA expressionwrite
-    | IDENTIFIER COMMA expressionwrite
-    ;
-
-*/
 affectation:
     IDENTIFIER ASSIGN expressionarithmetic SEMICOLON {
         // Vérification si la variable est déclarée
@@ -203,10 +154,13 @@ affectation:
             if (strcmp(varType, exprType) != 0) {
                 yyerror("Type incompatible dans l'affectation.");
                 return 0;
+            }else{
+            modifierValeur($1,$3.value);
             }
+         
         }
     }
-;
+;  
 expressionarithmetic:
     IDENTIFIER {
         // Vérifier que la variable est déclarée et obtenir son type
@@ -215,13 +169,27 @@ expressionarithmetic:
             return 0;
         } else {
             $$.type = rechercher($1)->type;
+            $$.value=rechercher($1)->val;
         }
     }
     | LPAREN expressionarithmetic RPAREN {
         $$ = $2;  // Propagation du type
     }
-    | NUMBER {
+    | NUMBERINTPOS {
         $$.type = "INTEGER";  // Ou FLOAT selon le type de NUMBER
+        $$.value = $1; 
+    }
+     | NUMBERFLOATPOS {
+        $$.type = "FLOAT";  // Ou FLOAT selon le type de NUMBER
+        $$.value = $1; 
+    }
+     |NUMBERINTNEG {
+        $$.type = "INTEGER";  // Ou FLOAT selon le type de NUMBER
+        $$.value = $1; 
+    }
+     | NUMBERFLOATNEG {
+        $$.type = "FLOAT";  // Ou FLOAT selon le type de NUMBER
+        $$.value = $1; 
     }
     | expressionarithmetic PLUS expressionarithmetic {
         // Vérification des types pour l'opération arithmétique
@@ -230,6 +198,7 @@ expressionarithmetic:
             return 0;
         }
         $$.type = $1.type;  // Le résultat a le même type que les opérandes
+        $$.value=$1.value+$3.value;
     }
     | expressionarithmetic MINUS expressionarithmetic {
         // Logique similaire pour l'opération de soustraction
@@ -238,6 +207,7 @@ expressionarithmetic:
             return 0;
         }
         $$.type = $1.type;
+          $$.value=$1.value-$3.value;
     }
     | expressionarithmetic MULT expressionarithmetic {
         // Vérification pour multiplication
@@ -246,6 +216,7 @@ expressionarithmetic:
             return 0;
         }
         $$.type = $1.type;
+          $$.value=$1.value*$3.value;
     }
     | expressionarithmetic DIV expressionarithmetic {
         // Vérification pour division
@@ -254,8 +225,15 @@ expressionarithmetic:
             return 0;
         }
         $$.type = $1.type;
+          $$.value=$1.value/$3.value;
     }
 ;
+type:
+    INTEGER { $$ = "INTEGER"; }
+    | FLOAT { $$ = "FLOAT"; }
+    | CHAR { $$ = "CHAR"; }
+    ;
+
 expressionlogic:
     expressionarithmetic LT expressionarithmetic {
         if (strcmp($1.type, $3.type) != 0) {
@@ -354,10 +332,6 @@ NUMBERINT:
     NUMBERINTPOS
     | NUMBERINTNEG;
 
-NUMBER:
-    NUMBERINT
-    | NUMBERFLOATPOS
-    | NUMBERFLOATNEG;
 
 fortext:
     NUMBERINT COLON NUMBERINT
@@ -393,3 +367,62 @@ void yyerror(const char *s) {
 //     fclose(f);
 //     return 0;
 // }
+
+/*listevariable:
+    listevariable COMMA IDENTIFIER
+    | IDENTIFIER 
+    ;*/
+
+/*affectation:
+    IDENTIFIER ASSIGN expressionarithmetic SEMICOLON
+    
+expressionarithmetic:
+    IDENTIFIER
+    | LPAREN expressionarithmetic RPAREN
+    | NUMBER
+    | expressionarithmetic PLUS expressionarithmetic
+    | expressionarithmetic MINUS expressionarithmetic
+    | expressionarithmetic MULT expressionarithmetic
+    | expressionarithmetic DIV expressionarithmetic
+    ;
+
+expressionlogic:
+    | LPAREN expressionlogic RPAREN
+    | NOT expressionlogic
+    | expressionlogic AND expressionlogic
+    | expressionlogic OR expressionlogic
+    | expressionlogic EQUAL expressionlogic
+    | expressionlogic NEQ expressionlogic
+    | expressionarithmetic LT expressionarithmetic
+    | expressionarithmetic LTE expressionarithmetic
+    | expressionarithmetic GT expressionarithmetic
+    | expressionarithmetic GTE expressionarithmetic
+    ;
+
+statements:
+    statement
+    | statements statement
+    ;
+
+statement:
+    affectation
+    | IF LPAREN expressionlogic RPAREN LBRACE statements RBRACE ELSE LBRACE statements RBRACE
+    | FOR LPAREN initialisation COLON fortext RPAREN LBRACE statements RBRACE
+    | READ LPAREN IDENTIFIER RPAREN SEMICOLON
+    | WRITE LPAREN expressionwrite RPAREN SEMICOLON
+    ;
+
+fortext:
+    NUMBERINT COLON NUMBERINT
+    | NUMBERINT COLON IDENTIFIER
+    | IDENTIFIER COLON IDENTIFIER
+    | IDENTIFIER COLON NUMBERINT
+;
+expressionwrite:
+    IDENTIFIER
+    | TEXT
+    | TEXT COMMA expressionwrite
+    | IDENTIFIER COMMA expressionwrite
+    ;
+
+*/
