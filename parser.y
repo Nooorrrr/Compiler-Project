@@ -275,9 +275,18 @@ expression:
         }
        $$.type = $1.type;
          if($$.type =="FLOAT"){
+            if($3.value.fval==0){
+                yyerror("division sur 0 impossible.");
+            }else{
             $$.value.fval= $1.value.fval / $3.value.fval;
+            }
          }else{
-             $$.value.ival = $1.value.ival /$3.value.ival ;
+            if($3.value.fval==0){
+              yyerror("division sur 0 impossible.");
+            }else{
+            $$.value.ival = $1.value.ival /$3.value.ival ;
+            }
+ 
          }
     }
     |LPAREN expression RPAREN
