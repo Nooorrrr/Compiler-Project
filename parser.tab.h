@@ -109,8 +109,9 @@ union YYSTYPE
     int entier;        // Pour les entiers
     float flottant;    // Pour les nombres flottants
     char* chaine;      // Pour les chaînes de caractères
+    struct { char** variables; int count; } varList;  // Pour gérer une liste de variables
 
-#line 114 "parser.tab.h"
+#line 115 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

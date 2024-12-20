@@ -540,12 +540,12 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    41,    41,    45,    46,    50,    51,    59,    67,    75,
-      83,    94,    95,    99,   100,   101,   105,   109,   110,   111,
-     112,   113,   114,   115,   118,   119,   120,   121,   122,   123,
-     124,   125,   126,   127,   128,   132,   133,   137,   138,   139,
-     140,   141,   145,   146,   147,   148,   152,   156,   157,   160,
-     161,   162,   165,   166,   167,   168
+       0,    43,    43,    47,    48,    52,    65,    73,    81,    89,
+      97,   107,   113,   125,   126,   127,   131,   135,   136,   137,
+     138,   139,   140,   141,   144,   145,   146,   147,   148,   149,
+     150,   151,   152,   153,   154,   158,   159,   163,   164,   165,
+     166,   167,   171,   172,   173,   174,   178,   182,   183,   186,
+     187,   188,   191,   192,   193,   194
 };
 #endif
 
@@ -1216,8 +1216,25 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
+  case 5: /* declaration: type listevariable SEMICOLON  */
+#line 52 "parser.y"
+                                     {
+        // Boucle sur chaque variable dans listevariable
+        for (int i = 0; i < (yyvsp[-1].varList).count; i++) {
+            if (rechercher((yyvsp[-1].varList).variables[i]) != NULL) {
+                yyerror("Variable déjà déclarée.");
+                return 0;
+            } else {
+               inserer((yyvsp[-1].varList).variables[i], (yyvsp[-2].chaine), 0, scope, 0, 0, 0);  // Insérer la variable (pas un tableau, pas une constante)
+
+            }
+        }
+    }
+#line 1234 "parser.tab.c"
+    break;
+
   case 6: /* declaration: type IDENTIFIER LBRACKET NUMBERINTPOS RBRACKET SEMICOLON  */
-#line 51 "parser.y"
+#line 65 "parser.y"
                                                                {
            if (rechercher((yyvsp[-4].chaine)) != NULL) {
             yyerror("Variable déjà déclarée.");
@@ -1226,11 +1243,11 @@ yyreduce:
             inserer((yyvsp[-4].chaine), (yyvsp[-5].chaine), 0, scope, 0, (yyvsp[-2].entier), 1);
         }
     }
-#line 1230 "parser.tab.c"
+#line 1247 "parser.tab.c"
     break;
 
   case 7: /* declaration: CONST type IDENTIFIER ASSIGN NUMBERINTPOS SEMICOLON  */
-#line 59 "parser.y"
+#line 73 "parser.y"
                                                           {
          if (rechercher((yyvsp[-3].chaine)) != NULL) {
             yyerror("Variable déjà déclarée.");
@@ -1239,11 +1256,11 @@ yyreduce:
           inserer((yyvsp[-3].chaine), (yyvsp[-4].chaine), (yyvsp[-1].entier), scope, 1, 0, 0);
         }
     }
-#line 1243 "parser.tab.c"
+#line 1260 "parser.tab.c"
     break;
 
   case 8: /* declaration: CONST type IDENTIFIER ASSIGN NUMBERINTNEG SEMICOLON  */
-#line 67 "parser.y"
+#line 81 "parser.y"
                                                           {
         if (rechercher((yyvsp[-3].chaine)) != NULL) {
             yyerror("Variable déjà déclarée.");
@@ -1252,11 +1269,11 @@ yyreduce:
          inserer((yyvsp[-3].chaine), (yyvsp[-4].chaine), (yyvsp[-1].entier), scope, 1, 0, 0);
         }
     }
-#line 1256 "parser.tab.c"
+#line 1273 "parser.tab.c"
     break;
 
   case 9: /* declaration: CONST type IDENTIFIER ASSIGN NUMBERFLOATPOS SEMICOLON  */
-#line 75 "parser.y"
+#line 89 "parser.y"
                                                             {
         if (rechercher((yyvsp[-3].chaine)) != NULL) {
             yyerror("Variable déjà déclarée.");
@@ -1265,11 +1282,11 @@ yyreduce:
             inserer((yyvsp[-3].chaine), (yyvsp[-4].chaine), (yyvsp[-1].flottant), scope, 1, 0, 0);
         }
     }
-#line 1269 "parser.tab.c"
+#line 1286 "parser.tab.c"
     break;
 
   case 10: /* declaration: CONST type IDENTIFIER ASSIGN NUMBERFLOATNEG SEMICOLON  */
-#line 83 "parser.y"
+#line 97 "parser.y"
                                                             {
         if (rechercher((yyvsp[-3].chaine)) != NULL) {
             yyerror("Variable déjà déclarée.");
@@ -1278,29 +1295,50 @@ yyreduce:
           inserer((yyvsp[-3].chaine), (yyvsp[-4].chaine), (yyvsp[-1].flottant), scope, 1, 0, 0);
         }
     }
-#line 1282 "parser.tab.c"
+#line 1299 "parser.tab.c"
+    break;
+
+  case 11: /* listevariable: listevariable COMMA IDENTIFIER  */
+#line 107 "parser.y"
+                                   {
+        (yyval.varList) = (yyvsp[-2].varList);  // Copier la liste précédente
+        (yyval.varList) .count++;  // Incrémenter le nombre d'éléments
+        (yyval.varList) .variables = realloc((yyval.varList).variables, sizeof(char*) * (yyval.varList) .count);
+        (yyval.varList) .variables[(yyval.varList).count - 1] = (yyvsp[0].chaine);  // Ajouter la nouvelle variable
+    }
+#line 1310 "parser.tab.c"
+    break;
+
+  case 12: /* listevariable: IDENTIFIER  */
+#line 113 "parser.y"
+                 {
+        (yyval.varList) .count = 1;  // Une seule variable
+        (yyval.varList) .variables = malloc(sizeof(char*));
+        (yyval.varList) .variables[0] = (yyvsp[0].chaine);
+    }
+#line 1320 "parser.tab.c"
     break;
 
   case 13: /* type: INTEGER  */
-#line 99 "parser.y"
+#line 125 "parser.y"
             { (yyval.chaine) = "INTEGER"; }
-#line 1288 "parser.tab.c"
+#line 1326 "parser.tab.c"
     break;
 
   case 14: /* type: FLOAT  */
-#line 100 "parser.y"
+#line 126 "parser.y"
             { (yyval.chaine) = "FLOAT"; }
-#line 1294 "parser.tab.c"
+#line 1332 "parser.tab.c"
     break;
 
   case 15: /* type: CHAR  */
-#line 101 "parser.y"
+#line 127 "parser.y"
            { (yyval.chaine) = "CHAR"; }
-#line 1300 "parser.tab.c"
+#line 1338 "parser.tab.c"
     break;
 
 
-#line 1304 "parser.tab.c"
+#line 1342 "parser.tab.c"
 
       default: break;
     }
@@ -1494,7 +1532,7 @@ yyreturn:
   return yyresult;
 }
 
-#line 171 "parser.y"
+#line 197 "parser.y"
 
 
 void yyerror(const char *s) {

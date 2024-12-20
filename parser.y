@@ -14,6 +14,7 @@ void yyerror(const char *s);  // Déclaration de la fonction d'erreur
     int entier;        // Pour les entiers
     float flottant;    // Pour les nombres flottants
     char* chaine;      // Pour les chaînes de caractères
+    struct { char** variables; int count; } varList;  // Pour gérer une liste de variables
 }
  
 
@@ -21,6 +22,7 @@ void yyerror(const char *s);  // Déclaration de la fonction d'erreur
 %token <flottant> NUMBERFLOATPOS NUMBERFLOATNEG
 %token <chaine> IDENTIFIER caractere
 %type <chaine> type
+%type <varList>  listevariable
 
 %token VAR_GLOBAL DECLARATION INSTRUCTION INTEGER FLOAT CHAR CONST IF ELSE FOR READ WRITE
 %token AND OR NOT EQUAL NEQ GTE LTE GT LT
@@ -47,7 +49,19 @@ varGloballist:
     ;
 
 declaration:
-    type listevariable SEMICOLON 
+        type listevariable SEMICOLON {
+        // Boucle sur chaque variable dans listevariable
+        for (int i = 0; i < $2.count; i++) {
+            if (rechercher($2.variables[i]) != NULL) {
+                yyerror("Variable déjà déclarée.");
+                return 0;
+            } else {
+               inserer($2.variables[i], $1, 0, scope, 0, 0, 0);  // Insérer la variable (pas un tableau, pas une constante)
+
+            }
+        }
+    }
+
     | type IDENTIFIER LBRACKET NUMBERINTPOS RBRACKET SEMICOLON {
            if (rechercher($2) != NULL) {
             yyerror("Variable déjà déclarée.");
@@ -89,12 +103,24 @@ declaration:
         }
     }
     ;
-
 listevariable:
-    listevariable COMMA IDENTIFIER
-    | IDENTIFIER
+    listevariable COMMA IDENTIFIER {
+        $$ = $1;  // Copier la liste précédente
+        $$ .count++;  // Incrémenter le nombre d'éléments
+        $$ .variables = realloc($$.variables, sizeof(char*) * $$ .count);
+        $$ .variables[$$.count - 1] = $3;  // Ajouter la nouvelle variable
+    }
+    | IDENTIFIER {
+        $$ .count = 1;  // Une seule variable
+        $$ .variables = malloc(sizeof(char*));
+        $$ .variables[0] = $1;
+    }
     ;
 
+/*listevariable:
+    listevariable COMMA IDENTIFIER
+    | IDENTIFIER 
+    ;*/
 type:
     INTEGER { $$ = "INTEGER"; }
     | FLOAT { $$ = "FLOAT"; }

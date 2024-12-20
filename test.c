@@ -1,6 +1,5 @@
-
-
 VAR_GLOBAL {
+    INTEGER A,B,C;
     INTEGER Q;
     INTEGER Q, Z, T;%%     affectations    
     INTEGER Q, Z, T;
