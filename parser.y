@@ -9,40 +9,53 @@ extern int scope;  // Déclaration de la variable scope
 extern TableEntry Tab[1000];  // Table des identifiants et constantes
 int scope = 0;  // Initialisation de scope
 void yyerror(const char *s);  // Déclaration de la fonction d'erreur
-
 %}
+
 %union {
     int entier;        // Pour les entiers
     float flottant;    // Pour les nombres flottants
     char* chaine;      // Pour les chaînes de caractères
-    struct
-     { char** variables;
-       int count; 
+    char car;
+    struct { 
+        char** variables;
+        int count; 
     } varList;  // Pour gérer une liste de variables
 
-     struct { 
-        char* type;    // Le type de l'expression (par exemple: "int", "float")
-        char** variables; 
-        int count; 
-        float value;
-    } exprari;    
+    // Déclaration de l'union Value
+    union {
+        char cval;     // Caractère
+        int ival;      // Entier
+        float fval;    // Flottant
+    } Value;  // Union pour stocker la valeur
 
-     struct { 
+    struct { 
         char* type;    // Le type de l'expression (par exemple: "int", "float")
         char** variables; 
         int count; 
-      
+        union {         // Utilisation de l'union pour la valeur
+            char cval;
+            int ival;
+            float fval;
+        } value;
+    } exprari;
+
+    struct { 
+        char* type;    // Le type de l'expression (par exemple: "int", "float")
+        char** variables; 
+        int count; 
     } exprlog;    
 }
 
-
 %token <entier> NUMBERINTPOS NUMBERINTNEG 
 %token <flottant> NUMBERFLOATPOS NUMBERFLOATNEG
-%token <chaine> IDENTIFIER caractere
+%token <chaine> IDENTIFIER 
 %type <chaine> type
 %type <varList>  listevariable
-%type <exprari> expressionarithmetic 
+%type <exprari> expression 
 %type <exprlog> expressionlogic
+%token<car> CARACTERE
+%type <entier> NUMBERINT 
+%type <flottant> NUMBERFLOAT
 
 
 
@@ -69,22 +82,49 @@ program:
 varGloballist:
     varGloballist declaration
     | /* Vide */
-    ;
-
-declaration:
-        type listevariable SEMICOLON {
-        // Boucle sur chaque variable dans listevariable
+    ;declaration:
+    type listevariable SEMICOLON {
         for (int i = 0; i < $2.count; i++) {
             if (rechercher($2.variables[i]) != NULL) {
                 yyerror("Variable déjà déclarée.");
                 return 0;
             } else {
-               inserer($2.variables[i], $1, 0, scope, 0, 0, 0);  // Insérer la variable (pas un tableau, pas une constante)
-
+                if (strcmp($1, "INTEGER") == 0) {
+                    inserer($2.variables[i], $1, 0, scope, 0, 0, 0);  // Insérer sans valeur initiale pour une variable
+                } else if (strcmp($1, "FLOAT") == 0) {
+                    inserer($2.variables[i], $1, 0.0f, scope, 0, 0, 0);  // Insérer un flottant
+                } else if (strcmp($1, "CHAR") == 0) {
+                    inserer($2.variables[i], $1, '\0', scope, 0, 0, 0);  // Insérer un caractère (valeur nulle par défaut)
+                }
             }
         }
     }
-
+    | CONST type IDENTIFIER ASSIGN NUMBERINT SEMICOLON {
+        if (rechercher($3) != NULL) {
+            yyerror("Variable déjà déclarée.");
+            return 0;
+        } else {
+           
+            inserer($3, $2,$5, scope, 0, 0, 1);  // Insérer la constante entière
+  
+        }
+    }
+    | CONST type IDENTIFIER ASSIGN NUMBERFLOAT SEMICOLON {
+        if (rechercher($3) != NULL) {
+            yyerror("Variable déjà déclarée.");
+            return 0;
+        } else {
+            inserer($3, $2, $5, scope, 0, 0, 1);  // Insérer la constante flottante
+        }
+    }
+     | CONST type IDENTIFIER ASSIGN CARACTERE SEMICOLON {
+        if (rechercher($3) != NULL) {
+            yyerror("Variable déjà déclarée.");
+            return 0;
+        } else {
+            inserer($3, $2, $5, scope, 0, 0, 1);  // Insérer la constante flottante
+        }
+    }
     | type IDENTIFIER LBRACKET NUMBERINTPOS RBRACKET SEMICOLON {
            if (rechercher($2) != NULL) {
             yyerror("Variable déjà déclarée.");
@@ -92,41 +132,8 @@ declaration:
         } else {
             inserer($2, $1, 0, scope, 0, $4, 1);
         }
-    }
-    | CONST type IDENTIFIER ASSIGN NUMBERINTPOS SEMICOLON {
-         if (rechercher($3) != NULL) {
-            yyerror("Variable déjà déclarée.");
-            return 0;
-        } else {
-          inserer($3, $2, $5, scope, 1, 0, 0);
-        }
-    } 
-    | CONST type IDENTIFIER ASSIGN NUMBERINTNEG SEMICOLON {
-        if (rechercher($3) != NULL) {
-            yyerror("Variable déjà déclarée.");
-            return 0;
-        } else {
-         inserer($3, $2, $5, scope, 1, 0, 0);
-        }
-    } 
-    | CONST type IDENTIFIER ASSIGN NUMBERFLOATPOS SEMICOLON {
-        if (rechercher($3) != NULL) {
-            yyerror("Variable déjà déclarée.");
-            return 0;
-        } else {
-            inserer($3, $2, $5, scope, 1, 0, 0);
-        }
-    }
-    | CONST type IDENTIFIER ASSIGN NUMBERFLOATNEG SEMICOLON {
-        if (rechercher($3) != NULL) {
-            yyerror("Variable déjà déclarée.");
-            return 0;
-        } else {
-          inserer($3, $2, $5, scope, 1, 0, 0);
-        }
-    }
-    
-    ;
+    };
+
 listevariable:
     listevariable COMMA IDENTIFIER {
         $$ = $1;  // Copier la liste précédente
@@ -140,123 +147,163 @@ listevariable:
         $$ .variables[0] = $1;
     }
     ;
-
+    /*
+*/// Affectation
+// Affectation et expression dans un même bloc
 affectation:
-    IDENTIFIER ASSIGN expressionarithmetic SEMICOLON {
+    IDENTIFIER ASSIGN expression SEMICOLON {
         // Vérification si la variable est déclarée
-        if (rechercher($1) == NULL) {
+        TableEntry *varEntry = rechercher($1);
+        if (varEntry == NULL) {
             yyerror("Variable non déclarée.");
             return 0;
-        } else {
-            // Vérification des types (assumer qu'on a un champ type dans la table des symboles)
-            char *varType = rechercher($1)->type;
-            char *exprType = $3.type; // Ici, tu devras récupérer le type de l'expression
-            if (strcmp(varType, exprType) != 0) {
-                yyerror("Type incompatible dans l'affectation.");
-                return 0;
-            }else{
-            modifierValeur($1,$3.value);
-            }
-         
         }
-    }
-;  
-expressionarithmetic:
-    IDENTIFIER {
-        // Vérifier que la variable est déclarée et obtenir son type
-        if (rechercher($1) == NULL) {
-            yyerror("Variable non déclarée.");
-            return 0;
-        } else {
-            $$.type = rechercher($1)->type;
-            $$.value=rechercher($1)->val;
-        }
-    }
-    | LPAREN expressionarithmetic RPAREN {
-        $$ = $2;  // Propagation du type
-    }
-    | NUMBERINTPOS {
-        $$.type = "INTEGER";  // Ou FLOAT selon le type de NUMBER
-        $$.value = $1; 
-    }
-     | NUMBERFLOATPOS {
-        $$.type = "FLOAT";  // Ou FLOAT selon le type de NUMBER
-        $$.value = $1; 
-    }
-     |NUMBERINTNEG {
-        $$.type = "INTEGER";  // Ou FLOAT selon le type de NUMBER
-        $$.value = $1; 
-    }
-     | NUMBERFLOATNEG {
-        $$.type = "FLOAT";  // Ou FLOAT selon le type de NUMBER
-        $$.value = $1; 
-    }
-    | expressionarithmetic PLUS expressionarithmetic {
-        // Vérification des types pour l'opération arithmétique
-        if (strcmp($1.type, $3.type) != 0) {
-            yyerror("Opérandes de types incompatibles.");
+
+        // Vérification si la variable est une constante et ne peut pas être modifiée
+        if (varEntry->isConst == 1) {
+            yyerror("Vous essayez de modifier une constante.");
             return 0;
         }
-        $$.type = $1.type;  // Le résultat a le même type que les opérandes
-        $$.value=$1.value+$3.value;
-    }
-    | expressionarithmetic MINUS expressionarithmetic {
-        // Logique similaire pour l'opération de soustraction
-        if (strcmp($1.type, $3.type) != 0) {
-            yyerror("Opérandes de types incompatibles.");
+
+        // Vérification de la compatibilité des types entre la variable et l'expression
+        if (strcmp(varEntry->type, $3.type) != 0) {
+            yyerror("Type incompatible dans l'affectation.");
             return 0;
         }
-        $$.type = $1.type;
-          $$.value=$1.value-$3.value;
-    }
-    | expressionarithmetic MULT expressionarithmetic {
-        // Vérification pour multiplication
-        if (strcmp($1.type, $3.type) != 0) {
-            yyerror("Opérandes de types incompatibles.");
-            return 0;
-        }
-        $$.type = $1.type;
-          $$.value=$1.value*$3.value;
-    }
-    | expressionarithmetic DIV expressionarithmetic {
-        // Vérification pour division
-        if (strcmp($1.type, $3.type) != 0) {
-            yyerror("Opérandes de types incompatibles.");
-            return 0;
-        }
-        $$.type = $1.type;
-          $$.value=$1.value/$3.value;
+
+        // Effectuer la modification de la valeur
+        modifierValeur($1, &($3.value), varEntry->type);
     }
 ;
+
+// Expression générale (affectation ou arithmétique)
+expression:
+    IDENTIFIER {
+        TableEntry *entry = rechercher($1);
+        if (entry == NULL) {
+            yyerror("Variable non déclarée.");
+            return 0;
+        }
+        
+        $$.type = entry->type;
+
+        // Affectation de valeur selon le type de la variable
+        if (strcmp($$.type, "INTEGER") == 0) {
+            $$.value.ival = entry->val.ival;
+        } else if (strcmp($$.type, "FLOAT") == 0) {
+            $$.value.fval = entry->val.fval;
+        } else if (strcmp($$.type, "CHAR") == 0) {
+            $$.value.cval = entry->val.cval;
+        }
+    }
+    | NUMBERINT {
+        $$.type = "INTEGER";
+        $$.value.ival = $1;
+    }
+    | NUMBERFLOAT {
+        $$.type = "FLOAT";
+        $$.value.fval = $1;
+    }
+    | CARACTERE {
+        $$.type = "CHAR";
+        $$.value.cval = $1;  // Valeur du caractère
+    }
+    | expression PLUS expression {
+        if (strcmp($1.type, $3.type) != 0) {
+            yyerror("Opérandes de types incompatibles pour l'addition.");
+            return 0;
+        }
+        if($1.type=="CHAR"){
+            yyerror("Opération addition avec char.");
+        }
+       $$.type = $1.type;
+         if($$.type =="FLOAT"){
+            $$.value.fval= $1.value.fval - $3.value.fval;
+         }else{
+             $$.value.ival = $1.value.ival - $3.value.ival ;
+         }
+    }
+    | expression MINUS expression {
+        if (strcmp($1.type, $3.type) != 0) {
+            yyerror("Opérandes de types incompatibles pour la soustraction.");
+            return 0;
+        }
+          if($1.type=="CHAR"){
+            yyerror("Opération addition avec char.");
+        }
+        $$.type = $1.type;
+         if($$.type =="FLOAT"){
+            $$.value.fval= $1.value.fval - $3.value.fval;
+         }else{
+             $$.value.ival = $1.value.ival - $3.value.ival ;
+         }
+    }
+    | expression MULT expression {
+        if (strcmp($1.type, $3.type) != 0) {
+            yyerror("Opérandes de types incompatibles pour la multiplication.");
+            return 0;
+        }
+          if($1.type=="CHAR"){
+            yyerror("Opération addition avec char.");
+        }
+       $$.type = $1.type;
+         if($$.type =="FLOAT"){
+            $$.value.fval= $1.value.fval - $3.value.fval;
+         }else{
+             $$.value.ival = $1.value.ival - $3.value.ival ;
+         }
+    }
+    | expression DIV expression {
+        if (strcmp($1.type, $3.type) != 0) {
+            yyerror("Opérandes de types incompatibles pour la division.");
+            return 0;
+        }
+          if($1.type=="CHAR"){
+            yyerror("Opération addition avec char.");
+        }
+       $$.type = $1.type;
+         if($$.type =="FLOAT"){
+            $$.value.fval= $1.value.fval - $3.value.fval;
+         }else{
+             $$.value.ival = $1.value.ival - $3.value.ival ;
+         }
+    }
+   
+;
+
+
+
 type:
     INTEGER { $$ = "INTEGER"; }
     | FLOAT { $$ = "FLOAT"; }
     | CHAR { $$ = "CHAR"; }
     ;
 
+
+
 expressionlogic:
-    expressionarithmetic LT expressionarithmetic {
+    expression LT expression {
         if (strcmp($1.type, $3.type) != 0) {
             yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
             return 0;
         }
         $$.type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
     }
-    | expressionarithmetic LTE expressionarithmetic {
+    | expression LTE expression {
         if (strcmp($1.type, $3.type) != 0) {
             yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
             return 0;
         }
         $$.type = "BOOLEAN";
     }
-    | expressionarithmetic GT expressionarithmetic {
+    | expression GT expression {
         if (strcmp($1.type, $3.type) != 0) {
             yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
             return 0;
         }
         $$.type = "BOOLEAN";
     }
-    | expressionarithmetic GTE expressionarithmetic {
+    | expression GTE expression {
         if (strcmp($1.type, $3.type) != 0) {
             yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
             return 0;
@@ -325,12 +372,16 @@ expressionwrite:
 
 
 initialisation:
-    IDENTIFIER ASSIGN expressionarithmetic
+    IDENTIFIER ASSIGN expression
 ;
 
 NUMBERINT:
     NUMBERINTPOS
     | NUMBERINTNEG;
+NUMBERFLOAT:
+    NUMBERFLOATNEG
+    | NUMBERFLOATPOS;
+
 
 
 fortext:

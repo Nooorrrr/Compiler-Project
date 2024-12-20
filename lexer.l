@@ -25,12 +25,19 @@
 "%%"[^\n]*           {  }
 
 [A-Z][a-z0-9]{0,7}   { yylval.chaine = strdup(yytext);return IDENTIFIER; }
-
+\'[a-zA-Z]\' {
+    yylval.car = yytext[1]; // Le caractère encapsulé (sans les guillemets simples)
+    return CARACTERE;
+}
+\"[a-zA-Z]\" {
+    yylval.car = yytext[1]; // Le caractère encapsulé (sans les guillemets simples)
+    return CARACTERE;
+}
 [+]?[0-9]+              { yylval.entier = atoi(yytext); return NUMBERINTPOS; }
 [+]?[0-9]+\.[0-9]+      {yylval.entier = atoi(yytext);  return NUMBERFLOATPOS; }
 "-"[0-9]+              { yylval.flottant = atoi(yytext); return NUMBERINTNEG; }
 "-"[0-9]+\.[0-9]+      {yylval.flottant = atoi(yytext);  return NUMBERFLOATNEG; }
-[A-Za-z]                {return caractere;}
+
 "&&"                 { return AND; }
 "\|\|"               { return OR; }
 "!"                  { return NOT; }

@@ -59,7 +59,7 @@ extern int yydebug;
     NUMBERFLOATPOS = 260,          /* NUMBERFLOATPOS  */
     NUMBERFLOATNEG = 261,          /* NUMBERFLOATNEG  */
     IDENTIFIER = 262,              /* IDENTIFIER  */
-    caractere = 263,               /* caractere  */
+    CARACTERE = 263,               /* CARACTERE  */
     VAR_GLOBAL = 264,              /* VAR_GLOBAL  */
     DECLARATION = 265,             /* DECLARATION  */
     INSTRUCTION = 266,             /* INSTRUCTION  */
@@ -109,26 +109,37 @@ union YYSTYPE
     int entier;        // Pour les entiers
     float flottant;    // Pour les nombres flottants
     char* chaine;      // Pour les chaînes de caractères
-    struct
-     { char** variables;
-       int count; 
+    char car;
+    struct { 
+        char** variables;
+        int count; 
     } varList;  // Pour gérer une liste de variables
 
-     struct { 
-        char* type;    // Le type de l'expression (par exemple: "int", "float")
-        char** variables; 
-        int count; 
-        float value;
-    } exprari;    
+    // Déclaration de l'union Value
+    union {
+        char cval;     // Caractère
+        int ival;      // Entier
+        float fval;    // Flottant
+    } Value;  // Union pour stocker la valeur
 
-     struct { 
+    struct { 
         char* type;    // Le type de l'expression (par exemple: "int", "float")
         char** variables; 
         int count; 
-      
+        union {         // Utilisation de l'union pour la valeur
+            char cval;
+            int ival;
+            float fval;
+        } value;
+    } exprari;
+
+    struct { 
+        char* type;    // Le type de l'expression (par exemple: "int", "float")
+        char** variables; 
+        int count; 
     } exprlog;    
 
-#line 132 "parser.tab.h"
+#line 143 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
