@@ -149,7 +149,6 @@ listevariable:
     ;
     /*
 */// Affectation
-// Affectation et expression dans un même bloc
 affectation:
     IDENTIFIER ASSIGN expression SEMICOLON {
         // Vérification si la variable est déclarée
@@ -178,6 +177,50 @@ affectation:
             varEntry->val.fval = $3.value.fval;  // Affecter un flottant
         } else if (strcmp(varEntry->type, "CHAR") == 0) {
             varEntry->val.cval = $3.value.cval;  // Affecter un caractère
+        } else {
+            yyerror("Type inconnu pour l'affectation.");
+            return 0;
+        }
+    }
+    | IDENTIFIER LBRACKET NUMBERINT RBRACKET ASSIGN expression SEMICOLON {
+        // Recherche de la variable
+        TableEntry *varEntry = rechercher($1);
+        if (varEntry == NULL) {
+            yyerror("Variable non déclarée.");
+            return 0;
+        }
+
+        // Vérification si la variable est une constante et ne peut pas être modifiée
+        if (varEntry->isConst == 1) {
+            yyerror("Vous essayez de modifier une constante.");
+            return 0;
+        }
+
+        // Vérification si la variable est un tableau
+        if (varEntry->isArray == 0) {
+            yyerror("La variable n'est pas un tableau.");
+            return 0;
+        }
+
+        // Vérification de la compatibilité des types entre la variable et l'expression
+        if (strcmp(varEntry->type, $6.type) != 0) {
+            yyerror("Type incompatible dans l'affectation.");
+            return 0;
+        }
+
+        // Vérification que l'index est valide pour le tableau
+        if ($3.value.ival < 0 || $3.value.ival >= varEntry->arraySize) {
+            yyerror("Index hors des limites du tableau.");
+            return 0;
+        }
+
+        // Modification de la valeur du tableau
+        if (strcmp(varEntry->type, "INTEGER") == 0) {
+            ((int*)varEntry->val.ival)[$3.value.ival] = $6.value.ival;  // Affecter un entier à la position du tableau
+        } else if (strcmp(varEntry->type, "FLOAT") == 0) {
+            ((float*)varEntry->val.fval)[$3.value.ival] = $6.value.fval;  // Affecter un flottant
+        } else if (strcmp(varEntry->type, "CHAR") == 0) {
+            ((char*)varEntry->val.cval)[$3.value.ival] = $6.value.cval;  // Affecter un caractère
         } else {
             yyerror("Type inconnu pour l'affectation.");
             return 0;

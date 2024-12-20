@@ -33,7 +33,6 @@ TableEntry* rechercher(const char entite[]) {
     }
     return NULL;
 }
-// Insertion d'une nouvelle entrée dans la table
 void inserer(const char entite[], const char type[], float val, int scope, int isArray, int arraySize, int isConst) {
     for (int i = 0; i < 1000; i++) {
         if (Tab[i].state == 0) { 
@@ -41,19 +40,32 @@ void inserer(const char entite[], const char type[], float val, int scope, int i
             strcpy(Tab[i].name, entite);
             strcpy(Tab[i].type, type);
             
-            // Modifiez cette ligne pour affecter un float à la valeur
-            if (strcmp(type, "INTEGER") == 0) {
-                Tab[i].val.ival = (int)val;  // Assurez-vous de convertir float en int si nécessaire
-            } else if (strcmp(type, "FLOAT") == 0) {
-                Tab[i].val.fval = val;  // Affectation directe si c'est un float
-            } else if (strcmp(type, "CHAR") == 0) {
-                Tab[i].val.cval = (char)val;  // Conversion si c'est un char
-            }
-            
             Tab[i].scope = scope;
             Tab[i].isArray = isArray;
             Tab[i].arraySize = arraySize;
             Tab[i].isConst = isConst;
+
+            if (isArray) {
+                if (strcmp(type, "INTEGER") == 0) {
+                    Tab[i].arrayValues = calloc(arraySize, sizeof(int));
+                } else if (strcmp(type, "FLOAT") == 0) {
+                    Tab[i].arrayValues = calloc(arraySize, sizeof(float));
+                } else if (strcmp(type, "CHAR") == 0) {
+                    Tab[i].arrayValues = calloc(arraySize, sizeof(char));
+                } else {
+                    fprintf(stderr, "Erreur : type de tableau non pris en charge pour %s\n", entite);
+                    Tab[i].arrayValues = NULL;
+                }
+            } else {
+                if (strcmp(type, "INTEGER") == 0) {
+                    Tab[i].val.ival = (int)val;
+                } else if (strcmp(type, "FLOAT") == 0) {
+                    Tab[i].val.fval = val;
+                } else if (strcmp(type, "CHAR") == 0) {
+                    Tab[i].val.cval = (char)val;
+                }
+            }
+
             Tab[i].offset = -1;
             Tab[i].next = NULL;
             return;
@@ -71,6 +83,10 @@ void afficherEnTete() {
 }
 // Affichage d'une entrée de la table
 void afficherEntree(TableEntry *entry) {
+    if (entry->isArray) {
+        // Affichage de l'entrée du tableau déjà géré dans afficherTable
+        return;
+    }
     if (strcmp(entry->type, "INTEGER") == 0) {
         printf("| %-15s | %-10s | %-8d | %-5d | %-5d | %-5d | %-5d |\n", 
                entry->name, entry->type, entry->val.ival, entry->scope,
@@ -84,7 +100,7 @@ void afficherEntree(TableEntry *entry) {
                entry->name, entry->type, entry->val.cval, entry->scope,
                entry->isArray, entry->arraySize, entry->isConst);
     } else {
-        // Ajoutez un message de debug si le type est inconnu
+        // Affichage d'un message d'erreur si le type est inconnu
         printf("Type inconnu: %s\n", entry->type);
     }
 }
@@ -94,7 +110,29 @@ void afficherTable(TableEntry *table, int taille) {
     afficherEnTete();
     for (int i = 0; i < taille; i++) {
         if (table[i].state == 1) {  // Vérifie si l'entrée est valide
-            afficherEntree(&table[i]);
+            if (table[i].isArray) {
+                // Si l'entrée est un tableau, afficher chaque élément du tableau
+                printf("| %-15s | %-10s | [TABLEAU] | %-5d | %-5d | %-5d | %-5d |\n", 
+                       table[i].name, table[i].type, table[i].scope, 
+                       table[i].isArray, table[i].arraySize, table[i].isConst);
+                
+                // Afficher les éléments du tableau
+                if (strcmp(table[i].type, "INTEGER") == 0) {
+                    for (int j = 0; j < table[i].arraySize; j++) {
+                        printf("    |   [%d]  | %-8d |\n", j, ((int*)table[i].arrayValues)[j]);
+                    }
+                } else if (strcmp(table[i].type, "FLOAT") == 0) {
+                    for (int j = 0; j < table[i].arraySize; j++) {
+                        printf("    |   [%d]  | %-8.2f |\n", j, ((float*)table[i].arrayValues)[j]);
+                    }
+                } else if (strcmp(table[i].type, "CHAR") == 0) {
+                    for (int j = 0; j < table[i].arraySize; j++) {
+                        printf("    |   [%d]  | %-8c |\n", j, ((char*)table[i].arrayValues)[j]);
+                    }
+                }
+            } else {
+                afficherEntree(&table[i]);  // Si ce n'est pas un tableau, afficher comme avant
+            }
         }
     }
     printf("+-----------------+------------+----------+-------+-------+-------+-------+\n");
@@ -128,5 +166,27 @@ void modifierValeur(const char idf[], void *newValue, const char *type) {
         }
     } else {
         fprintf(stderr, "Erreur : l'identifiant %s n'existe pas dans la table des symboles.\n", idf);
+    }
+}
+void modifierValeurTableau(const char idf[], int index, void *newValue, const char *type) {
+    TableEntry *entry = rechercher(idf);
+    if (entry == NULL) {
+        fprintf(stderr, "Erreur : tableau %s non trouvé.\n", idf);
+        return;
+    }
+
+    if (!entry->isArray || index < 0 || index >= entry->arraySize) {
+        fprintf(stderr, "Erreur : %s n'est pas un tableau valide ou index hors limites.\n", idf);
+        return;
+    }
+
+    if (strcmp(type, "INTEGER") == 0) {
+        ((int*)entry->arrayValues)[index] = *(int*)newValue;
+    } else if (strcmp(type, "FLOAT") == 0) {
+        ((float*)entry->arrayValues)[index] = *(float*)newValue;
+    } else if (strcmp(type, "CHAR") == 0) {
+        ((char*)entry->arrayValues)[index] = *(char*)newValue;
+    } else {
+        fprintf(stderr, "Erreur : type non pris en charge pour le tableau %s\n", idf);
     }
 }
