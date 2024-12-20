@@ -52,7 +52,7 @@ void yyerror(const char *s);  // Déclaration de la fonction d'erreur
 %type <chaine> type
 %type <varList>  listevariable
 %type <exprari> expression 
-%type <exprlog> expressionlogic
+%type <exprlog> expressionlogic expressionslogic
 %token<car> CARACTERE
 %type <entier> NUMBERINT 
 %type <flottant> NUMBERFLOAT
@@ -280,6 +280,15 @@ expression:
              $$.value.ival = $1.value.ival /$3.value.ival ;
          }
     }
+    |LPAREN expression RPAREN
+    {
+        // Copier le contenu de la sous-expression dans l'expression actuelle
+        $$.type = $2.type;
+        $$.variables = $2.variables;
+        $$.count = $2.count;
+        $$.value = $2.value;
+        
+    }
    
 ;
 
@@ -294,7 +303,14 @@ type:
 
 
 expressionlogic:
-    expression LT expression {
+    LPAREN expressionlogic RPAREN
+    {
+        // Copier le contenu de la sous-expression dans l'expression actuelle
+        $$.type = $2.type;
+        $$.variables = $2.variables;
+        $$.count = $2.count;
+    }
+    |expression LT expression {
         if (strcmp($1.type, $3.type) != 0) {
             yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
             return 0;
@@ -344,6 +360,7 @@ expressionlogic:
         }
         $$.type = "BOOLEAN";
     }
+   
 ;
 
 statements:
@@ -351,9 +368,13 @@ statements:
     | statements statement
     ;
 
+expressionslogic:
+expressionlogic
+|expressionslogic expressionlogic
+;
 statement:
     affectation
-    |IF LPAREN expressionlogic RPAREN LBRACE statements RBRACE ELSE LBRACE statements RBRACE {
+    |IF LPAREN expressionslogic RPAREN LBRACE statements RBRACE ELSE LBRACE statements RBRACE {
         // Vérifier que la condition dans IF est de type booléen
         if (strcmp($3.type, "BOOLEAN") != 0) {
             yyerror("La condition de l'instruction IF doit être de type BOOLEAN.");

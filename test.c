@@ -19,7 +19,7 @@ INSTRUCTION {
     A=N+N;
   
    D="h";
-    B=D;
+
  
      
     IF ((A > B) && (A > B)){
