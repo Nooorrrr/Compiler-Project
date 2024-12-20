@@ -52,7 +52,7 @@ void yyerror(const char *s);  // Déclaration de la fonction d'erreur
 %type <chaine> type
 %type <varList>  listevariable
 %type <exprari> expression 
-%type <exprlog> expressionlogic
+%type <exprlog> expressionlogic expressionslogic
 %token<car> CARACTERE
 %type <entier> NUMBERINT 
 %type <flottant> NUMBERFLOAT
@@ -171,10 +171,20 @@ affectation:
             return 0;
         }
 
-        // Effectuer la modification de la valeur
-        modifierValeur($1, &($3.value), varEntry->type);
+        // Modification de la valeur en fonction du type
+        if (strcmp(varEntry->type, "INTEGER") == 0) {
+            varEntry->val.ival = $3.value.ival;  // Affecter un entier
+        } else if (strcmp(varEntry->type, "FLOAT") == 0) {
+            varEntry->val.fval = $3.value.fval;  // Affecter un flottant
+        } else if (strcmp(varEntry->type, "CHAR") == 0) {
+            varEntry->val.cval = $3.value.cval;  // Affecter un caractère
+        } else {
+            yyerror("Type inconnu pour l'affectation.");
+            return 0;
+        }
     }
 ;
+
 
 // Expression générale (affectation ou arithmétique)
 expression:
@@ -218,9 +228,11 @@ expression:
         }
        $$.type = $1.type;
          if($$.type =="FLOAT"){
-            $$.value.fval= $1.value.fval - $3.value.fval;
+            $$.value.fval= $1.value.fval +$3.value.fval;
          }else{
-             $$.value.ival = $1.value.ival - $3.value.ival ;
+
+             $$.value.ival = $1.value.ival + $3.value.ival ;
+            int a=$$.value.ival;
          }
     }
     | expression MINUS expression {
@@ -248,9 +260,9 @@ expression:
         }
        $$.type = $1.type;
          if($$.type =="FLOAT"){
-            $$.value.fval= $1.value.fval - $3.value.fval;
+            $$.value.fval= $1.value.fval *$3.value.fval;
          }else{
-             $$.value.ival = $1.value.ival - $3.value.ival ;
+             $$.value.ival = $1.value.ival*$3.value.ival ;
          }
     }
     | expression DIV expression {
@@ -263,10 +275,28 @@ expression:
         }
        $$.type = $1.type;
          if($$.type =="FLOAT"){
-            $$.value.fval= $1.value.fval - $3.value.fval;
+            if($3.value.fval==0){
+                yyerror("division sur 0 impossible.");
+            }else{
+            $$.value.fval= $1.value.fval / $3.value.fval;
+            }
          }else{
-             $$.value.ival = $1.value.ival - $3.value.ival ;
+            if($3.value.fval==0){
+              yyerror("division sur 0 impossible.");
+            }else{
+            $$.value.ival = $1.value.ival /$3.value.ival ;
+            }
+ 
          }
+    }
+    |LPAREN expression RPAREN
+    {
+        // Copier le contenu de la sous-expression dans l'expression actuelle
+        $$.type = $2.type;
+        $$.variables = $2.variables;
+        $$.count = $2.count;
+        $$.value = $2.value;
+        
     }
    
 ;
@@ -282,7 +312,14 @@ type:
 
 
 expressionlogic:
-    expression LT expression {
+    LPAREN expressionlogic RPAREN
+    {
+        // Copier le contenu de la sous-expression dans l'expression actuelle
+        $$.type = $2.type;
+        $$.variables = $2.variables;
+        $$.count = $2.count;
+    }
+    |expression LT expression {
         if (strcmp($1.type, $3.type) != 0) {
             yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
             return 0;
@@ -332,6 +369,7 @@ expressionlogic:
         }
         $$.type = "BOOLEAN";
     }
+   
 ;
 
 statements:
@@ -339,16 +377,20 @@ statements:
     | statements statement
     ;
 
+expressionslogic:
+expressionlogic
+|expressionslogic expressionlogic
+;
 statement:
     affectation
-    |IF LPAREN expressionlogic RPAREN LBRACE statements RBRACE ELSE LBRACE statements RBRACE {
+    |IF LPAREN expressionslogic RPAREN LBRACE statements RBRACE ELSE LBRACE statements RBRACE {
         // Vérifier que la condition dans IF est de type booléen
         if (strcmp($3.type, "BOOLEAN") != 0) {
             yyerror("La condition de l'instruction IF doit être de type BOOLEAN.");
             return 0;
         }
     }
-    | FOR LPAREN initialisation COLON fortext RPAREN LBRACE statements RBRACE {
+    | FOR LPAREN affectation COLON fortext RPAREN LBRACE statements RBRACE {
         // Vérifier la validité des types dans la boucle
         // Par exemple, vérifier que le type de la variable utilisée dans la boucle est compatible avec la condition
     }
@@ -364,16 +406,25 @@ statement:
 ;
 
 expressionwrite:
-    IDENTIFIER
+    IDENTIFIER {    TableEntry *varEntry = rechercher($1);
+        if (varEntry == NULL) {
+            yyerror("Variable non déclarée.");
+            return 0;
+        }
+        }
     | TEXT
     | TEXT COMMA expressionwrite
-    | IDENTIFIER COMMA expressionwrite
+    | IDENTIFIER COMMA expressionwrite{
+            TableEntry *varEntry = rechercher($1);
+        if (varEntry == NULL) {
+            yyerror("Variable non déclarée.");
+            return 0;
+        }
+    }
     ;
 
 
-initialisation:
-    IDENTIFIER ASSIGN expression
-;
+
 
 NUMBERINT:
     NUMBERINTPOS
@@ -386,9 +437,26 @@ NUMBERFLOAT:
 
 fortext:
     NUMBERINT COLON NUMBERINT
-    | NUMBERINT COLON IDENTIFIER
+    | NUMBERINT COLON IDENTIFIER 
+       { TableEntry *varEntry = rechercher($3);
+        if (varEntry == NULL) {
+            yyerror("Variable non déclarée.");
+            return 0;
+        }}
     | IDENTIFIER COLON IDENTIFIER
+        { TableEntry *varEntry = rechercher($1);
+           TableEntry *varEntry2 = rechercher($3);
+        if (varEntry == NULL || varEntry2==NULL) {
+            yyerror("Variable non déclarée.");
+            return 0;
+        }
+        }
     | IDENTIFIER COLON NUMBERINT
+       { TableEntry *varEntry = rechercher($1);
+        if (varEntry == NULL) {
+            yyerror("Variable non déclarée.");
+            return 0;
+        }}
 ;
 %%
 

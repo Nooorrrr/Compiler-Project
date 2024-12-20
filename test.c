@@ -16,18 +16,18 @@ DECLARATION { %%affectations
 }
 
 INSTRUCTION {
-    A=N;
+    A=N+N;
   
    D="h";
-    D=B;
+
  
      
-    IF ((A > B) && (A > B)){
-        C = A + 1;
-         C = A- 1;
+    IF ((A > Q) && (A > Q)){
+        Q = A + 1;
+         Q = A- 1;
     } ELSE {
-        C = A- 1;
-         C = A- 1;
+        Q = A- 1;
+         Q = A- 1;
     }
  FOR (I = 0 : 1 : 10) {
     X = X + 1;
