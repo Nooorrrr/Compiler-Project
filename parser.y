@@ -166,10 +166,25 @@ affectation:
         }
 
         // Vérification de la compatibilité des types entre la variable et l'expression
+        if(strcmp(varEntry->type,"INTEGER")||strcmp(varEntry->type,"CHAR")){
         if (strcmp(varEntry->type, $3.type) != 0) {
             yyerror("Type incompatible dans l'affectation.");
             return 0;
         }
+        }
+        if(strcmp(varEntry->type,"FLOAT")){
+            if (strcmp($3.type, "CHAR") == 0) {
+            yyerror("Type incompatible dans l'affectation.");
+            return 0;
+        }
+        }
+         if(strcmp(varEntry->type,"CHAR")){
+            if (strcmp($3.type, "CHAR") != 0) {
+            yyerror("Type incompatible dans l'affectation.");
+            return 0;
+        }
+        }
+        
 
         // Modification de la valeur en fonction du type
         if (strcmp(varEntry->type, "INTEGER") == 0) {
@@ -219,6 +234,7 @@ expression:
         $$.value.cval = $1;  // Valeur du caractère
     }
     | expression PLUS expression {
+        
         if (strcmp($1.type, $3.type) != 0) {
             yyerror("Opérandes de types incompatibles pour l'addition.");
             return 0;

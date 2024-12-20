@@ -1,35 +1,51 @@
 VAR_GLOBAL {
     INTEGER A;
-    CONST CHAR B="M";
+    CONST FLOAT Pi = 3.14;
     CHAR C;
     INTEGER Q;  
-    FLOAT X;
-    CONST INTEGER Z = 5;
-    CONST INTEGER L = 1;
-    
+    FLOAT Y;
+    CONST INTEGER Max= 100;
+    CONST CHAR D = 'X';
 }
 
-DECLARATION { %%affectations
-   CONST INTEGER N= 4;
-   CHAR D;
-
+DECLARATION { %% local variables
+   INTEGER N;
+   CONST INTEGER Min = 1;
+   CHAR Z;
 }
 
 INSTRUCTION {
-    A=N+N;
-  
-   D="h";
-
- 
-     
-    IF ((A > Q) && (A > Q)){
-        Q = A + 1;
-         Q = A- 1;
+    A = Max - Min;
+    C = 'G';
+    Y = Pi * 2;
+    
+    IF ((A > Min) || (C == 'G')) {
+        Q = A + Max;
+        Y = Y / 2;
     } ELSE {
-        Q = A- 1;
-         Q = A- 1;
+        Q = Min * 2;
+        Y = Pi+ 5;
     }
- FOR (I = 0 : 1 : 10) {
-    X = X + 1;
-}
+
+    FOR (I = 0 : 2 : 20) {
+        Y = Y + I;
+        IF (I % 2 == 0) {
+            A = A + I;
+        }
+    }
+    
+    WHILE (Y < MAX) {
+        Y = Y + 1;
+    }
+    
+    SWITCH (A) {
+        CASE 10:
+            Q = A + 1;
+            BREAK;
+        CASE 20:
+            Q = A + 2;
+            BREAK;
+        DEFAULT:
+            Q = A;
+    }
 }
