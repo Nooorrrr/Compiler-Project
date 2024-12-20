@@ -104,14 +104,22 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 13 "parser.y"
+#line 14 "parser.y"
 
     int entier;        // Pour les entiers
     float flottant;    // Pour les nombres flottants
     char* chaine;      // Pour les chaînes de caractères
-    struct { char** variables; int count; } varList;  // Pour gérer une liste de variables
+    struct
+     { char** variables;
+       int count; 
+    } varList;  // Pour gérer une liste de variables
+     struct { 
+        char* type;    // Le type de l'expression (par exemple: "int", "float")
+        char** variables; 
+        int count; 
+    } expr;     
 
-#line 115 "parser.tab.h"
+#line 123 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

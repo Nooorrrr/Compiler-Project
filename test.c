@@ -1,23 +1,18 @@
 VAR_GLOBAL {
     INTEGER A,B,C;
-    INTEGER Q;
-    INTEGER Q, Z, T;%%     affectations    
-    INTEGER Q, Z, T;
+    INTEGER Q;  
     FLOAT X,L;
     CHAR Y[8];
-    CHAR X[8];
     CONST INTEGER Z = 5;
     
 }
 
 DECLARATION { %%affectations
-    FLOAT X,L;
-    CHAR X[8];
-    CONST INTEGER Z = 5;
+   CONST INTEGER N= 5;
 }
 
 INSTRUCTION {
-     C = A- 1;
+     C = 1;
     IF ((A > B) && (A > B)){
         C = A + 1;
          C = A- 1;
