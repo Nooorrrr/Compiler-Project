@@ -13,19 +13,29 @@ typedef struct {
     char *result;     // Résultat
 } Quadruplet;
 
-// Fonction pour créer un quadruplet
-Quadruplet* create_quadruplet(const char *op, const char *arg1, const char *arg2, const char *result);
+// Déclaration des variables globales
+extern Quadruplet liste[2000]; // Liste des quadruplets
+extern int qc;                 // Compteur des quadruplets
 
-// Fonction pour afficher un quadruplet
-void print_quadruplet(Quadruplet *quad);
+// Fonctions pour gérer les quadruplets
+void generer(char* a, char* b, char* c, char* d);  // Générer un quadruplet
+void quadL(int i, char* b, char* c, char* d);       // Gérer les expressions logiques
+void quadC(int i, char* b, char* c, char* d);       // Gérer les expressions de comparaison
+char* convert(int i);                              // Convertir un entier en chaîne de caractères
 
-// Fonction pour afficher tous les quadruplets
-void print_all_quadruplets();
+// Fonctions pour afficher les quadruplets
+void  afficher_quadruplets();                               // Afficher tous les quadruplets
 
-// Fonction pour libérer la mémoire d'un quadruplet
-void free_quadruplet(Quadruplet *quad);
+// Fonctions de gestion de la mémoire
+void delete_quad();                                // Supprimer les quadruplets inutilisés
+void free_quadruplet(Quadruplet *quad);            // Libérer la mémoire d'un quadruplet
+void free_all_quadruplets();                       // Libérer la mémoire de tous les quadruplets
 
-// Fonction pour ajouter un quadruplet à une liste
+// Fonction pour ajouter un quadruplet à la liste globale
 void add_quadruplet(const char *op, const char *arg1, const char *arg2, const char *result);
+
+// Fonctions pour les branchements (saute conditionnel ou inconditionnel)
+void add_unconditional_jump(const char *label);     // Ajouter un saut inconditionnel
+void add_conditional_jump(const char *condition, const char *label); // Ajouter un saut conditionnel
 
 #endif
