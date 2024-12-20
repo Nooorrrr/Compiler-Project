@@ -360,7 +360,7 @@ statement:
             return 0;
         }
     }
-    | FOR LPAREN initialisation COLON fortext RPAREN LBRACE statements RBRACE {
+    | FOR LPAREN affectation COLON fortext RPAREN LBRACE statements RBRACE {
         // Vérifier la validité des types dans la boucle
         // Par exemple, vérifier que le type de la variable utilisée dans la boucle est compatible avec la condition
     }
@@ -376,16 +376,25 @@ statement:
 ;
 
 expressionwrite:
-    IDENTIFIER
+    IDENTIFIER {    TableEntry *varEntry = rechercher($1);
+        if (varEntry == NULL) {
+            yyerror("Variable non déclarée.");
+            return 0;
+        }
+        }
     | TEXT
     | TEXT COMMA expressionwrite
-    | IDENTIFIER COMMA expressionwrite
+    | IDENTIFIER COMMA expressionwrite{
+            TableEntry *varEntry = rechercher($1);
+        if (varEntry == NULL) {
+            yyerror("Variable non déclarée.");
+            return 0;
+        }
+    }
     ;
 
 
-initialisation:
-    IDENTIFIER ASSIGN expression
-;
+
 
 NUMBERINT:
     NUMBERINTPOS
@@ -398,9 +407,26 @@ NUMBERFLOAT:
 
 fortext:
     NUMBERINT COLON NUMBERINT
-    | NUMBERINT COLON IDENTIFIER
+    | NUMBERINT COLON IDENTIFIER 
+       { TableEntry *varEntry = rechercher($3);
+        if (varEntry == NULL) {
+            yyerror("Variable non déclarée.");
+            return 0;
+        }}
     | IDENTIFIER COLON IDENTIFIER
+        { TableEntry *varEntry = rechercher($1);
+           TableEntry *varEntry2 = rechercher($3);
+        if (varEntry == NULL || varEntry2==NULL) {
+            yyerror("Variable non déclarée.");
+            return 0;
+        }
+        }
     | IDENTIFIER COLON NUMBERINT
+       { TableEntry *varEntry = rechercher($1);
+        if (varEntry == NULL) {
+            yyerror("Variable non déclarée.");
+            return 0;
+        }}
 ;
 %%
 
