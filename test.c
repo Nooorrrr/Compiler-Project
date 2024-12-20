@@ -17,7 +17,8 @@ DECLARATION { %% local variables
 INSTRUCTION {
     A = Max - Min;
     C = 'G';
-    Y = Pi * 2;
+    N=20/3;
+    Y=4*A;
     
     IF ((A > Min) || (C == 'G')) {
         Q = A + Max;

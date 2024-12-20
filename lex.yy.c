@@ -369,9 +369,9 @@ static const flex_int16_t yy_accept[125] =
        47,   36,   37,   32,   30,   42,   31,   33,   17,   41,
        40,   29,   43,   28,   14,   14,   14,   14,   14,   14,
        14,   14,   14,   38,   39,   34,   47,   35,   25,    0,
-       44,    0,   13,   21,    0,   17,   19,    0,   27,   24,
+       44,    0,   13,   21,    0,   17,   18,    0,   27,   24,
        26,   14,    0,    0,    0,    0,    0,    0,    8,    0,
-        0,    0,    0,   22,   16,   13,   15,    0,   18,   14,
+        0,    0,    0,   22,   16,   13,   15,    0,   19,   14,
         0,    0,    0,    0,    0,   10,    0,    0,    0,    0,
         0,   20,   14,    6,    0,    0,    9,    0,    0,    0,
        11,    0,    0,   14,    7,    0,    5,    0,    0,    0,
@@ -917,17 +917,17 @@ YY_RULE_SETUP
 case 18:
 YY_RULE_SETUP
 #line 37 "lexer.l"
-{yylval.entier = atoi(yytext);  return NUMBERFLOATPOS; }
+{ yylval.entier = atoi(yytext); return NUMBERINTNEG; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
 #line 38 "lexer.l"
-{ yylval.flottant = atoi(yytext); return NUMBERINTNEG; }
+{ yylval.flottant = strtod(yytext, NULL); return NUMBERFLOATPOS; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
 #line 39 "lexer.l"
-{yylval.flottant = atoi(yytext);  return NUMBERFLOATNEG; }
+{ yylval.flottant = strtod(yytext, NULL); return NUMBERFLOATNEG; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP

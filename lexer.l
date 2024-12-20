@@ -34,9 +34,9 @@
     return CARACTERE;
 }
 [+]?[0-9]+              { yylval.entier = atoi(yytext); return NUMBERINTPOS; }
-[+]?[0-9]+\.[0-9]+      {yylval.entier = atoi(yytext);  return NUMBERFLOATPOS; }
-"-"[0-9]+              { yylval.flottant = atoi(yytext); return NUMBERINTNEG; }
-"-"[0-9]+\.[0-9]+      {yylval.flottant = atoi(yytext);  return NUMBERFLOATNEG; }
+"-"[0-9]+              { yylval.entier = atoi(yytext); return NUMBERINTNEG; }
+[+]?[0-9]+\.[0-9]+      { yylval.flottant = strtod(yytext, NULL); return NUMBERFLOATPOS; }
+"-"[0-9]+\.[0-9]+      { yylval.flottant = strtod(yytext, NULL); return NUMBERFLOATNEG; }
 
 "&&"                 { return AND; }
 "\|\|"               { return OR; }

@@ -191,6 +191,9 @@ affectation:
             varEntry->val.ival = $3.value.ival;  // Affecter un entier
         } else if (strcmp(varEntry->type, "FLOAT") == 0) {
             varEntry->val.fval = $3.value.fval;  // Affecter un flottant
+            if(strcmp($3.type,"INTEGER") == 0){
+                varEntry->val.fval = (float) $3.value.ival;
+            }
         } else if (strcmp(varEntry->type, "CHAR") == 0) {
             varEntry->val.cval = $3.value.cval;  // Affecter un caractère
         } else {
@@ -224,119 +227,136 @@ expression:
     | NUMBERINT {
         $$.type = "INTEGER";
         $$.value.ival = $1;
+
     }
     | NUMBERFLOAT {
         $$.type = "FLOAT";
         $$.value.fval = $1;
+       
     }
     | CARACTERE {
         $$.type = "CHAR";
         $$.value.cval = $1;  // Valeur du caractère
     }
-    | expression PLUS expression {
-        
-        if (strcmp($1.type, $3.type) != 0) {
-            if(strcmp($1.type,"FLOAT")){
-            $3.type="FLOAT";
-            $3.value.fval=$3.value.ival;
-            }else  if(strcmp($3.type,"FLOAT")){
-            $1.type="FLOAT";
-            $1.value.fval=$1.value.ival;
-            } else{
-            yyerror("Opérandes de types incompatibles pour l'addition.");
-            return 0;
-            }
-        }
-        if($1.type=="CHAR"){
-            yyerror("Opération addition avec char.");
-        }
-         $$.type = $1.type;
-         if($$.type =="FLOAT"){
-            $$.value.fval= $1.value.fval +$3.value.fval;
-         }else{
-
-             $$.value.ival = $1.value.ival + $3.value.ival ;
-            int a=$$.value.ival;
-         }
+    | expression PLUS expression{
+    // Vérifier la compatibilité des types avant de faire l'opération
+    if (strcmp($1.type,"INTEGER")==0 && strcmp($3.type,"INTEGER")==0) {
+        // Si les deux sont des entiers
+        $$.type = "INTEGER";
+        $$.value.ival = $1.value.ival + $3.value.ival;
+        printf("%d",$$.value.ival);
     }
-    | expression MINUS expression {
-   if (strcmp($1.type, $3.type) != 0) {
-            if(strcmp($1.type,"FLOAT")){
-            $3.type="FLOAT";
-            $3.value.fval=$3.value.ival;
-            }else  if(strcmp($3.type,"FLOAT")){
-            $1.type="FLOAT";
-            $1.value.fval=$1.value.ival;
-            }else {
-            yyerror("Opérandes de types incompatibles.");
-            return 0;
-            }
+    else if (strcmp($1.type,"FLOAT")==0|| strcmp($3.type,"FLOAT")==0) {
+        // Si l'un des opérandes est un FLOAT
+        if (strcmp($1.type,"INTEGER")==0) {
+            $1.type = "FLOAT";
+            $1.value.fval = (float) $1.value.ival;
         }
-        if($1.type=="CHAR"){
-            yyerror("Opération min avec char.");
+        if (strcmp($1.type,"INTEGER")==0) {
+            $3.type = "FLOAT";
+            $3.value.fval = (float) $3.value.ival;
         }
-        $$.type = $1.type;
-         if($$.type =="FLOAT"){
-            $$.value.fval= $1.value.fval - $3.value.fval;
-         }else{
-             $$.value.ival = $1.value.ival - $3.value.ival ;
-         }
+        $$.type = "FLOAT";
+        $$.value.fval = $1.value.fval + $3.value.fval;
+    } 
+    else {
+        // Si les types sont incompatibles
+        yyerror("Opérandes de types incompatibles pour l'addition.");
+        return 0;
+    }
+    }
+    | expression MINUS expression{
+    // Vérifier la compatibilité des types avant de faire l'opération
+    if (strcmp($1.type,"INTEGER")==0 && strcmp($3.type,"INTEGER")==0) {
+        // Si les deux sont des entiers
+        $$.type = "INTEGER";
+        $$.value.ival = $1.value.ival - $3.value.ival;
+     
+    }
+    else if (strcmp($1.type,"FLOAT")==0|| strcmp($3.type,"FLOAT")==0) {
+        // Si l'un des opérandes est un FLOAT
+        if (strcmp($1.type,"INTEGER")==0) {
+            $1.type = "FLOAT";
+            $1.value.fval = (float) $1.value.ival;
+        }
+        if (strcmp($1.type,"INTEGER")==0) {
+            $3.type = "FLOAT";
+            $3.value.fval = (float) $3.value.ival;
+        }
+        $$.type = "FLOAT";
+        $$.value.fval = $1.value.fval - $3.value.fval;
+    } 
+    else {
+        // Si les types sont incompatibles
+        yyerror("Opérandes de types incompatibles pour la soustraction.");
+        return 0;
+    }
     }
     | expression MULT expression {
-   if (strcmp($1.type, $3.type) != 0) {
-            if(strcmp($1.type,"FLOAT")){
-            $3.type="FLOAT";
-            $3.value.fval=$3.value.ival;
-            }else  if(strcmp($3.type,"FLOAT")){
-            $1.type="FLOAT";
-            $1.value.fval=$1.value.ival;
-            } else{
-            yyerror("Opérandes de types incompatibles pour la multiplication.");
-            return 0;
-            }
-        }
-        if($1.type=="CHAR"){
-            yyerror("Opération mult avec char.");
-        }
-       $$.type = $1.type;
-         if($$.type =="FLOAT"){
-            $$.value.fval= $1.value.fval *$3.value.fval;
-         }else{
-             $$.value.ival = $1.value.ival*$3.value.ival ;
-         }
+    // Vérifier la compatibilité des types avant de faire l'opération
+    if (strcmp($1.type,"INTEGER")==0 && strcmp($3.type,"INTEGER")==0) {
+        // Si les deux sont des entiers
+        $$.type = "INTEGER";
+        $$.value.ival = $1.value.ival * $3.value.ival;
+       
     }
-    | expression DIV expression {
-    if (strcmp($1.type, $3.type) != 0) {
-            if(strcmp($1.type,"FLOAT")){
-            $3.type="FLOAT";
-            $3.value.fval=$3.value.ival;
-            }else  if(strcmp($3.type,"FLOAT")){
-            $1.type="FLOAT";
-            $1.value.fval=$1.value.ival;
-            } {
-            yyerror("Opérandes de types incompatibles pour l'addition.");
-            return 0;
-            }
+    else if (strcmp($1.type,"FLOAT")==0|| strcmp($3.type,"FLOAT")==0) {
+        // Si l'un des opérandes est un FLOAT
+        if (strcmp($1.type,"INTEGER")==0) {
+            $1.type = "FLOAT";
+            $1.value.fval = (float) $1.value.ival;
         }
-        if($1.type=="CHAR"){
-            yyerror("Opération div avec char.");
+        if (strcmp($1.type,"INTEGER")==0) {
+            $3.type = "FLOAT";
+            $3.value.fval = (float) $3.value.ival;
         }
-       $$.type = $1.type;
-         if($$.type =="FLOAT"){
-            if($3.value.fval==0){
-                yyerror("division sur 0 impossible.");
-            }else{
-            $$.value.fval= $1.value.fval / $3.value.fval;
-            }
-         }else{
-            if($3.value.fval==0){
+        $$.type = "FLOAT";
+        $$.value.fval = $1.value.fval * $3.value.fval;
+    } 
+    else {
+        // Si les types sont incompatibles
+        yyerror("Opérandes de types incompatibles pour la multiplication.");
+        return 0;
+    }
+    }
+
+    | expression DIV expression{
+    // Vérifier la compatibilité des types avant de faire l'opération
+    if (strcmp($1.type,"INTEGER")==0 && strcmp($3.type,"INTEGER")==0) {
+        // Si les deux sont des entiers
+        $$.type = "INTEGER";
+         if($3.value.fval==0){
               yyerror("division sur 0 impossible.");
-            }else{
-            $$.value.ival = $1.value.ival /$3.value.ival ;
-            }
- 
-         }
+        }else{  
+            $$.value.ival = $1.value.ival / $3.value.ival;
+        }
+      
     }
+    else if (strcmp($1.type,"FLOAT")==0|| strcmp($3.type,"FLOAT")==0) {
+        // Si l'un des opérandes est un FLOAT
+        if (strcmp($1.type,"INTEGER")==0) {
+            $1.type = "FLOAT";
+            $1.value.fval = (float) $1.value.ival;
+        }
+        if (strcmp($1.type,"INTEGER")==0) {
+            $3.type = "FLOAT";
+            $3.value.fval = (float) $3.value.ival;
+        }
+        $$.type = "FLOAT";
+      if($3.value.fval==0){
+              yyerror("division sur 0 impossible.");
+       }else{
+         $$.value.ival = $1.value.ival / $3.value.ival;
+       }
+    } 
+    else {
+        // Si les types sont incompatibles
+        yyerror("Opérandes de types incompatibles pour la multiplication.");
+        return 0;
+    }
+    }
+       
+    
     |LPAREN expression RPAREN
     {
         // Copier le contenu de la sous-expression dans l'expression actuelle

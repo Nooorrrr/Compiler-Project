@@ -45,7 +45,7 @@ void inserer(const char entite[], const char type[], float val, int scope, int i
             if (strcmp(type, "INTEGER") == 0) {
                 Tab[i].val.ival = (int)val;  // Assurez-vous de convertir float en int si nécessaire
             } else if (strcmp(type, "FLOAT") == 0) {
-                Tab[i].val.fval = val;  // Affectation directe si c'est un float
+                Tab[i].val.fval = (float)val;  // Affectation directe si c'est un float
             } else if (strcmp(type, "CHAR") == 0) {
                 Tab[i].val.cval = (char)val;  // Conversion si c'est un char
             }
