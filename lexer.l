@@ -24,12 +24,13 @@
 
 "%%"[^\n]*           {  }
 
-[A-Z][a-z0-9]{0,7}   { return IDENTIFIER; }
+[A-Z][a-z0-9]{0,7}   { yylval.chaine = strdup(yytext);return IDENTIFIER; }
 
-[+]?[0-9]+              { return NUMBERINTPOS; }
-[+]?[0-9]+\.[0-9]+      { return NUMBERFLOATPOS; }
-"-"[0-9]+              { return NUMBERINTNEG; }
-"-"[0-9]+\.[0-9]+      { return NUMBERFLOATNEG; }
+[+]?[0-9]+              { yylval.entier = atoi(yytext); return NUMBERINTPOS; }
+[+]?[0-9]+\.[0-9]+      {yylval.entier = atoi(yytext);  return NUMBERFLOATPOS; }
+"-"[0-9]+              { yylval.flottant = atoi(yytext); return NUMBERINTNEG; }
+"-"[0-9]+\.[0-9]+      {yylval.flottant = atoi(yytext);  return NUMBERFLOATNEG; }
+[A-Za-z]                {return caractere;}
 "&&"                 { return AND; }
 "\|\|"               { return OR; }
 "!"                  { return NOT; }
