@@ -29,7 +29,7 @@ char* convert(int i);                              // Convertir un entier en cha
 void afficher_quadruplets();                       // Afficher tous les quadruplets
 
 // Fonctions de gestion de la mémoire
-void delete_quad();                                // Supprimer les quadruplets inutilisés
+void delete_quad(Quadruplet* quad);                               // Supprimer les quadruplets inutilisés
 void free_quadruplet(Quadruplet *quad);            // Libérer la mémoire d'un quadruplet
 void free_all_quadruplets();                       // Libérer la mémoire de tous les quadruplets
 
