@@ -1763,22 +1763,22 @@ void yyerror(const char *s) {
     fprintf(stderr, "Erreur à la ligne %d: %s\n", yylineno, s);
 }
 
-int main(int argc, char **argv) {
-    if (argc < 2) {
-        fprintf(stderr, "Erreur : aucun fichier spécifié.\n");
-        return 1;
-    }
+// int main(int argc, char **argv) {
+//     if (argc < 2) {
+//         fprintf(stderr, "Erreur : aucun fichier spécifié.\n");
+//         return 1;
+//     }
 
-    FILE *f = fopen(argv[1], "r");
-    if (!f) {
-        perror("Erreur d'ouverture du fichier");
-        return 1;
-    }
+//     FILE *f = fopen(argv[1], "r");
+//     if (!f) {
+//         perror("Erreur d'ouverture du fichier");
+//         return 1;
+//     }
 
-    initialisation();
-    yyin = f;
-    yyparse();
-    afficherTable(Tab, 1000);
-    fclose(f);
-    return 0;
-}
+//     initialisation();
+//     yyin = f;
+//     yyparse();
+//     afficherTable(Tab, 1000);
+//     fclose(f);
+//     return 0;
+// }

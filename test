@@ -2,13 +2,13 @@ VAR_GLOBAL {
     INTEGER A,B,C;
     INTEGER Q;  
     FLOAT X,L;
-    CHAR Y[8];
     CONST INTEGER Z = 5;
     
 }
 
 DECLARATION { %%affectations
    CONST INTEGER N= 5;
+   CHAR Y[8] = "hello";
 }
 
 INSTRUCTION {
