@@ -540,12 +540,12 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    77,    77,    81,    82,    86,   102,   110,   118,   126,
-     137,   143,   151,   204,   222,   227,   232,   236,   263,   290,
-     318,   355,   366,   367,   368,   373,   381,   387,   394,   401,
-     408,   416,   424,   431,   441,   452,   453,   457,   458,   462,
-     463,   470,   476,   482,   488,   495,   496,   497,   507,   508,
-     512,   513
+       0,    87,    87,    91,    92,    96,   112,   120,   128,   136,
+     147,   153,   161,   214,   232,   237,   242,   246,   274,   301,
+     329,   366,   377,   378,   379,   384,   392,   398,   405,   412,
+     419,   427,   435,   442,   452,   463,   464,   468,   469,   473,
+     474,   481,   487,   493,   499,   506,   507,   508,   518,   519,
+     523,   524
 };
 #endif
 
@@ -1214,7 +1214,7 @@ yyreduce:
   switch (yyn)
     {
   case 5: /* declaration: type listevariable SEMICOLON  */
-#line 86 "parser.y"
+#line 96 "parser.y"
                                  {
         for (int i = 0; i < (yyvsp[-1].varList).count; i++) {
             if (rechercher((yyvsp[-1].varList).variables[i]) != NULL) {
@@ -1235,83 +1235,83 @@ yyreduce:
     break;
 
   case 6: /* declaration: CONST type IDENTIFIER ASSIGN NUMBERINT SEMICOLON  */
-#line 102 "parser.y"
+#line 112 "parser.y"
                                                        {
-        if (rechercher((yyvsp[-3].chaine)) != NULL) {
+        if (rechercher((yyvsp[-3].id).nom) != NULL) {
             yyerror("Variable déjà déclarée.");
             return 0;
         } else {
-            inserer((yyvsp[-3].chaine), (yyvsp[-4].chaine), (yyvsp[-1].entier), scope, 0, 0, 1);  // Insérer la constante entière
+            inserer((yyvsp[-3].id).nom, (yyvsp[-4].chaine), (yyvsp[-1].entier), scope, 0, 0, 1);  // Insérer la constante entière
         }
     }
 #line 1248 "parser.tab.c"
     break;
 
   case 7: /* declaration: CONST type IDENTIFIER ASSIGN NUMBERFLOAT SEMICOLON  */
-#line 110 "parser.y"
+#line 120 "parser.y"
                                                          {
-        if (rechercher((yyvsp[-3].chaine)) != NULL) {
+        if (rechercher((yyvsp[-3].id).nom) != NULL) {
             yyerror("Variable déjà déclarée.");
             return 0;
         } else {
-            inserer((yyvsp[-3].chaine), (yyvsp[-4].chaine), (yyvsp[-1].flottant), scope, 0, 0, 1);  // Insérer la constante flottante
+            inserer((yyvsp[-3].id).nom, (yyvsp[-4].chaine), (yyvsp[-1].flottant), scope, 0, 0, 1);  // Insérer la constante flottante
         }
     }
 #line 1261 "parser.tab.c"
     break;
 
   case 8: /* declaration: CONST type IDENTIFIER ASSIGN CARACTERE SEMICOLON  */
-#line 118 "parser.y"
+#line 128 "parser.y"
                                                        {
-        if (rechercher((yyvsp[-3].chaine)) != NULL) {
+        if (rechercher((yyvsp[-3].id).nom) != NULL) {
             yyerror("Variable déjà déclarée.");
             return 0;
         } else {
-            inserer((yyvsp[-3].chaine), (yyvsp[-4].chaine), (yyvsp[-1].car), scope, 0, 0, 1);  // Insérer la constante flottante
+            inserer((yyvsp[-3].id).nom, (yyvsp[-4].chaine), (yyvsp[-1].car), scope, 0, 0, 1);  // Insérer la constante flottante
         }
     }
 #line 1274 "parser.tab.c"
     break;
 
   case 9: /* declaration: type IDENTIFIER LBRACKET NUMBERINTPOS RBRACKET SEMICOLON  */
-#line 126 "parser.y"
+#line 136 "parser.y"
                                                                {
-        if (rechercher((yyvsp[-4].chaine)) != NULL) {
+        if (rechercher((yyvsp[-4].id).nom) != NULL) {
             yyerror("Variable déjà déclarée.");
             return 0;
         } else {
-            inserer((yyvsp[-4].chaine), (yyvsp[-5].chaine), 0, scope, 0, (yyvsp[-2].entier), 1);
+            inserer((yyvsp[-4].id).nom, (yyvsp[-5].chaine), 0, scope, 0, (yyvsp[-2].entier), 1);
         }
     }
 #line 1287 "parser.tab.c"
     break;
 
   case 10: /* listevariable: listevariable COMMA IDENTIFIER  */
-#line 137 "parser.y"
+#line 147 "parser.y"
                                    {
         (yyval.varList) = (yyvsp[-2].varList);  // Copier la liste précédente
         (yyval.varList).count++;  // Incrémenter le nombre d'éléments
         (yyval.varList).variables = realloc((yyval.varList).variables, sizeof(char*) * (yyval.varList).count);
-        (yyval.varList).variables[(yyval.varList).count - 1] = (yyvsp[0].chaine);  // Ajouter la nouvelle variable
+        (yyval.varList).variables[(yyval.varList).count - 1] = (yyvsp[0].id).nom;  // Ajouter la nouvelle variable
     }
 #line 1298 "parser.tab.c"
     break;
 
   case 11: /* listevariable: IDENTIFIER  */
-#line 143 "parser.y"
+#line 153 "parser.y"
                  {
         (yyval.varList).count = 1;  // Une seule variable
         (yyval.varList).variables = malloc(sizeof(char*));
-        (yyval.varList).variables[0] = (yyvsp[0].chaine);
+        (yyval.varList).variables[0] = (yyvsp[0].id).nom;
     }
 #line 1308 "parser.tab.c"
     break;
 
   case 12: /* affectation: IDENTIFIER ASSIGN expression SEMICOLON  */
-#line 151 "parser.y"
+#line 161 "parser.y"
                                            {
         // Vérification si la variable est déclarée
-        TableEntry *varEntry = rechercher((yyvsp[-3].chaine));
+        TableEntry *varEntry = rechercher((yyvsp[-3].id).nom);
         if (varEntry == NULL) {
             yyerror("Variable non déclarée.");
             return 0;
@@ -1363,9 +1363,9 @@ yyreduce:
     break;
 
   case 13: /* expression: IDENTIFIER  */
-#line 204 "parser.y"
+#line 214 "parser.y"
                {
-        TableEntry *entry = rechercher((yyvsp[0].chaine));
+        TableEntry *entry = rechercher((yyvsp[0].id).nom);
         if (entry == NULL) {
             yyerror("Variable non déclarée.");
             return 0;
@@ -1386,7 +1386,7 @@ yyreduce:
     break;
 
   case 14: /* expression: NUMBERINT  */
-#line 222 "parser.y"
+#line 232 "parser.y"
                 {
         (yyval.exprari).type = "INTEGER";
         (yyval.exprari).value.ival = (yyvsp[0].entier);
@@ -1396,7 +1396,7 @@ yyreduce:
     break;
 
   case 15: /* expression: NUMBERFLOAT  */
-#line 227 "parser.y"
+#line 237 "parser.y"
                   {
         (yyval.exprari).type = "FLOAT";
         (yyval.exprari).value.fval = (yyvsp[0].flottant);
@@ -1406,7 +1406,7 @@ yyreduce:
     break;
 
   case 16: /* expression: CARACTERE  */
-#line 232 "parser.y"
+#line 242 "parser.y"
                 {
         (yyval.exprari).type = "CHAR";
         (yyval.exprari).value.cval = (yyvsp[0].car);  // Valeur du caractère
@@ -1415,7 +1415,7 @@ yyreduce:
     break;
 
   case 17: /* expression: expression PLUS expression  */
-#line 236 "parser.y"
+#line 246 "parser.y"
                                 {
     // Vérifier la compatibilité des types avant de faire l'opération
     if (strcmp((yyvsp[-2].exprari).type,"INTEGER")==0 && strcmp((yyvsp[0].exprari).type,"INTEGER")==0) {
@@ -1442,12 +1442,13 @@ yyreduce:
         yyerror("Opérandes de types incompatibles pour l'addition.");
         return 0;
     }
+
     }
-#line 1447 "parser.tab.c"
+#line 1448 "parser.tab.c"
     break;
 
   case 18: /* expression: expression MINUS expression  */
-#line 263 "parser.y"
+#line 274 "parser.y"
                                  {
     // Vérifier la compatibilité des types avant de faire l'opération
     if (strcmp((yyvsp[-2].exprari).type,"INTEGER")==0 && strcmp((yyvsp[0].exprari).type,"INTEGER")==0) {
@@ -1475,11 +1476,11 @@ yyreduce:
         return 0;
     }
     }
-#line 1479 "parser.tab.c"
+#line 1480 "parser.tab.c"
     break;
 
   case 19: /* expression: expression MULT expression  */
-#line 290 "parser.y"
+#line 301 "parser.y"
                                  {
     // Vérifier la compatibilité des types avant de faire l'opération
     if (strcmp((yyvsp[-2].exprari).type,"INTEGER")==0 && strcmp((yyvsp[0].exprari).type,"INTEGER")==0) {
@@ -1507,11 +1508,11 @@ yyreduce:
         return 0;
     }
     }
-#line 1511 "parser.tab.c"
+#line 1512 "parser.tab.c"
     break;
 
   case 20: /* expression: expression DIV expression  */
-#line 318 "parser.y"
+#line 329 "parser.y"
                                {
     // Vérifier la compatibilité des types avant de faire l'opération
     if (strcmp((yyvsp[-2].exprari).type,"INTEGER")==0 && strcmp((yyvsp[0].exprari).type,"INTEGER")==0) {
@@ -1547,11 +1548,11 @@ yyreduce:
         return 0;
     }
     }
-#line 1551 "parser.tab.c"
+#line 1552 "parser.tab.c"
     break;
 
   case 21: /* expression: LPAREN expression RPAREN  */
-#line 356 "parser.y"
+#line 367 "parser.y"
     {
         // Copier le contenu de la sous-expression dans l'expression actuelle
         (yyval.exprari).type = (yyvsp[-1].exprari).type;
@@ -1559,29 +1560,29 @@ yyreduce:
         (yyval.exprari).count = (yyvsp[-1].exprari).count;
         (yyval.exprari).value = (yyvsp[-1].exprari).value;
     }
-#line 1563 "parser.tab.c"
+#line 1564 "parser.tab.c"
     break;
 
   case 22: /* type: INTEGER  */
-#line 366 "parser.y"
+#line 377 "parser.y"
             { (yyval.chaine) = "INTEGER"; }
-#line 1569 "parser.tab.c"
+#line 1570 "parser.tab.c"
     break;
 
   case 23: /* type: FLOAT  */
-#line 367 "parser.y"
+#line 378 "parser.y"
             { (yyval.chaine) = "FLOAT"; }
-#line 1575 "parser.tab.c"
+#line 1576 "parser.tab.c"
     break;
 
   case 24: /* type: CHAR  */
-#line 368 "parser.y"
+#line 379 "parser.y"
            { (yyval.chaine) = "CHAR"; }
-#line 1581 "parser.tab.c"
+#line 1582 "parser.tab.c"
     break;
 
   case 25: /* expressionlogic: expression EQUAL expression  */
-#line 373 "parser.y"
+#line 384 "parser.y"
                            {
         if (strcmp((yyvsp[-2].exprari).type, (yyvsp[0].exprari).type) != 0) {
             yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
@@ -1589,22 +1590,22 @@ yyreduce:
         }
         (yyval.exprlog).type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
     }
-#line 1593 "parser.tab.c"
+#line 1594 "parser.tab.c"
     break;
 
   case 26: /* expressionlogic: LPAREN expressionlogic RPAREN  */
-#line 381 "parser.y"
+#line 392 "parser.y"
                                   {
         // Copier le contenu de la sous-expression dans l'expression actuelle
         (yyval.exprlog).type = (yyvsp[-1].exprlog).type;
         (yyval.exprlog).variables = (yyvsp[-1].exprlog).variables;
         (yyval.exprlog).count = (yyvsp[-1].exprlog).count;
     }
-#line 1604 "parser.tab.c"
+#line 1605 "parser.tab.c"
     break;
 
   case 27: /* expressionlogic: expression LT expression  */
-#line 387 "parser.y"
+#line 398 "parser.y"
                                {
         if (strcmp((yyvsp[-2].exprari).type, (yyvsp[0].exprari).type) != 0) {
             yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
@@ -1612,11 +1613,11 @@ yyreduce:
         }
         (yyval.exprlog).type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
     }
-#line 1616 "parser.tab.c"
+#line 1617 "parser.tab.c"
     break;
 
   case 28: /* expressionlogic: expression LTE expression  */
-#line 394 "parser.y"
+#line 405 "parser.y"
                                 {
         if (strcmp((yyvsp[-2].exprari).type, (yyvsp[0].exprari).type) != 0) {
             yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
@@ -1624,11 +1625,11 @@ yyreduce:
         }
         (yyval.exprlog).type = "BOOLEAN";
     }
-#line 1628 "parser.tab.c"
+#line 1629 "parser.tab.c"
     break;
 
   case 29: /* expressionlogic: expression GT expression  */
-#line 401 "parser.y"
+#line 412 "parser.y"
                                {
         if (strcmp((yyvsp[-2].exprari).type, (yyvsp[0].exprari).type) != 0) {
             yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
@@ -1636,11 +1637,11 @@ yyreduce:
         }
         (yyval.exprlog).type = "BOOLEAN";
     }
-#line 1640 "parser.tab.c"
+#line 1641 "parser.tab.c"
     break;
 
   case 30: /* expressionlogic: expression GTE expression  */
-#line 408 "parser.y"
+#line 419 "parser.y"
                                 {
         if (strcmp((yyvsp[-2].exprari).type, (yyvsp[0].exprari).type) != 0) {
             yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
@@ -1648,11 +1649,11 @@ yyreduce:
         }
         (yyval.exprlog).type = "BOOLEAN";
     }
-#line 1652 "parser.tab.c"
+#line 1653 "parser.tab.c"
     break;
 
   case 31: /* expressionlogic: expressionlogic AND expressionlogic  */
-#line 416 "parser.y"
+#line 427 "parser.y"
                                           {
         // Vérification que les deux opérandes sont booléens
         if (strcmp((yyvsp[-2].exprlog).type, "BOOLEAN") != 0 || strcmp((yyvsp[0].exprlog).type, "BOOLEAN") != 0) {
@@ -1661,11 +1662,11 @@ yyreduce:
         }
         (yyval.exprlog).type = "BOOLEAN";
     }
-#line 1665 "parser.tab.c"
+#line 1666 "parser.tab.c"
     break;
 
   case 32: /* expressionlogic: expressionlogic OR expressionlogic  */
-#line 424 "parser.y"
+#line 435 "parser.y"
                                          {
         if (strcmp((yyvsp[-2].exprlog).type, "BOOLEAN") != 0 || strcmp((yyvsp[0].exprlog).type, "BOOLEAN") != 0) {
             yyerror("Opérandes incompatibles pour l'opérateur logique OR.");
@@ -1673,11 +1674,11 @@ yyreduce:
         }
         (yyval.exprlog).type = "BOOLEAN";
     }
-#line 1677 "parser.tab.c"
+#line 1678 "parser.tab.c"
     break;
 
   case 33: /* expressionlogic: NOT expressionlogic  */
-#line 431 "parser.y"
+#line 442 "parser.y"
                           {
         if (strcmp((yyvsp[0].exprlog).type, "BOOLEAN") != 0) {
             yyerror("L'opérande de NOT doit être de type BOOLEAN.");
@@ -1685,24 +1686,24 @@ yyreduce:
         }
         (yyval.exprlog).type = "BOOLEAN";
     }
-#line 1689 "parser.tab.c"
+#line 1690 "parser.tab.c"
     break;
 
   case 34: /* init_for: IDENTIFIER ASSIGN expression  */
-#line 441 "parser.y"
+#line 452 "parser.y"
                                  {
-        TableEntry *varEntry = rechercher((yyvsp[-2].chaine));
+        TableEntry *varEntry = rechercher((yyvsp[-2].id).nom);
         if (varEntry == NULL) {
             yyerror("Variable non déclarée.");
             return 0;
         }
         (yyval.exprari) = (yyvsp[0].exprari);  // Pass the expression value up
     }
-#line 1702 "parser.tab.c"
+#line 1703 "parser.tab.c"
     break;
 
   case 40: /* statement: IF LPAREN expressionslogic RPAREN LBRACE statements RBRACE ELSE LBRACE statements RBRACE  */
-#line 463 "parser.y"
+#line 474 "parser.y"
                                                                                                {
         // Vérifier que la condition dans IF est de type booléen
         if (strcmp((yyvsp[-8].exprlog).type, "BOOLEAN") != 0) {
@@ -1710,65 +1711,65 @@ yyreduce:
             return 0;
         }
     }
-#line 1714 "parser.tab.c"
+#line 1715 "parser.tab.c"
     break;
 
   case 41: /* statement: FOR LPAREN init_for BOUCLESEPARATOR expression BOUCLESEPARATOR expression RPAREN LBRACE statements RBRACE  */
-#line 470 "parser.y"
+#line 481 "parser.y"
                                                                                                                 {
       if (strcmp((yyvsp[-6].exprari).type, "INTEGER") != 0||strcmp((yyvsp[-4].exprari).type, "INTEGER") != 0) {
         yyerror("Le pas de la boucle doit être un entier.");
         return 0;
     }
     }
-#line 1725 "parser.tab.c"
+#line 1726 "parser.tab.c"
     break;
 
   case 42: /* statement: READ LPAREN IDENTIFIER RPAREN SEMICOLON  */
-#line 476 "parser.y"
+#line 487 "parser.y"
                                               {
-        if (rechercher((yyvsp[-2].chaine)) == NULL) {
+        if (rechercher((yyvsp[-2].id).nom) == NULL) {
             yyerror("Variable non déclarée.");
             return 0;
         }
     }
-#line 1736 "parser.tab.c"
+#line 1737 "parser.tab.c"
     break;
 
   case 43: /* statement: WRITE LPAREN expressionwrite RPAREN SEMICOLON  */
-#line 482 "parser.y"
+#line 493 "parser.y"
                                                     {
         // Vérification que l'expression à écrire est valide
     }
-#line 1744 "parser.tab.c"
+#line 1745 "parser.tab.c"
     break;
 
   case 44: /* expressionwrite: IDENTIFIER  */
-#line 488 "parser.y"
+#line 499 "parser.y"
                {
-        TableEntry *varEntry = rechercher((yyvsp[0].chaine));
+        TableEntry *varEntry = rechercher((yyvsp[0].id).nom);
         if (varEntry == NULL) {
             yyerror("Variable non déclarée.");
             return 0;
         }
     }
-#line 1756 "parser.tab.c"
+#line 1757 "parser.tab.c"
     break;
 
   case 47: /* expressionwrite: IDENTIFIER COMMA expressionwrite  */
-#line 497 "parser.y"
+#line 508 "parser.y"
                                        {
-        TableEntry *varEntry = rechercher((yyvsp[-2].chaine));
+        TableEntry *varEntry = rechercher((yyvsp[-2].id).nom);
         if (varEntry == NULL) {
             yyerror("Variable non déclarée.");
             return 0;
         }
     }
-#line 1768 "parser.tab.c"
+#line 1769 "parser.tab.c"
     break;
 
 
-#line 1772 "parser.tab.c"
+#line 1773 "parser.tab.c"
 
       default: break;
     }
@@ -1962,7 +1963,7 @@ yyreturn:
   return yyresult;
 }
 
-#line 516 "parser.y"
+#line 527 "parser.y"
 
 
 void yyerror(const char *s) {

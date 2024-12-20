@@ -16,7 +16,7 @@ DECLARATION { %% local variables
 
 INSTRUCTION {
      
-    A = Max - C;
+    A = Max - 1;
     
     N=20/3;
     Y=4*A;

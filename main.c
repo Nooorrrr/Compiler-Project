@@ -5,6 +5,7 @@ extern int yyparse();
 extern FILE *yyin;
 
 int main(int argc, char **argv) {
+     printf("hi");
     if (argc < 2) {
         fprintf(stderr, "Erreur : aucun fichier spécifié.\n");
         return 1;
@@ -17,6 +18,7 @@ int main(int argc, char **argv) {
     }
 
     initialisation();
+   
     yyin = f;
     yyparse();
     afficherTable(Tab, 1000);

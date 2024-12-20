@@ -44,11 +44,21 @@ void yyerror(const char *s);  // Déclaration de la fonction d'erreur
         char** variables; 
         int count; 
     } exprlog;    
+
+    struct {
+        char* nom;        // Nom d'une entité (chaîne de caractères)
+        char** variables; // Tableau de chaînes de caractères
+        int count;        // Nombre d'éléments dans le tableau
+    } id;
+    
+    
+    
+
 }
 
 %token <entier> NUMBERINTPOS NUMBERINTNEG 
 %token <flottant> NUMBERFLOATPOS NUMBERFLOATNEG
-%token <chaine> IDENTIFIER 
+%token <id> IDENTIFIER 
 %type <chaine> type
 %type <varList>  listevariable
 %type <exprari> expression 
@@ -100,35 +110,35 @@ declaration:
         }
     }
     | CONST type IDENTIFIER ASSIGN NUMBERINT SEMICOLON {
-        if (rechercher($3) != NULL) {
+        if (rechercher($3.nom) != NULL) {
             yyerror("Variable déjà déclarée.");
             return 0;
         } else {
-            inserer($3, $2, $5, scope, 0, 0, 1);  // Insérer la constante entière
+            inserer($3.nom, $2, $5, scope, 0, 0, 1);  // Insérer la constante entière
         }
     }
     | CONST type IDENTIFIER ASSIGN NUMBERFLOAT SEMICOLON {
-        if (rechercher($3) != NULL) {
+        if (rechercher($3.nom) != NULL) {
             yyerror("Variable déjà déclarée.");
             return 0;
         } else {
-            inserer($3, $2, $5, scope, 0, 0, 1);  // Insérer la constante flottante
+            inserer($3.nom, $2, $5, scope, 0, 0, 1);  // Insérer la constante flottante
         }
     }
     | CONST type IDENTIFIER ASSIGN CARACTERE SEMICOLON {
-        if (rechercher($3) != NULL) {
+        if (rechercher($3.nom) != NULL) {
             yyerror("Variable déjà déclarée.");
             return 0;
         } else {
-            inserer($3, $2, $5, scope, 0, 0, 1);  // Insérer la constante flottante
+            inserer($3.nom, $2, $5, scope, 0, 0, 1);  // Insérer la constante flottante
         }
     }
     | type IDENTIFIER LBRACKET NUMBERINTPOS RBRACKET SEMICOLON {
-        if (rechercher($2) != NULL) {
+        if (rechercher($2.nom) != NULL) {
             yyerror("Variable déjà déclarée.");
             return 0;
         } else {
-            inserer($2, $1, 0, scope, 0, $4, 1);
+            inserer($2.nom, $1, 0, scope, 0, $4, 1);
         }
     }
     ;
@@ -138,19 +148,19 @@ listevariable:
         $$ = $1;  // Copier la liste précédente
         $$.count++;  // Incrémenter le nombre d'éléments
         $$.variables = realloc($$.variables, sizeof(char*) * $$.count);
-        $$.variables[$$.count - 1] = $3;  // Ajouter la nouvelle variable
+        $$.variables[$$.count - 1] = $3.nom;  // Ajouter la nouvelle variable
     }
     | IDENTIFIER {
         $$.count = 1;  // Une seule variable
         $$.variables = malloc(sizeof(char*));
-        $$.variables[0] = $1;
+        $$.variables[0] = $1.nom;
     }
     ;
 
 affectation:
     IDENTIFIER ASSIGN expression SEMICOLON {
         // Vérification si la variable est déclarée
-        TableEntry *varEntry = rechercher($1);
+        TableEntry *varEntry = rechercher($1.nom);
         if (varEntry == NULL) {
             yyerror("Variable non déclarée.");
             return 0;
@@ -202,7 +212,7 @@ affectation:
 
 expression:
     IDENTIFIER {
-        TableEntry *entry = rechercher($1);
+        TableEntry *entry = rechercher($1.nom);
         if (entry == NULL) {
             yyerror("Variable non déclarée.");
             return 0;
@@ -259,6 +269,7 @@ expression:
         yyerror("Opérandes de types incompatibles pour l'addition.");
         return 0;
     }
+
     }
     | expression MINUS expression{
     // Vérifier la compatibilité des types avant de faire l'opération
@@ -439,7 +450,7 @@ expression EQUAL expression{
 
 init_for:
     IDENTIFIER ASSIGN expression {
-        TableEntry *varEntry = rechercher($1);
+        TableEntry *varEntry = rechercher($1.nom);
         if (varEntry == NULL) {
             yyerror("Variable non déclarée.");
             return 0;
@@ -474,7 +485,7 @@ statement:
     }
     }
     | READ LPAREN IDENTIFIER RPAREN SEMICOLON {
-        if (rechercher($3) == NULL) {
+        if (rechercher($3.nom) == NULL) {
             yyerror("Variable non déclarée.");
             return 0;
         }
@@ -486,7 +497,7 @@ statement:
 
 expressionwrite:
     IDENTIFIER {
-        TableEntry *varEntry = rechercher($1);
+        TableEntry *varEntry = rechercher($1.nom);
         if (varEntry == NULL) {
             yyerror("Variable non déclarée.");
             return 0;
@@ -495,7 +506,7 @@ expressionwrite:
     | TEXT
     | TEXT COMMA expressionwrite
     | IDENTIFIER COMMA expressionwrite {
-        TableEntry *varEntry = rechercher($1);
+        TableEntry *varEntry = rechercher($1.nom);
         if (varEntry == NULL) {
             yyerror("Variable non déclarée.");
             return 0;

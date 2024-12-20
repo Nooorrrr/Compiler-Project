@@ -139,7 +139,17 @@ union YYSTYPE
         int count; 
     } exprlog;    
 
-#line 143 "parser.tab.h"
+    struct {
+        char* nom;        // Nom d'une entité (chaîne de caractères)
+        char** variables; // Tableau de chaînes de caractères
+        int count;        // Nombre d'éléments dans le tableau
+    } id;
+    
+    
+    
+
+
+#line 153 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

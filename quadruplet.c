@@ -2,31 +2,24 @@
 #include <string.h>
 #include <stdlib.h>
 #include "quadruplet.h"
-#include "ts.c"
 
-// quadruplets pour stocker les quadruplets
+
 Quadruplet *quadruplets[1000];  // Tableau pour stocker jusqu'à 1000 quadruplets
-int quadruplet_count = 0;       // Compteur pour le nombre de quadruplets
+int quadruplet_count = 0;
+Quadruplet liste[1500]; // Liste des quadruplets
+int qc = 0;             // Compteur des quadruplets
 
 // Fonction pour créer un quadruplet
-Quadruplet* create_quadruplet(const char *op, const char *arg1, const char *arg2, const char *result) {
-    
-Quadruplet *quad = (Quadruplet*)malloc(sizeof(Quadruplet));
+Quadruplet* create_quadruplet(const char* op, const char* arg1, const char* arg2, const char* result) {
+    Quadruplet* quad = (Quadruplet*)malloc(sizeof(Quadruplet));
     if (!quad) {
-        perror("Erreur d'allocation mémoire pour Quadruplet");
+        fprintf(stderr, "Memory allocation failed for Quadruplet\n");
         exit(EXIT_FAILURE);
     }
     quad->op = strdup(op);
     quad->arg1 = strdup(arg1);
     quad->arg2 = strdup(arg2);
     quad->result = strdup(result);
-
-    if (!quad->op || !quad->arg1 || !quad->arg2 || !quad->result) {
-        perror("Erreur d'allocation mémoire pour les chaînes du Quadruplet");
-        free_quadruplet(quad);
-        exit(EXIT_FAILURE);
-    }
-
     return quad;
 }
 
@@ -178,18 +171,34 @@ void delete_quad() {
 // Fonction pour libérer la mémoire d'un quadruplet
 void free_quadruplet(Quadruplet *quad) {
     if (quad) {
-        free(quad->op);
-        free(quad->arg1);
-        free(quad->arg2);
-        free(quad->result);
+        if (quad->op) {
+            free(quad->op);
+            quad->op = NULL;
+        }
+        if (quad->arg1) {
+            free(quad->arg1);
+            quad->arg1 = NULL;
+        }
+        if (quad->arg2) {
+            free(quad->arg2);
+            quad->arg2 = NULL;
+        }
+        if (quad->result) {
+            free(quad->result);
+            quad->result = NULL;
+        }
         free(quad);
     }
 }
 
+
 // Fonction pour libérer la mémoire de tous les quadruplets
 void free_all_quadruplets() {
     for (int i = 0; i < quadruplet_count; i++) {
-        free_quadruplet(quadruplets[i]);
+        if (quadruplets[i]) {
+            free_quadruplet(quadruplets[i]);
+            quadruplets[i] = NULL;
+        }
     }
     quadruplet_count = 0; // Réinitialiser le compteur après la libération
 }

@@ -41,3 +41,4 @@ void afficherEnTete();
 void afficherEntree(TableEntry *entry);
 void afficherTable(TableEntry *table, int taille);
 #endif
+
