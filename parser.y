@@ -206,10 +206,8 @@ affectation:
         } else if (strcmp(varEntry->type, "FLOAT") == 0) {
             varEntry->val.fval = $3.value.fval;  // Affecter un flottant
             if(strcmp($3.type,"INTEGER") == 0){
-            
-               
                 generer("=",$3.name, "", varEntry->name);
-                varEntry->val.fval = (float) $3.value.fval;
+                varEntry->val.fval = (float) $3.value.ival;
             }
         } else if (strcmp(varEntry->type, "CHAR") == 0) {
        
@@ -267,7 +265,7 @@ expression:
        char val[20];
         sprintf(val, "%f", $1);  // Corrected format specifier
          $$.name=val;
-         printf("%s",val);
+        
     }
     | CARACTERE {  // Cas où l'expression est un caractère
         $$.type = "CHAR";
@@ -279,12 +277,8 @@ expression:
 
     }
     | expression PLUS expression {  // Addition
-        if (strcmp($1.type, $3.type) != 0) {
-            yyerror("Opérandes incompatibles pour l'addition.");
-            return 0;
-        }
-        if (strcmp($1.type, "INTEGER") == 0) {
-            $$.type = "INTEGER";
+     if (strcmp($1.type,"INTEGER")==0 && strcmp($3.type,"INTEGER")==0) {
+       $$.type = "INTEGER";
             $$.value.ival = $1.value.ival + $3.value.ival;
 
             // Générer un quadruplet pour l'addition
@@ -292,118 +286,152 @@ expression:
             sprintf(tempVar, "t%d", tempCount++);
             generer("+", $1.name,$3.name, tempVar);
                 $$.name=tempVar;
-        } else if (strcmp($1.type, "FLOAT") == 0) {
-            $$.type = "FLOAT";
-            $$.value.fval = $1.value.fval + $3.value.fval;
-
-            // Générer un quadruplet pour l'addition flottante
+    } else if (strcmp($1.type,"FLOAT")==0|| strcmp($3.type,"FLOAT")==0) {
+        // Si l'un des opérandes est un FLOAT
+        if (strcmp($1.type,"INTEGER")==0) {
+            $1.type = "FLOAT";
+            $1.value.fval = (float) $1.value.ival;
+          
+        }
+        if (strcmp($3.type,"INTEGER")==0) {
+            $3.type = "FLOAT";
+            $3.value.fval = (float) $3.value.ival;
+      
+        }
+        $$.type = "FLOAT";
+        $$.value.fval = $1.value.fval + $3.value.fval;
+           // Générer un quadruplet pour l'addition flottante
             char tempVar[20];
             sprintf(tempVar, "t%d", tempCount++);
             generer("+",$1.name,$3.name, tempVar);
             $$.name=tempVar;
-        } else {
-            yyerror("Addition non supportée pour ce type.");
-            return 0;
-        }
-      
+    } else {
+        // Si les types sont incompatibles
+        yyerror("Opérandes de types incompatibles pour l'addition.");
+        return 0;
+    }
+
+
     }
     | expression MINUS expression {  // Soustraction
-        if (strcmp($1.type, $3.type) != 0) {
-            yyerror("Opérandes incompatibles pour la soustraction.");
-            return 0;
-        }
-        if (strcmp($1.type, "INTEGER") == 0) {
-            $$.type = "INTEGER";
+        if (strcmp($1.type,"INTEGER")==0 && strcmp($3.type,"INTEGER")==0) {
+       $$.type = "INTEGER";
             $$.value.ival = $1.value.ival - $3.value.ival;
 
-            // Générer un quadruplet pour la soustraction
+            // Générer un quadruplet pour l'addition
             char tempVar[20];
             sprintf(tempVar, "t%d", tempCount++);
-             
+            generer("-", $1.name,$3.name, tempVar);
+                $$.name=tempVar;
+    } else if (strcmp($1.type,"FLOAT")==0|| strcmp($3.type,"FLOAT")==0) {
+        // Si l'un des opérandes est un FLOAT
+        if (strcmp($1.type,"INTEGER")==0) {
+            $1.type = "FLOAT";
+            $1.value.fval = (float) $1.value.ival;
+        }
+        if (strcmp($3.type,"INTEGER")==0) {
+            $3.type = "FLOAT";
+            $3.value.fval = (float) $3.value.ival;
+        }
+        printf("var1 :\n%f\n",$1.value.ival);
+           printf("var2 :\n%f\n",$3.value.ival);
+        $$.type = "FLOAT";
+        $$.value.fval = $1.value.fval - $3.value.fval;
+           // Générer un quadruplet pour l'addition flottante
+            char tempVar[20];
+            sprintf(tempVar, "t%d", tempCount++);
             generer("-",$1.name,$3.name, tempVar);
             $$.name=tempVar;
-        } else if (strcmp($1.type, "FLOAT") == 0) {
-            $$.type = "FLOAT";
-            $$.value.fval = $1.value.fval - $3.value.fval;
+    } else {
+        // Si les types sont incompatibles
+        yyerror("Opérandes de types incompatibles pour la soustraction.");
+        return 0;
+    }
 
-            // Générer un quadruplet pour la soustraction flottante
-            char tempVar[20];
-            sprintf(tempVar, "t%d", tempCount++);
-            generer("-",$1.name,$3.name, tempVar);
-                $$.name=tempVar;
-            
-        } else {
-            yyerror("Soustraction non supportée pour ce type.");
-            return 0;
-        }
     }
     | expression MULT expression {  // Multiplication
-        if (strcmp($1.type, $3.type) != 0) {
-            yyerror("Opérandes incompatibles pour la multiplication.");
-            return 0;
-        }
-        if (strcmp($1.type, "INTEGER") == 0) {
-            $$.type = "INTEGER";
+  
+      
+         if (strcmp($1.type,"INTEGER")==0 && strcmp($3.type,"INTEGER")==0) {
+       $$.type = "INTEGER";
             $$.value.ival = $1.value.ival * $3.value.ival;
 
-            // Générer un quadruplet pour la multiplication
-            char tempVar[20];
-                
-            sprintf(tempVar, "t%d", tempCount++);
-            generer("*", $1.name,$3.name, tempVar);
-            $$.name=tempVar;
-        } else if (strcmp($1.type, "FLOAT") == 0) {
-            $$.type = "FLOAT";
-            $$.value.fval = $1.value.fval * $3.value.fval;
-
-            // Générer un quadruplet pour la multiplication flottante
+            // Générer un quadruplet pour l'addition
             char tempVar[20];
             sprintf(tempVar, "t%d", tempCount++);
-               printf("\n\n\n\n%s\n\n\n\n", $1.name);
-                     printf("\n\n\n\n%s\n\n\n\n", $3.name);
             generer("*", $1.name,$3.name, tempVar);
-            $$.name=tempVar;
-        } else {
-            yyerror("Multiplication non supportée pour ce type.");
-            return 0;
+                $$.name=tempVar;
+    } else if (strcmp($1.type,"FLOAT")==0|| strcmp($3.type,"FLOAT")==0) {
+        // Si l'un des opérandes est un FLOAT
+        if (strcmp($1.type,"INTEGER")==0) {
+            $1.type = "FLOAT";
+            $1.value.fval = (float) $1.value.ival;
         }
+        if (strcmp($3.type,"INTEGER")==0) {
+            $3.type = "FLOAT";
+          
+            $3.value.fval = (float) $3.value.ival;
+          
+        }
+           
+
+        $$.type = "FLOAT";
+        $$.value.fval = $1.value.fval * $3.value.fval;
+           // Générer un quadruplet pour l'addition flottante
+            char tempVar[20];
+            sprintf(tempVar, "t%d", tempCount++);
+            generer("*",$1.name,$3.name, tempVar);
+            $$.name=tempVar;
+    } else {
+        // Si les types sont incompatibles
+        yyerror("Opérandes de types incompatibles pour la multiplication.");
+        return 0;
+    }
+
     }
     | expression DIV expression {  // Division
-        if (strcmp($1.type, $3.type) != 0) {
-            yyerror("Opérandes incompatibles pour la division.");
-            return 0;
-        }
-        if (strcmp($1.type, "INTEGER") == 0) {
-            if ($3.value.ival == 0) {
-                yyerror("Division par zéro.");
-                return 0;
-            }
-            $$.type = "INTEGER";
-            $$.value.ival = $1.value.ival / $3.value.ival;
 
-            // Générer un quadruplet pour la division
+        if (strcmp($1.type,"INTEGER")==0 && strcmp($3.type,"INTEGER")==0) {
+             $$.type = "INTEGER";
+               if($3.value.fval==0){
+              yyerror("division sur 0 impossible.");
+                }else{  
+             $$.value.ival = $1.value.ival/ $3.value.ival;
+
+            // Générer un quadruplet pour l'addition
+            char tempVar[20];
+            sprintf(tempVar, "t%d", tempCount++);
+            generer("/", $1.name,$3.name, tempVar);
+                $$.name=tempVar;
+             }
+           
+    } else if (strcmp($1.type,"FLOAT")==0|| strcmp($3.type,"FLOAT")==0) {
+        // Si l'un des opérandes est un FLOAT
+        if (strcmp($1.type,"INTEGER")==0) {
+            $1.type = "FLOAT";
+            $1.value.fval = (float) $1.value.ival;
+        }
+        if (strcmp($3.type,"INTEGER")==0) {
+            $3.type = "FLOAT";
+            $3.value.fval = (float) $3.value.ival;
+        }
+        $$.type = "FLOAT";
+          if($3.value.fval==0){
+              yyerror("division sur 0 impossible.");
+                }else{ 
+        $$.value.fval = $1.value.fval / $3.value.fval;
+           // Générer un quadruplet pour l'addition flottante
             char tempVar[20];
             sprintf(tempVar, "t%d", tempCount++);
             generer("/",$1.name,$3.name, tempVar);
             $$.name=tempVar;
-        } else if (strcmp($1.type, "FLOAT") == 0) {
-            if ($3.value.fval == 0.0f) {
-                yyerror("Division par zéro.");
-                return 0;
-            }
-            $$.type = "FLOAT";
-            $$.value.fval = $1.value.fval / $3.value.fval;
+                }
+    } else {
+        // Si les types sont incompatibles
+        yyerror("Opérandes de types incompatibles pour la division.");
+        return 0;
+    }
 
-            // Générer un quadruplet pour la division flottante
-            char tempVar[20];
-               sprintf(tempVar, "t%d", tempCount++);
-    
-            generer("/", $1.name,$3.name, tempVar);
-                $$.name=tempVar;
-        } else {
-            yyerror("Division non supportée pour ce type.");
-            return 0;
-        }
     }
     | LPAREN expression RPAREN {  // Parenthèses pour prioriser les opérations
         $$.type = $2.type;

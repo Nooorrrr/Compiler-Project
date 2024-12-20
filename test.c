@@ -12,6 +12,9 @@ DECLARATION { %%affectations
 }
 
 INSTRUCTION {
+    X=2;
+    X=2+N;
+ 
      C = 1;
      A =5;
      B=3;
