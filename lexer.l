@@ -51,7 +51,8 @@
 "+"                   { return PLUS; }   
 "-"                   { return MINUS; } 
 "*"                   { return MULT; }   
-"/"                   { return DIV; }    
+"/"                   { return DIV; }   
+":"                   { return BOUCLESEPARATOR; } 
 
 "{"                  { return LBRACE; }
 "}"                  { return RBRACE; }
@@ -60,7 +61,7 @@
 "["                  { return LBRACKET; }
 "]"                  { return RBRACKET; }
 ";"                  { return SEMICOLON; }
-"\:"                   { return COLON;}
+
 ","                  { return COMMA; }
 "="                  { return ASSIGN; }
 \"[^\n\t\"]*\"  { return TEXT; }
