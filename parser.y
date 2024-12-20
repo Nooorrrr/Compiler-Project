@@ -166,21 +166,21 @@ affectation:
         }
 
         // Vérification de la compatibilité des types entre la variable et l'expression
-        if(strcmp(varEntry->type,"INTEGER")||strcmp(varEntry->type,"CHAR")){
+        if(strcmp(varEntry->type,"INTEGER")== 0||strcmp(varEntry->type,"CHAR")== 0){
         if (strcmp(varEntry->type, $3.type) != 0) {
-            yyerror("Type incompatible dans l'affectation.");
+            yyerror("Type incompatible dans l'affectation.test1");
             return 0;
         }
         }
-        if(strcmp(varEntry->type,"FLOAT")){
+        if(strcmp(varEntry->type,"FLOAT")== 0){
             if (strcmp($3.type, "CHAR") == 0) {
-            yyerror("Type incompatible dans l'affectation.");
+            yyerror("Type incompatible dans l'affectation.2");
             return 0;
         }
         }
-         if(strcmp(varEntry->type,"CHAR")){
+         if(strcmp(varEntry->type,"CHAR")== 0){
             if (strcmp($3.type, "CHAR") != 0) {
-            yyerror("Type incompatible dans l'affectation.");
+            yyerror("Type incompatible dans l'affectation.3");
             return 0;
         }
         }
@@ -194,7 +194,7 @@ affectation:
         } else if (strcmp(varEntry->type, "CHAR") == 0) {
             varEntry->val.cval = $3.value.cval;  // Affecter un caractère
         } else {
-            yyerror("Type inconnu pour l'affectation.");
+            yyerror("Type inconnu pour l'affectation.4");
             return 0;
         }
     }
@@ -236,13 +236,21 @@ expression:
     | expression PLUS expression {
         
         if (strcmp($1.type, $3.type) != 0) {
+            if(strcmp($1.type,"FLOAT")){
+            $3.type="FLOAT";
+            $3.value.fval=$3.value.ival;
+            }else  if(strcmp($3.type,"FLOAT")){
+            $1.type="FLOAT";
+            $1.value.fval=$1.value.ival;
+            } else{
             yyerror("Opérandes de types incompatibles pour l'addition.");
             return 0;
+            }
         }
         if($1.type=="CHAR"){
             yyerror("Opération addition avec char.");
         }
-       $$.type = $1.type;
+         $$.type = $1.type;
          if($$.type =="FLOAT"){
             $$.value.fval= $1.value.fval +$3.value.fval;
          }else{
@@ -252,12 +260,20 @@ expression:
          }
     }
     | expression MINUS expression {
-        if (strcmp($1.type, $3.type) != 0) {
-            yyerror("Opérandes de types incompatibles pour la soustraction.");
+   if (strcmp($1.type, $3.type) != 0) {
+            if(strcmp($1.type,"FLOAT")){
+            $3.type="FLOAT";
+            $3.value.fval=$3.value.ival;
+            }else  if(strcmp($3.type,"FLOAT")){
+            $1.type="FLOAT";
+            $1.value.fval=$1.value.ival;
+            }else {
+            yyerror("Opérandes de types incompatibles.");
             return 0;
+            }
         }
-          if($1.type=="CHAR"){
-            yyerror("Opération addition avec char.");
+        if($1.type=="CHAR"){
+            yyerror("Opération min avec char.");
         }
         $$.type = $1.type;
          if($$.type =="FLOAT"){
@@ -267,12 +283,20 @@ expression:
          }
     }
     | expression MULT expression {
-        if (strcmp($1.type, $3.type) != 0) {
+   if (strcmp($1.type, $3.type) != 0) {
+            if(strcmp($1.type,"FLOAT")){
+            $3.type="FLOAT";
+            $3.value.fval=$3.value.ival;
+            }else  if(strcmp($3.type,"FLOAT")){
+            $1.type="FLOAT";
+            $1.value.fval=$1.value.ival;
+            } else{
             yyerror("Opérandes de types incompatibles pour la multiplication.");
             return 0;
+            }
         }
-          if($1.type=="CHAR"){
-            yyerror("Opération addition avec char.");
+        if($1.type=="CHAR"){
+            yyerror("Opération mult avec char.");
         }
        $$.type = $1.type;
          if($$.type =="FLOAT"){
@@ -282,12 +306,20 @@ expression:
          }
     }
     | expression DIV expression {
-        if (strcmp($1.type, $3.type) != 0) {
-            yyerror("Opérandes de types incompatibles pour la division.");
+    if (strcmp($1.type, $3.type) != 0) {
+            if(strcmp($1.type,"FLOAT")){
+            $3.type="FLOAT";
+            $3.value.fval=$3.value.ival;
+            }else  if(strcmp($3.type,"FLOAT")){
+            $1.type="FLOAT";
+            $1.value.fval=$1.value.ival;
+            } {
+            yyerror("Opérandes de types incompatibles pour l'addition.");
             return 0;
+            }
         }
-          if($1.type=="CHAR"){
-            yyerror("Opération addition avec char.");
+        if($1.type=="CHAR"){
+            yyerror("Opération div avec char.");
         }
        $$.type = $1.type;
          if($$.type =="FLOAT"){
