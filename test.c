@@ -6,7 +6,10 @@ VAR_GLOBAL {
     INTEGER Q, Z, T;
     FLOAT X,L;
     CHAR X[8];
+    CHAR Y[8];
+    CHAR X[8];
     CONST INTEGER Z = 5;
+    a
 }
 
 

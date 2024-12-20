@@ -876,27 +876,27 @@ YY_RULE_SETUP
 case 14:
 YY_RULE_SETUP
 #line 26 "lexer.l"
-{ return IDENTIFIER; }
+{ yylval.chaine = strdup(yytext);return IDENTIFIER; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
 #line 28 "lexer.l"
-{ return NUMBERINTPOS; }
+{ yylval.entier = atoi(yytext); return NUMBERINTPOS; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
 #line 29 "lexer.l"
-{ return NUMBERFLOATPOS; }
+{yylval.entier = atoi(yytext);  return NUMBERFLOATPOS; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
 #line 30 "lexer.l"
-{ return NUMBERINTNEG; }
+{ yylval.flottant = atoi(yytext); return NUMBERINTNEG; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
 #line 31 "lexer.l"
-{ return NUMBERFLOATNEG; }
+{yylval.flottant = atoi(yytext);  return NUMBERFLOATNEG; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP

@@ -540,12 +540,12 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    40,    40,    44,    45,    49,    50,    57,    64,    71,
-      78,    88,    89,    93,    94,    95,    99,   103,   104,   105,
-     106,   107,   108,   109,   112,   113,   114,   115,   116,   117,
-     118,   119,   120,   121,   122,   126,   127,   131,   132,   133,
-     134,   135,   139,   140,   141,   142,   146,   150,   151,   154,
-     155,   156,   159,   160,   161,   162
+       0,    41,    41,    45,    46,    50,    51,    60,    67,    74,
+      81,    91,    92,    96,    97,    98,   102,   106,   107,   108,
+     109,   110,   111,   112,   115,   116,   117,   118,   119,   120,
+     121,   122,   123,   124,   125,   129,   130,   134,   135,   136,
+     137,   138,   142,   143,   144,   145,   149,   153,   154,   157,
+     158,   159,   162,   163,   164,   165
 };
 #endif
 
@@ -1217,85 +1217,87 @@ yyreduce:
   switch (yyn)
     {
   case 6: /* declaration: type IDENTIFIER LBRACKET NUMBERINTPOS RBRACKET SEMICOLON  */
-#line 50 "parser.y"
+#line 51 "parser.y"
                                                                {
            if (rechercher((yyvsp[-4].chaine)) != NULL) {
             yyerror("Variable déjà déclarée.");
         } else {
-          inserer((yyvsp[-4].chaine), (yyvsp[-5].chaine), 0, scope, 0, (yyvsp[-2].entier), 1);
+            
+        
+                     inserer((yyvsp[-4].chaine), (yyvsp[-5].chaine), 0, scope, 0, (yyvsp[-2].entier), 1);
         }
     }
-#line 1229 "parser.tab.c"
+#line 1231 "parser.tab.c"
     break;
 
   case 7: /* declaration: CONST type IDENTIFIER ASSIGN NUMBERINTPOS SEMICOLON  */
-#line 57 "parser.y"
+#line 60 "parser.y"
                                                           {
          if (rechercher((yyvsp[-3].chaine)) != NULL) {
             yyerror("Variable déjà déclarée.");
         } else {
-           inserer((yyvsp[-3].chaine), (yyvsp[-4].chaine), (yyvsp[-1].entier), scope, 1, 0, 0);
+         //  inserer($3, $2, $5, scope, 1, 0, 0);
         }
     }
-#line 1241 "parser.tab.c"
+#line 1243 "parser.tab.c"
     break;
 
   case 8: /* declaration: CONST type IDENTIFIER ASSIGN NUMBERINTNEG SEMICOLON  */
-#line 64 "parser.y"
+#line 67 "parser.y"
                                                           {
         if (rechercher((yyvsp[-3].chaine)) != NULL) {
             yyerror("Variable déjà déclarée.");
         } else {
-           inserer((yyvsp[-3].chaine), (yyvsp[-4].chaine), (yyvsp[-1].entier), scope, 1, 0, 0);
+         //  inserer($3, $2, $5, scope, 1, 0, 0);
         }
     }
-#line 1253 "parser.tab.c"
+#line 1255 "parser.tab.c"
     break;
 
   case 9: /* declaration: CONST type IDENTIFIER ASSIGN NUMBERFLOATPOS SEMICOLON  */
-#line 71 "parser.y"
+#line 74 "parser.y"
                                                             {
         if (rechercher((yyvsp[-3].chaine)) != NULL) {
             yyerror("Variable déjà déclarée.");
         } else {
-           inserer((yyvsp[-3].chaine), (yyvsp[-4].chaine), (yyvsp[-1].flottant), scope, 1, 0, 0);
+         //  inserer($3, $2, $5, scope, 1, 0, 0);
         }
     }
-#line 1265 "parser.tab.c"
+#line 1267 "parser.tab.c"
     break;
 
   case 10: /* declaration: CONST type IDENTIFIER ASSIGN NUMBERFLOATNEG SEMICOLON  */
-#line 78 "parser.y"
+#line 81 "parser.y"
                                                             {
         if (rechercher((yyvsp[-3].chaine)) != NULL) {
             yyerror("Variable déjà déclarée.");
         } else {
-           inserer((yyvsp[-3].chaine), (yyvsp[-4].chaine), (yyvsp[-1].flottant), scope, 1, 0, 0);
+          // inserer($3, $2, $5, scope, 1, 0, 0);
         }
     }
-#line 1277 "parser.tab.c"
+#line 1279 "parser.tab.c"
     break;
 
   case 13: /* type: INTEGER  */
-#line 93 "parser.y"
+#line 96 "parser.y"
             { (yyval.chaine) = "INTEGER"; }
-#line 1283 "parser.tab.c"
+#line 1285 "parser.tab.c"
     break;
 
   case 14: /* type: FLOAT  */
-#line 94 "parser.y"
+#line 97 "parser.y"
             { (yyval.chaine) = "FLOAT"; }
-#line 1289 "parser.tab.c"
+#line 1291 "parser.tab.c"
     break;
 
   case 15: /* type: CHAR  */
-#line 95 "parser.y"
+#line 98 "parser.y"
            { (yyval.chaine) = "CHAR"; }
-#line 1295 "parser.tab.c"
+#line 1297 "parser.tab.c"
     break;
 
 
-#line 1299 "parser.tab.c"
+#line 1301 "parser.tab.c"
 
       default: break;
     }
@@ -1489,7 +1491,7 @@ yyreturn:
   return yyresult;
 }
 
-#line 165 "parser.y"
+#line 168 "parser.y"
 
 
 void yyerror(const char *s) {
@@ -1511,7 +1513,7 @@ int main(int argc, char **argv) {
 
     initialisation();
     yyin = f;
-    yyparse();
+    yyparse();// l erreur rhy hna
     afficherTable(Tab, 1000);
     fclose(f);
     return 0;

@@ -52,35 +52,37 @@ declaration:
            if (rechercher($2) != NULL) {
             yyerror("Variable déjà déclarée.");
         } else {
-          inserer($2, $1, 0, scope, 0, $4, 1);
+            
+        
+                     inserer($2, $1, 0, scope, 0, $4, 1);
         }
     }
     | CONST type IDENTIFIER ASSIGN NUMBERINTPOS SEMICOLON {
          if (rechercher($3) != NULL) {
             yyerror("Variable déjà déclarée.");
         } else {
-           inserer($3, $2, $5, scope, 1, 0, 0);
+         //  inserer($3, $2, $5, scope, 1, 0, 0);
         }
     } 
     | CONST type IDENTIFIER ASSIGN NUMBERINTNEG SEMICOLON {
         if (rechercher($3) != NULL) {
             yyerror("Variable déjà déclarée.");
         } else {
-           inserer($3, $2, $5, scope, 1, 0, 0);
+         //  inserer($3, $2, $5, scope, 1, 0, 0);
         }
     } 
     | CONST type IDENTIFIER ASSIGN NUMBERFLOATPOS SEMICOLON {
         if (rechercher($3) != NULL) {
             yyerror("Variable déjà déclarée.");
         } else {
-           inserer($3, $2, $5, scope, 1, 0, 0);
+         //  inserer($3, $2, $5, scope, 1, 0, 0);
         }
     }
     | CONST type IDENTIFIER ASSIGN NUMBERFLOATNEG SEMICOLON {
         if (rechercher($3) != NULL) {
             yyerror("Variable déjà déclarée.");
         } else {
-           inserer($3, $2, $5, scope, 1, 0, 0);
+          // inserer($3, $2, $5, scope, 1, 0, 0);
         }
     }
     ;
@@ -184,7 +186,7 @@ int main(int argc, char **argv) {
 
     initialisation();
     yyin = f;
-    yyparse();
+    yyparse();// l erreur rhy hna
     afficherTable(Tab, 1000);
     fclose(f);
     return 0;
