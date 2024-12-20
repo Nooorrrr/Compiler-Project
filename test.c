@@ -20,7 +20,7 @@ INSTRUCTION {
     N=20/3;
     Y=4*A;
     
-    IF ((A > Min) || (C == 'G')) {
+    IF ((A > Min)) {
         Q = A + Max;
         Y = Y / 2;
     } ELSE {
@@ -35,18 +35,5 @@ INSTRUCTION {
         }
     }
     
-    WHILE (Y < MAX) {
-        Y = Y + 1;
-    }
-    
-    SWITCH (A) {
-        CASE 10:
-            Q = A + 1;
-            BREAK;
-        CASE 20:
-            Q = A + 2;
-            BREAK;
-        DEFAULT:
-            Q = A;
-    }
+  
 }

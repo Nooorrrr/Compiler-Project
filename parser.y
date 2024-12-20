@@ -415,6 +415,7 @@ expressionlogic:
         }
         $$.type = "BOOLEAN";
     }
+    
     | expressionlogic AND expressionlogic {
         // Vérification que les deux opérandes sont booléens
         if (strcmp($1.type, "BOOLEAN") != 0 || strcmp($3.type, "BOOLEAN") != 0) {
@@ -526,6 +527,7 @@ fortext:
             return 0;
         }}
 ;
+
 %%
 
 ;
