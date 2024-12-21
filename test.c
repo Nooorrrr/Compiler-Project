@@ -1,6 +1,6 @@
 VAR_GLOBAL {
     INTEGER A;
-    CONST FLOAT Pi = 3;
+    CONST FLOAT Pi = 3.14; %%(=,3, ,pi)
     CHAR C;
     INTEGER Q;  
     FLOAT Y;
@@ -18,7 +18,7 @@ INSTRUCTION {
      
     A = Max - 1;
     
-    N=20/3;
+    N=Max/3;
     Y=4*A;
     
     IF ((A > Min) ) {

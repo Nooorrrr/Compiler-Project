@@ -107,7 +107,7 @@ union YYSTYPE
 #line 14 "parser.y"
 
     int entier;        // Pour les entiers
-    float flottant;    // Pour les nombres flottants
+    float flottant;    // Pour les namebres flottants
     char* chaine;      // Pour les chaînes de caractères
     char car;
     struct { 
@@ -122,7 +122,8 @@ union YYSTYPE
         float fval;    // Flottant
     } Value;  // Union pour stocker la valeur
 
-    struct { 
+    struct {
+         char* name;       
         char* type;    // Le type de l'expression (par exemple: "int", "float")
         char** variables; 
         int count; 
@@ -140,16 +141,16 @@ union YYSTYPE
     } exprlog;    
 
     struct {
-        char* nom;        // Nom d'une entité (chaîne de caractères)
+        char* name;        // name d'une entité (chaîne de caractères)
         char** variables; // Tableau de chaînes de caractères
-        int count;        // Nombre d'éléments dans le tableau
+        int count;        // namebre d'éléments dans le tableau
     } id;
     
     
     
 
 
-#line 153 "parser.tab.h"
+#line 154 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

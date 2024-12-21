@@ -13,7 +13,7 @@ void yyerror(const char *s);  // Déclaration de la fonction d'erreur
 
 %union {
     int entier;        // Pour les entiers
-    float flottant;    // Pour les nombres flottants
+    float flottant;    // Pour les namebres flottants
     char* chaine;      // Pour les chaînes de caractères
     char car;
     struct { 
@@ -28,7 +28,8 @@ void yyerror(const char *s);  // Déclaration de la fonction d'erreur
         float fval;    // Flottant
     } Value;  // Union pour stocker la valeur
 
-    struct { 
+    struct {
+         char* name;       
         char* type;    // Le type de l'expression (par exemple: "int", "float")
         char** variables; 
         int count; 
@@ -46,9 +47,9 @@ void yyerror(const char *s);  // Déclaration de la fonction d'erreur
     } exprlog;    
 
     struct {
-        char* nom;        // Nom d'une entité (chaîne de caractères)
+        char* name;        // name d'une entité (chaîne de caractères)
         char** variables; // Tableau de chaînes de caractères
-        int count;        // Nombre d'éléments dans le tableau
+        int count;        // namebre d'éléments dans le tableau
     } id;
     
     
@@ -110,35 +111,45 @@ declaration:
         }
     }
     | CONST type IDENTIFIER ASSIGN NUMBERINT SEMICOLON {
-        if (rechercher($3.nom) != NULL) {
+        if (rechercher($3.name) != NULL) {
             yyerror("Variable déjà déclarée.");
             return 0;
         } else {
-            inserer($3.nom, $2, $5, scope, 0, 0, 1);  // Insérer la constante entière
+            inserer($3.name, $2, $5, scope, 0, 0, 1);  // Insérer la constante entière
         }
+         char var2[20];
+        sprintf(var2,"%d",  $5);
+        generer("=",var2, "", $3.name);
     }
     | CONST type IDENTIFIER ASSIGN NUMBERFLOAT SEMICOLON {
-        if (rechercher($3.nom) != NULL) {
+        if (rechercher($3.name) != NULL) {
             yyerror("Variable déjà déclarée.");
             return 0;
         } else {
-            inserer($3.nom, $2, $5, scope, 0, 0, 1);  // Insérer la constante flottante
+            inserer($3.name, $2, $5, scope, 0, 0, 1);  // Insérer la constante flottante
         }
+         char var2[20];
+        sprintf(var2,"%f",  $5);
+        generer("=",var2, "", $3.name);
+        
     }
     | CONST type IDENTIFIER ASSIGN CARACTERE SEMICOLON {
-        if (rechercher($3.nom) != NULL) {
+        if (rechercher($3.name) != NULL) {
             yyerror("Variable déjà déclarée.");
             return 0;
         } else {
-            inserer($3.nom, $2, $5, scope, 0, 0, 1);  // Insérer la constante flottante
+            inserer($3.name, $2, $5, scope, 0, 0, 1);  // Insérer la constante flottante
         }
+             char var2[20];
+        sprintf(var2,"%c",  $5);
+        generer("=",var2, "", $3.name);
     }
     | type IDENTIFIER LBRACKET NUMBERINTPOS RBRACKET SEMICOLON {
-        if (rechercher($2.nom) != NULL) {
+        if (rechercher($2.name) != NULL) {
             yyerror("Variable déjà déclarée.");
             return 0;
         } else {
-            inserer($2.nom, $1, 0, scope, 0, $4, 1);
+            inserer($2.name, $1, 0, scope, 0, $4, 1);
         }
     }
     ;
@@ -146,20 +157,20 @@ declaration:
 listevariable:
     listevariable COMMA IDENTIFIER {
         $$ = $1;  // Copier la liste précédente
-        $$.count++;  // Incrémenter le nombre d'éléments
+        $$.count++;  // Incrémenter le namebre d'éléments
         $$.variables = realloc($$.variables, sizeof(char*) * $$.count);
-        $$.variables[$$.count - 1] = $3.nom;  // Ajouter la nouvelle variable
+        $$.variables[$$.count - 1] = $3.name;  // Ajouter la nouvelle variable
     }
     | IDENTIFIER {
         $$.count = 1;  // Une seule variable
         $$.variables = malloc(sizeof(char*));
-        $$.variables[0] = $1.nom;
+        $$.variables[0] = $1.name;
     }
     ;
 affectation:
     IDENTIFIER ASSIGN expression SEMICOLON {
         // Vérification si la variable est déclarée
-        TableEntry *varEntry = rechercher($1.nom);
+        TableEntry *varEntry = rechercher($1.name);
         if (varEntry == NULL) {
             yyerror("Variable non déclarée.");
             return 0;
@@ -194,23 +205,30 @@ affectation:
         // Modification de la valeur en fonction du type
         if (strcmp(varEntry->type, "INTEGER") == 0) {
             varEntry->val.ival = $3.value.ival;  // Affecter un entier
+            generer("=",$3.name, "", varEntry->name);
         } else if (strcmp(varEntry->type, "FLOAT") == 0) {
             varEntry->val.fval = $3.value.fval;  // Affecter un flottant
             if(strcmp($3.type,"INTEGER") == 0){
-                varEntry->val.fval = (float) $3.value.ival;
+            
+               
+                generer("=",$3.name, "", varEntry->name);
+                varEntry->val.fval = (float) $3.value.fval;
             }
         } else if (strcmp(varEntry->type, "CHAR") == 0) {
+       
+            generer("=",$3.name, "", varEntry->name);
             varEntry->val.cval = $3.value.cval;  // Affecter un caractère
         } else {
             yyerror("Type inconnu pour l'affectation.4");
             return 0;
-        }
+        } 
+    
     }
 ;
 
 expression:
     IDENTIFIER {  // Cas où l'expression est une variable
-        TableEntry *entry = rechercher($1.nom);
+        TableEntry *entry = rechercher($1.name);
         if (entry == NULL) {
             yyerror("Variable non déclarée.");
             return 0;
@@ -229,38 +247,35 @@ expression:
             yyerror("Type inconnu pour l'expression.");
             return 0;
         }
+        $$.name=$1.name;
+      
     }
     | NUMBERINT {  // Cas où l'expression est un entier
         $$.type = "INTEGER";
         $$.value.ival = $1;  // La valeur entière
 
         // Générer un quadruplet pour l'entier
-        char tempVar[20];
-        char tempVar2[20];
-        sprintf(tempVar2, "%d", $1);
-        sprintf(tempVar, "t%d", tempCount++);
-        generer("=", tempVar2, "", tempVar);
+        char val[20];
+        sprintf(val, "%d", $1);
+         $$.name=val;
     }
     | NUMBERFLOAT {  // Cas où l'expression est un flottant
         $$.type = "FLOAT";
         $$.value.fval = $1;  // La valeur flottante
 
         // Générer un quadruplet pour le flottant
-        char tempVar[20];
-        sprintf(tempVar, "t%d", tempCount++);
-        char tempVar2[20];
-        sprintf(tempVar2, "%f", $1);
-        generer("=",tempVar2, "", tempVar);
+       char val[20];
+        sprintf(val, "\n\n\n%f\n\n\n", $1);
+         $$.name=val;
+         printf("%s",val);
     }
     | CARACTERE {  // Cas où l'expression est un caractère
         $$.type = "CHAR";
         $$.value.cval = $1;  // La valeur caractère
         // Générer un quadruplet pour le caractère
-        char tempVar[20];
-        sprintf(tempVar, "t%d", tempCount++);
-              char tempVar2[20];
-        sprintf(tempVar2, "%c", $1);
-        generer("=",tempVar2, "", tempVar);
+       char val[20];
+        sprintf(val, "%c", $1);
+         $$.name=val;
 
     }
     | expression PLUS expression {  // Addition
@@ -275,11 +290,7 @@ expression:
             // Générer un quadruplet pour l'addition
             char tempVar[20];
             sprintf(tempVar, "t%d", tempCount++);
-             char tempVar1[20];
-             sprintf(tempVar1, "%c", $1.value.ival);
-                char tempVar2[20];
-             sprintf(tempVar2, "%c", $3.value.ival);
-            generer("+", tempVar1,tempVar2, tempVar);
+            generer("+", $1.name,$3.name, tempVar);
         } else if (strcmp($1.type, "FLOAT") == 0) {
             $$.type = "FLOAT";
             $$.value.fval = $1.value.fval + $3.value.fval;
@@ -287,11 +298,9 @@ expression:
             // Générer un quadruplet pour l'addition flottante
             char tempVar[20];
             sprintf(tempVar, "t%d", tempCount++);
-              char tempVar1[20];
-             sprintf(tempVar1, "%c", $1.value.ival);
-                char tempVar2[20];
-             sprintf(tempVar2, "%c", $3.value.ival);
-            generer("+", tempVar1, tempVar2, tempVar);
+         
+            generer("+",$1.name,$3.name, tempVar);
+            $$.name=tempVar;
         } else {
             yyerror("Addition non supportée pour ce type.");
             return 0;
@@ -309,12 +318,9 @@ expression:
             // Générer un quadruplet pour la soustraction
             char tempVar[20];
             sprintf(tempVar, "t%d", tempCount++);
-             sprintf(tempVar, "t%d", tempCount++);
-              char tempVar1[20];
-             sprintf(tempVar1, "%c", $1.value.ival);
-                char tempVar2[20];
-             sprintf(tempVar2, "%c", $3.value.ival);
-            generer("-", tempVar1, tempVar2, tempVar);
+             
+            generer("-",$1.name,$3.name, tempVar);
+            $$.name=tempVar;
         } else if (strcmp($1.type, "FLOAT") == 0) {
             $$.type = "FLOAT";
             $$.value.fval = $1.value.fval - $3.value.fval;
@@ -322,11 +328,9 @@ expression:
             // Générer un quadruplet pour la soustraction flottante
             char tempVar[20];
             sprintf(tempVar, "t%d", tempCount++);
-                 char tempVar1[20];
-             sprintf(tempVar1, "%c", $1.value.ival);
-                char tempVar2[20];
-             sprintf(tempVar2, "%c", $3.value.ival);
-            generer("-", tempVar1, tempVar2, tempVar);
+            generer("-",$1.name,$3.name, tempVar);
+                $$.name=tempVar;
+            
         } else {
             yyerror("Soustraction non supportée pour ce type.");
             return 0;
@@ -344,11 +348,8 @@ expression:
             // Générer un quadruplet pour la multiplication
             char tempVar[20];
             sprintf(tempVar, "t%d", tempCount++);
-                     char tempVar1[20];
-             sprintf(tempVar1, "%c", $1.value.ival);
-                char tempVar2[20];
-             sprintf(tempVar2, "%c", $3.value.ival);
-            generer("*", tempVar1, tempVar2, tempVar);
+            generer("*", $1.name,$3.name, tempVar);
+            $$.name=tempVar;
         } else if (strcmp($1.type, "FLOAT") == 0) {
             $$.type = "FLOAT";
             $$.value.fval = $1.value.fval * $3.value.fval;
@@ -356,11 +357,8 @@ expression:
             // Générer un quadruplet pour la multiplication flottante
             char tempVar[20];
             sprintf(tempVar, "t%d", tempCount++);
-                char tempVar1[20];
-             sprintf(tempVar1, "%c", $1.value.ival);
-                char tempVar2[20];
-             sprintf(tempVar2, "%c", $3.value.ival);
-            generer("*", tempVar1, tempVar2, tempVar);
+            generer("*", $1.name,$3.name, tempVar);
+            $$.name=tempVar;
         } else {
             yyerror("Multiplication non supportée pour ce type.");
             return 0;
@@ -382,11 +380,8 @@ expression:
             // Générer un quadruplet pour la division
             char tempVar[20];
             sprintf(tempVar, "t%d", tempCount++);
-                 char tempVar1[20];
-             sprintf(tempVar1, "%c", $1.value.ival);
-                char tempVar2[20];
-             sprintf(tempVar2, "%c", $3.value.ival);
-            generer("/", tempVar1, tempVar2, tempVar);
+            generer("/",$1.name,$3.name, tempVar);
+            $$.name=tempVar;
         } else if (strcmp($1.type, "FLOAT") == 0) {
             if ($3.value.fval == 0.0f) {
                 yyerror("Division par zéro.");
@@ -398,12 +393,9 @@ expression:
             // Générer un quadruplet pour la division flottante
             char tempVar[20];
                sprintf(tempVar, "t%d", tempCount++);
-               char tempVar1[20];
-             sprintf(tempVar1, "%c", $1.value.ival);
-                char tempVar2[20];
-             sprintf(tempVar2, "%c", $3.value.ival);
     
-            generer("/", tempVar1, tempVar2, tempVar);
+            generer("/", $1.name,$3.name, tempVar);
+                $$.name=tempVar;
         } else {
             yyerror("Division non supportée pour ce type.");
             return 0;
@@ -412,6 +404,7 @@ expression:
     | LPAREN expression RPAREN {  // Parenthèses pour prioriser les opérations
         $$.type = $2.type;
         $$.value = $2.value;
+        $$.name=$2.name;
     }
     ;
 type:
@@ -419,6 +412,44 @@ type:
     | FLOAT { $$ = "FLOAT"; }
     | CHAR { $$ = "CHAR"; }
     ;
+
+
+
+statements:
+    statement
+    | statements statement
+    ;
+
+expressionslogic:
+    expressionlogic
+    | expressionslogic expressionlogic
+;
+
+statement:
+    affectation
+    | IF LPAREN expressionslogic RPAREN LBRACE statements RBRACE ELSE LBRACE statements RBRACE {
+        // Vérifier que la condition dans IF est de type booléen
+        if (strcmp($3.type, "BOOLEAN") != 0) {
+            yyerror("La condition de l'instruction IF doit être de type BOOLEAN.");
+            return 0;
+        }
+    }
+    | FOR LPAREN init_for BOUCLESEPARATOR expression BOUCLESEPARATOR expression RPAREN LBRACE statements RBRACE {
+      if (strcmp($5.type, "INTEGER") != 0||strcmp($7.type, "INTEGER") != 0) {
+        yyerror("Le pas de la boucle doit être un entier.");
+        return 0;
+    }
+    }
+    | READ LPAREN IDENTIFIER RPAREN SEMICOLON {
+        if (rechercher($3.name) == NULL) {
+            yyerror("Variable non déclarée.");
+            return 0;
+        }
+    }
+    | WRITE LPAREN expressionwrite RPAREN SEMICOLON {
+        // Vérification que l'expression à écrire est valide
+    }
+;
 
 expressionlogic:
 
@@ -491,7 +522,7 @@ expression EQUAL expression{
 
 init_for:
     IDENTIFIER ASSIGN expression {
-        TableEntry *varEntry = rechercher($1.nom);
+        TableEntry *varEntry = rechercher($1.name);
         if (varEntry == NULL) {
             yyerror("Variable non déclarée.");
             return 0;
@@ -500,45 +531,10 @@ init_for:
     }
     ;
 
-statements:
-    statement
-    | statements statement
-    ;
-
-expressionslogic:
-    expressionlogic
-    | expressionslogic expressionlogic
-;
-
-statement:
-    affectation
-    | IF LPAREN expressionslogic RPAREN LBRACE statements RBRACE ELSE LBRACE statements RBRACE {
-        // Vérifier que la condition dans IF est de type booléen
-        if (strcmp($3.type, "BOOLEAN") != 0) {
-            yyerror("La condition de l'instruction IF doit être de type BOOLEAN.");
-            return 0;
-        }
-    }
-    | FOR LPAREN init_for BOUCLESEPARATOR expression BOUCLESEPARATOR expression RPAREN LBRACE statements RBRACE {
-      if (strcmp($5.type, "INTEGER") != 0||strcmp($7.type, "INTEGER") != 0) {
-        yyerror("Le pas de la boucle doit être un entier.");
-        return 0;
-    }
-    }
-    | READ LPAREN IDENTIFIER RPAREN SEMICOLON {
-        if (rechercher($3.nom) == NULL) {
-            yyerror("Variable non déclarée.");
-            return 0;
-        }
-    }
-    | WRITE LPAREN expressionwrite RPAREN SEMICOLON {
-        // Vérification que l'expression à écrire est valide
-    }
-;
 
 expressionwrite:
     IDENTIFIER {
-        TableEntry *varEntry = rechercher($1.nom);
+        TableEntry *varEntry = rechercher($1.name);
         if (varEntry == NULL) {
             yyerror("Variable non déclarée.");
             return 0;
@@ -547,7 +543,7 @@ expressionwrite:
     | TEXT
     | TEXT COMMA expressionwrite
     | IDENTIFIER COMMA expressionwrite {
-        TableEntry *varEntry = rechercher($1.nom);
+        TableEntry *varEntry = rechercher($1.name);
         if (varEntry == NULL) {
             yyerror("Variable non déclarée.");
             return 0;
@@ -570,4 +566,72 @@ NUMBERFLOAT:
 void yyerror(const char *s) {
     extern int yylineno;
     fprintf(stderr, "Erreur à la ligne %d: %s\n", yylineno, s);
-}
+}/*
+expressionlogic:
+
+expression EQUAL expression{
+        if (strcmp($1.type, $3.type) != 0) {
+            yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
+            return 0;
+        }
+        $$.type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
+    }
+    |
+    LPAREN expressionlogic RPAREN {
+        // Copier le contenu de la sous-expression dans l'expression actuelle
+        $$.type = $2.type;
+        $$.variables = $2.variables;
+        $$.count = $2.count;
+    }
+    | expression LT expression {
+        if (strcmp($1.type, $3.type) != 0) {
+            yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
+            return 0;
+        }
+        $$.type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
+    }
+    | expression LTE expression {
+        if (strcmp($1.type, $3.type) != 0) {
+            yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
+            return 0;
+        }
+        $$.type = "BOOLEAN";
+    }
+    | expression GT expression {
+        if (strcmp($1.type, $3.type) != 0) {
+            yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
+            return 0;
+        }
+        $$.type = "BOOLEAN";
+    }
+    | expression GTE expression {
+        if (strcmp($1.type, $3.type) != 0) {
+            yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
+            return 0;
+        }
+        $$.type = "BOOLEAN";
+    }
+    
+    | expressionlogic AND expressionlogic {
+        // Vérification que les deux opérandes sont booléens
+        if (strcmp($1.type, "BOOLEAN") != 0 || strcmp($3.type, "BOOLEAN") != 0) {
+            yyerror("Opérandes incompatibles pour l'opérateur logique AND.");
+            return 0;
+        }
+        $$.type = "BOOLEAN";
+    }
+    | expressionlogic OPERA expressionlogic {
+        if (strcmp($1.type, "BOOLEAN") != 0 || strcmp($3.type, "BOOLEAN") != 0) {
+            yyerror("Opérandes incompatibles pour l'opérateur logique OR.");
+            return 0;
+        }
+        $$.type = "BOOLEAN";
+    }
+    | NOT expressionlogic {
+        if (strcmp($2.type, "BOOLEAN") != 0) {
+            yyerror("L'opérande de NOT doit être de type BOOLEAN.");
+            return 0;
+        }
+        $$.type = "BOOLEAN";
+    }
+;*/
