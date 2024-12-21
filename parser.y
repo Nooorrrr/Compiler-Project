@@ -253,19 +253,22 @@ expression:
     | NUMBERINT {  // Cas où l'expression est un entier
         $$.type = "INTEGER";
         $$.value.ival = $1;  // La valeur entière
-
         // Générer un quadruplet pour l'entier
         char val[20];
         sprintf(val, "%d", $1);
          $$.name=val;
+          
+      
+         
     }
     | NUMBERFLOAT {  // Cas où l'expression est un flottant
         $$.type = "FLOAT";
         $$.value.fval = $1;  // La valeur flottante
 
+
         // Générer un quadruplet pour le flottant
        char val[20];
-        sprintf(val, "\n\n\n%f\n\n\n", $1);
+        sprintf(val, "f", $1);
          $$.name=val;
          printf("%s",val);
     }
@@ -291,6 +294,7 @@ expression:
             char tempVar[20];
             sprintf(tempVar, "t%d", tempCount++);
             generer("+", $1.name,$3.name, tempVar);
+                $$.name=tempVar;
         } else if (strcmp($1.type, "FLOAT") == 0) {
             $$.type = "FLOAT";
             $$.value.fval = $1.value.fval + $3.value.fval;
@@ -305,6 +309,7 @@ expression:
             yyerror("Addition non supportée pour ce type.");
             return 0;
         }
+      
     }
     | expression MINUS expression {  // Soustraction
         if (strcmp($1.type, $3.type) != 0) {
@@ -347,6 +352,7 @@ expression:
 
             // Générer un quadruplet pour la multiplication
             char tempVar[20];
+                
             sprintf(tempVar, "t%d", tempCount++);
             generer("*", $1.name,$3.name, tempVar);
             $$.name=tempVar;
@@ -357,6 +363,8 @@ expression:
             // Générer un quadruplet pour la multiplication flottante
             char tempVar[20];
             sprintf(tempVar, "t%d", tempCount++);
+               printf("\n\n\n\n%s\n\n\n\n", $1.name);
+                     printf("\n\n\n\n%s\n\n\n\n", $3.name);
             generer("*", $1.name,$3.name, tempVar);
             $$.name=tempVar;
         } else {
