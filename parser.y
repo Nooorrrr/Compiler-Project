@@ -140,7 +140,7 @@ declaration:
             inserer($3.nom, $2, $5, scope, 0, 0, 1);  // Insérer la constante flottante
         }
              char tempVar2[20];
-        sprintf(tempVar2,"%d",  $5);
+        sprintf(tempVar2,"%c",  $5);
         generer("=",tempVar2, "", $3.nom);
     }
     | type IDENTIFIER LBRACKET NUMBERINTPOS RBRACKET SEMICOLON {
