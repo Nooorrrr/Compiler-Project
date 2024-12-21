@@ -437,6 +437,7 @@ statement:
     affectation
     | IF LPAREN expressionslogic RPAREN LBRACE statements RBRACE ELSE LBRACE statements RBRACE {
         // Vérifier que la condition dans IF est de type booléen
+
         if (strcmp($3.type, "BOOLEAN") != 0) {
             yyerror("La condition de l'instruction IF doit être de type BOOLEAN.");
             return 0;
