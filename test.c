@@ -18,7 +18,7 @@ INSTRUCTION {
      
     A = Max - 1;
     
-    N=20/3;
+    N=Max/3;
     Y=4*A;
     
     IF ((A > Min) ) {
