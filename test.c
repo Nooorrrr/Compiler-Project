@@ -1,6 +1,6 @@
 VAR_GLOBAL {
     INTEGER A;
-    CONST FLOAT Pi = 3.14;
+    CONST FLOAT Pi = 3;
     CHAR C;
     INTEGER Q;  
     FLOAT Y;
@@ -10,13 +10,13 @@ VAR_GLOBAL {
 
 DECLARATION { %% local variables
    INTEGER N,I;
-   CONST INTEGER Min = 1;
+   CONST INTEGER Min = 3;
    CHAR Z;
 }
 
 INSTRUCTION {
      
-    A = Max - C;
+    A = Max - 1;
     
     N=20/3;
     Y=4*A;

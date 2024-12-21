@@ -4,7 +4,7 @@
 #include "lex.yy.h"  // Inclure le fichier généré par Flex
 #include "ts.h"      // Inclure le fichier d'en-tête de la table de symboles
 #include "quadruplet.h"  // Le fichier où tu définis ta structure Quadruplet
-
+extern int tempCount;
 extern int scope;  // Déclaration de la variable scope
 extern TableEntry Tab[1000];  // Table des identifiants et constantes
 int scope = 0;  // Initialisation de scope
@@ -44,11 +44,21 @@ void yyerror(const char *s);  // Déclaration de la fonction d'erreur
         char** variables; 
         int count; 
     } exprlog;    
+
+    struct {
+        char* nom;        // Nom d'une entité (chaîne de caractères)
+        char** variables; // Tableau de chaînes de caractères
+        int count;        // Nombre d'éléments dans le tableau
+    } id;
+    
+    
+    
+
 }
 
 %token <entier> NUMBERINTPOS NUMBERINTNEG 
 %token <flottant> NUMBERFLOATPOS NUMBERFLOATNEG
-%token <chaine> IDENTIFIER 
+%token <id> IDENTIFIER 
 %type <chaine> type
 %type <varList>  listevariable
 %type <exprari> expression 
@@ -100,35 +110,35 @@ declaration:
         }
     }
     | CONST type IDENTIFIER ASSIGN NUMBERINT SEMICOLON {
-        if (rechercher($3) != NULL) {
+        if (rechercher($3.nom) != NULL) {
             yyerror("Variable déjà déclarée.");
             return 0;
         } else {
-            inserer($3, $2, $5, scope, 0, 0, 1);  // Insérer la constante entière
+            inserer($3.nom, $2, $5, scope, 0, 0, 1);  // Insérer la constante entière
         }
     }
     | CONST type IDENTIFIER ASSIGN NUMBERFLOAT SEMICOLON {
-        if (rechercher($3) != NULL) {
+        if (rechercher($3.nom) != NULL) {
             yyerror("Variable déjà déclarée.");
             return 0;
         } else {
-            inserer($3, $2, $5, scope, 0, 0, 1);  // Insérer la constante flottante
+            inserer($3.nom, $2, $5, scope, 0, 0, 1);  // Insérer la constante flottante
         }
     }
     | CONST type IDENTIFIER ASSIGN CARACTERE SEMICOLON {
-        if (rechercher($3) != NULL) {
+        if (rechercher($3.nom) != NULL) {
             yyerror("Variable déjà déclarée.");
             return 0;
         } else {
-            inserer($3, $2, $5, scope, 0, 0, 1);  // Insérer la constante flottante
+            inserer($3.nom, $2, $5, scope, 0, 0, 1);  // Insérer la constante flottante
         }
     }
     | type IDENTIFIER LBRACKET NUMBERINTPOS RBRACKET SEMICOLON {
-        if (rechercher($2) != NULL) {
+        if (rechercher($2.nom) != NULL) {
             yyerror("Variable déjà déclarée.");
             return 0;
         } else {
-            inserer($2, $1, 0, scope, 0, $4, 1);
+            inserer($2.nom, $1, 0, scope, 0, $4, 1);
         }
     }
     ;
@@ -138,19 +148,18 @@ listevariable:
         $$ = $1;  // Copier la liste précédente
         $$.count++;  // Incrémenter le nombre d'éléments
         $$.variables = realloc($$.variables, sizeof(char*) * $$.count);
-        $$.variables[$$.count - 1] = $3;  // Ajouter la nouvelle variable
+        $$.variables[$$.count - 1] = $3.nom;  // Ajouter la nouvelle variable
     }
     | IDENTIFIER {
         $$.count = 1;  // Une seule variable
         $$.variables = malloc(sizeof(char*));
-        $$.variables[0] = $1;
+        $$.variables[0] = $1.nom;
     }
     ;
-
 affectation:
     IDENTIFIER ASSIGN expression SEMICOLON {
         // Vérification si la variable est déclarée
-        TableEntry *varEntry = rechercher($1);
+        TableEntry *varEntry = rechercher($1.nom);
         if (varEntry == NULL) {
             yyerror("Variable non déclarée.");
             return 0;
@@ -181,7 +190,6 @@ affectation:
             return 0;
         }
         }
-        
 
         // Modification de la valeur en fonction du type
         if (strcmp(varEntry->type, "INTEGER") == 0) {
@@ -201,167 +209,211 @@ affectation:
 ;
 
 expression:
-    IDENTIFIER {
-        TableEntry *entry = rechercher($1);
+    IDENTIFIER {  // Cas où l'expression est une variable
+        TableEntry *entry = rechercher($1.nom);
         if (entry == NULL) {
             yyerror("Variable non déclarée.");
             return 0;
         }
-        
+
         $$.type = entry->type;
 
-        // Affectation de valeur selon le type de la variable
-        if (strcmp($$.type, "INTEGER") == 0) {
+        // Affectation de la valeur en fonction du type de la variable
+        if (strcmp(entry->type, "INTEGER") == 0) {
             $$.value.ival = entry->val.ival;
-        } else if (strcmp($$.type, "FLOAT") == 0) {
+        } else if (strcmp(entry->type, "FLOAT") == 0) {
             $$.value.fval = entry->val.fval;
-        } else if (strcmp($$.type, "CHAR") == 0) {
+        } else if (strcmp(entry->type, "CHAR") == 0) {
             $$.value.cval = entry->val.cval;
+        } else {
+            yyerror("Type inconnu pour l'expression.");
+            return 0;
         }
     }
-    | NUMBERINT {
+    | NUMBERINT {  // Cas où l'expression est un entier
         $$.type = "INTEGER";
-        $$.value.ival = $1;
+        $$.value.ival = $1;  // La valeur entière
 
+        // Générer un quadruplet pour l'entier
+        char tempVar[20];
+        char tempVar2[20];
+        sprintf(tempVar2, "%d", $1);
+        sprintf(tempVar, "t%d", tempCount++);
+        generer("=", tempVar2, "", tempVar);
     }
-    | NUMBERFLOAT {
+    | NUMBERFLOAT {  // Cas où l'expression est un flottant
         $$.type = "FLOAT";
-        $$.value.fval = $1;
-       
+        $$.value.fval = $1;  // La valeur flottante
+
+        // Générer un quadruplet pour le flottant
+        char tempVar[20];
+        sprintf(tempVar, "t%d", tempCount++);
+        char tempVar2[20];
+        sprintf(tempVar2, "%f", $1);
+        generer("=",tempVar2, "", tempVar);
     }
-    | CARACTERE {
+    | CARACTERE {  // Cas où l'expression est un caractère
         $$.type = "CHAR";
-        $$.value.cval = $1;  // Valeur du caractère
-    }
-    | expression PLUS expression{
-    // Vérifier la compatibilité des types avant de faire l'opération
-    if (strcmp($1.type,"INTEGER")==0 && strcmp($3.type,"INTEGER")==0) {
-        // Si les deux sont des entiers
-        $$.type = "INTEGER";
-        $$.value.ival = $1.value.ival + $3.value.ival;
-      
-    }
-    else if (strcmp($1.type,"FLOAT")==0|| strcmp($3.type,"FLOAT")==0) {
-        // Si l'un des opérandes est un FLOAT
-        if (strcmp($1.type,"INTEGER")==0) {
-            $1.type = "FLOAT";
-            $1.value.fval = (float) $1.value.ival;
-        }
-        if (strcmp($1.type,"INTEGER")==0) {
-            $3.type = "FLOAT";
-            $3.value.fval = (float) $3.value.ival;
-        }
-        $$.type = "FLOAT";
-        $$.value.fval = $1.value.fval + $3.value.fval;
-    } 
-    else {
-        // Si les types sont incompatibles
-        yyerror("Opérandes de types incompatibles pour l'addition.");
-        return 0;
-    }
-    }
-    | expression MINUS expression{
-    // Vérifier la compatibilité des types avant de faire l'opération
-    if (strcmp($1.type,"INTEGER")==0 && strcmp($3.type,"INTEGER")==0) {
-        // Si les deux sont des entiers
-        $$.type = "INTEGER";
-        $$.value.ival = $1.value.ival - $3.value.ival;
-     
-    }
-    else if (strcmp($1.type,"FLOAT")==0|| strcmp($3.type,"FLOAT")==0) {
-        // Si l'un des opérandes est un FLOAT
-        if (strcmp($1.type,"INTEGER")==0) {
-            $1.type = "FLOAT";
-            $1.value.fval = (float) $1.value.ival;
-        }
-        if (strcmp($1.type,"INTEGER")==0) {
-            $3.type = "FLOAT";
-            $3.value.fval = (float) $3.value.ival;
-        }
-        $$.type = "FLOAT";
-        $$.value.fval = $1.value.fval - $3.value.fval;
-    } 
-    else {
-        // Si les types sont incompatibles
-        yyerror("Opérandes de types incompatibles pour la soustraction.");
-        return 0;
-    }
-    }
-    | expression MULT expression {
-    // Vérifier la compatibilité des types avant de faire l'opération
-    if (strcmp($1.type,"INTEGER")==0 && strcmp($3.type,"INTEGER")==0) {
-        // Si les deux sont des entiers
-        $$.type = "INTEGER";
-        $$.value.ival = $1.value.ival * $3.value.ival;
-       
-    }
-    else if (strcmp($1.type,"FLOAT")==0|| strcmp($3.type,"FLOAT")==0) {
-        // Si l'un des opérandes est un FLOAT
-        if (strcmp($1.type,"INTEGER")==0) {
-            $1.type = "FLOAT";
-            $1.value.fval = (float) $1.value.ival;
-        }
-        if (strcmp($1.type,"INTEGER")==0) {
-            $3.type = "FLOAT";
-            $3.value.fval = (float) $3.value.ival;
-        }
-        $$.type = "FLOAT";
-        $$.value.fval = $1.value.fval * $3.value.fval;
-    } 
-    else {
-        // Si les types sont incompatibles
-        yyerror("Opérandes de types incompatibles pour la multiplication.");
-        return 0;
-    }
-    }
+        $$.value.cval = $1;  // La valeur caractère
+        // Générer un quadruplet pour le caractère
+        char tempVar[20];
+        sprintf(tempVar, "t%d", tempCount++);
+              char tempVar2[20];
+        sprintf(tempVar2, "%c", $1);
+        generer("=",tempVar2, "", tempVar);
 
-    | expression DIV expression{
-    // Vérifier la compatibilité des types avant de faire l'opération
-    if (strcmp($1.type,"INTEGER")==0 && strcmp($3.type,"INTEGER")==0) {
-        // Si les deux sont des entiers
-        $$.type = "INTEGER";
-         if($3.value.fval==0){
-              yyerror("division sur 0 impossible.");
-        }else{  
+    }
+    | expression PLUS expression {  // Addition
+        if (strcmp($1.type, $3.type) != 0) {
+            yyerror("Opérandes incompatibles pour l'addition.");
+            return 0;
+        }
+        if (strcmp($1.type, "INTEGER") == 0) {
+            $$.type = "INTEGER";
+            $$.value.ival = $1.value.ival + $3.value.ival;
+
+            // Générer un quadruplet pour l'addition
+            char tempVar[20];
+            sprintf(tempVar, "t%d", tempCount++);
+             char tempVar1[20];
+             sprintf(tempVar1, "%c", $1.value.ival);
+                char tempVar2[20];
+             sprintf(tempVar2, "%c", $3.value.ival);
+            generer("+", tempVar1,tempVar2, tempVar);
+        } else if (strcmp($1.type, "FLOAT") == 0) {
+            $$.type = "FLOAT";
+            $$.value.fval = $1.value.fval + $3.value.fval;
+
+            // Générer un quadruplet pour l'addition flottante
+            char tempVar[20];
+            sprintf(tempVar, "t%d", tempCount++);
+              char tempVar1[20];
+             sprintf(tempVar1, "%c", $1.value.ival);
+                char tempVar2[20];
+             sprintf(tempVar2, "%c", $3.value.ival);
+            generer("+", tempVar1, tempVar2, tempVar);
+        } else {
+            yyerror("Addition non supportée pour ce type.");
+            return 0;
+        }
+    }
+    | expression MINUS expression {  // Soustraction
+        if (strcmp($1.type, $3.type) != 0) {
+            yyerror("Opérandes incompatibles pour la soustraction.");
+            return 0;
+        }
+        if (strcmp($1.type, "INTEGER") == 0) {
+            $$.type = "INTEGER";
+            $$.value.ival = $1.value.ival - $3.value.ival;
+
+            // Générer un quadruplet pour la soustraction
+            char tempVar[20];
+            sprintf(tempVar, "t%d", tempCount++);
+             sprintf(tempVar, "t%d", tempCount++);
+              char tempVar1[20];
+             sprintf(tempVar1, "%c", $1.value.ival);
+                char tempVar2[20];
+             sprintf(tempVar2, "%c", $3.value.ival);
+            generer("-", tempVar1, tempVar2, tempVar);
+        } else if (strcmp($1.type, "FLOAT") == 0) {
+            $$.type = "FLOAT";
+            $$.value.fval = $1.value.fval - $3.value.fval;
+
+            // Générer un quadruplet pour la soustraction flottante
+            char tempVar[20];
+            sprintf(tempVar, "t%d", tempCount++);
+                 char tempVar1[20];
+             sprintf(tempVar1, "%c", $1.value.ival);
+                char tempVar2[20];
+             sprintf(tempVar2, "%c", $3.value.ival);
+            generer("-", tempVar1, tempVar2, tempVar);
+        } else {
+            yyerror("Soustraction non supportée pour ce type.");
+            return 0;
+        }
+    }
+    | expression MULT expression {  // Multiplication
+        if (strcmp($1.type, $3.type) != 0) {
+            yyerror("Opérandes incompatibles pour la multiplication.");
+            return 0;
+        }
+        if (strcmp($1.type, "INTEGER") == 0) {
+            $$.type = "INTEGER";
+            $$.value.ival = $1.value.ival * $3.value.ival;
+
+            // Générer un quadruplet pour la multiplication
+            char tempVar[20];
+            sprintf(tempVar, "t%d", tempCount++);
+                     char tempVar1[20];
+             sprintf(tempVar1, "%c", $1.value.ival);
+                char tempVar2[20];
+             sprintf(tempVar2, "%c", $3.value.ival);
+            generer("*", tempVar1, tempVar2, tempVar);
+        } else if (strcmp($1.type, "FLOAT") == 0) {
+            $$.type = "FLOAT";
+            $$.value.fval = $1.value.fval * $3.value.fval;
+
+            // Générer un quadruplet pour la multiplication flottante
+            char tempVar[20];
+            sprintf(tempVar, "t%d", tempCount++);
+                char tempVar1[20];
+             sprintf(tempVar1, "%c", $1.value.ival);
+                char tempVar2[20];
+             sprintf(tempVar2, "%c", $3.value.ival);
+            generer("*", tempVar1, tempVar2, tempVar);
+        } else {
+            yyerror("Multiplication non supportée pour ce type.");
+            return 0;
+        }
+    }
+    | expression DIV expression {  // Division
+        if (strcmp($1.type, $3.type) != 0) {
+            yyerror("Opérandes incompatibles pour la division.");
+            return 0;
+        }
+        if (strcmp($1.type, "INTEGER") == 0) {
+            if ($3.value.ival == 0) {
+                yyerror("Division par zéro.");
+                return 0;
+            }
+            $$.type = "INTEGER";
             $$.value.ival = $1.value.ival / $3.value.ival;
-        }
-      
-    }
-    else if (strcmp($1.type,"FLOAT")==0|| strcmp($3.type,"FLOAT")==0) {
-        // Si l'un des opérandes est un FLOAT
-        if (strcmp($1.type,"INTEGER")==0) {
-            $1.type = "FLOAT";
-            $1.value.fval = (float) $1.value.ival;
-        }
-        if (strcmp($1.type,"INTEGER")==0) {
-            $3.type = "FLOAT";
-            $3.value.fval = (float) $3.value.ival;
-        }
-        $$.type = "FLOAT";
-      if($3.value.fval==0){
-              yyerror("division sur 0 impossible.");
-       }else{
-         $$.value.ival = $1.value.ival / $3.value.ival;
-       }
-    } 
-    else {
-        // Si les types sont incompatibles
-        yyerror("Opérandes de types incompatibles pour la multiplication.");
-        return 0;
-    }
-    }
-       
+
+            // Générer un quadruplet pour la division
+            char tempVar[20];
+            sprintf(tempVar, "t%d", tempCount++);
+                 char tempVar1[20];
+             sprintf(tempVar1, "%c", $1.value.ival);
+                char tempVar2[20];
+             sprintf(tempVar2, "%c", $3.value.ival);
+            generer("/", tempVar1, tempVar2, tempVar);
+        } else if (strcmp($1.type, "FLOAT") == 0) {
+            if ($3.value.fval == 0.0f) {
+                yyerror("Division par zéro.");
+                return 0;
+            }
+            $$.type = "FLOAT";
+            $$.value.fval = $1.value.fval / $3.value.fval;
+
+            // Générer un quadruplet pour la division flottante
+            char tempVar[20];
+               sprintf(tempVar, "t%d", tempCount++);
+               char tempVar1[20];
+             sprintf(tempVar1, "%c", $1.value.ival);
+                char tempVar2[20];
+             sprintf(tempVar2, "%c", $3.value.ival);
     
-    |LPAREN expression RPAREN
-    {
-        // Copier le contenu de la sous-expression dans l'expression actuelle
+            generer("/", tempVar1, tempVar2, tempVar);
+        } else {
+            yyerror("Division non supportée pour ce type.");
+            return 0;
+        }
+    }
+    | LPAREN expression RPAREN {  // Parenthèses pour prioriser les opérations
         $$.type = $2.type;
-        $$.variables = $2.variables;
-        $$.count = $2.count;
         $$.value = $2.value;
     }
-;
-
+    ;
 type:
     INTEGER { $$ = "INTEGER"; }
     | FLOAT { $$ = "FLOAT"; }
@@ -439,7 +491,7 @@ expression EQUAL expression{
 
 init_for:
     IDENTIFIER ASSIGN expression {
-        TableEntry *varEntry = rechercher($1);
+        TableEntry *varEntry = rechercher($1.nom);
         if (varEntry == NULL) {
             yyerror("Variable non déclarée.");
             return 0;
@@ -474,7 +526,7 @@ statement:
     }
     }
     | READ LPAREN IDENTIFIER RPAREN SEMICOLON {
-        if (rechercher($3) == NULL) {
+        if (rechercher($3.nom) == NULL) {
             yyerror("Variable non déclarée.");
             return 0;
         }
@@ -486,7 +538,7 @@ statement:
 
 expressionwrite:
     IDENTIFIER {
-        TableEntry *varEntry = rechercher($1);
+        TableEntry *varEntry = rechercher($1.nom);
         if (varEntry == NULL) {
             yyerror("Variable non déclarée.");
             return 0;
@@ -495,7 +547,7 @@ expressionwrite:
     | TEXT
     | TEXT COMMA expressionwrite
     | IDENTIFIER COMMA expressionwrite {
-        TableEntry *varEntry = rechercher($1);
+        TableEntry *varEntry = rechercher($1.nom);
         if (varEntry == NULL) {
             yyerror("Variable non déclarée.");
             return 0;

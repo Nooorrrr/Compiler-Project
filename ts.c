@@ -3,6 +3,7 @@
 // Déclaration de la table des symboles
 TableEntry Tab[1000];  // Table des IDF et CONST
 
+
 // Initialisation de la table des symboles
 void initialiserTable(TableEntry *table, int taille) {
     for (int i = 0; i < taille; i++) {

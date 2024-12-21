@@ -14,7 +14,9 @@ typedef struct {
 } Quadruplet;
 
 // Déclaration des variables globales
-extern Quadruplet liste[2000]; // Liste des quadruplets
+extern Quadruplet *quadruplets[1000];  // Tableau pour stocker jusqu'à 1000 quadruplets
+extern int quadruplet_count;    
+extern Quadruplet liste[1500]; // Liste des quadruplets
 extern int qc;                 // Compteur des quadruplets
 
 // Fonctions pour gérer les quadruplets
@@ -24,10 +26,10 @@ void quadC(int i, char* b, char* c, char* d);       // Gérer les expressions de
 char* convert(int i);                              // Convertir un entier en chaîne de caractères
 
 // Fonctions pour afficher les quadruplets
-void  afficher_quadruplets();                               // Afficher tous les quadruplets
+void afficher_quadruplets();                       // Afficher tous les quadruplets
 
 // Fonctions de gestion de la mémoire
-void delete_quad();                                // Supprimer les quadruplets inutilisés
+void delete_quad(Quadruplet* quad);                               // Supprimer les quadruplets inutilisés
 void free_quadruplet(Quadruplet *quad);            // Libérer la mémoire d'un quadruplet
 void free_all_quadruplets();                       // Libérer la mémoire de tous les quadruplets
 
