@@ -44,6 +44,7 @@ void yyerror(const char *s);  // Déclaration de la fonction d'erreur
         char* type;    // Le type de l'expression (par exemple: "int", "float")
         char** variables; 
         int count; 
+        int value;
     } exprlog;    
 
     struct {
@@ -302,7 +303,6 @@ expression:
             // Générer un quadruplet pour l'addition flottante
             char tempVar[20];
             sprintf(tempVar, "t%d", tempCount++);
-         
             generer("+",$1.name,$3.name, tempVar);
             $$.name=tempVar;
         } else {
@@ -467,6 +467,28 @@ expression EQUAL expression{
             return 0;
         }
         $$.type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
+        if(strcmp($1.type,"INTEGER")==0){
+             if($1.value.ival==$3.value.ival){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
+        }
+          if(strcmp($1.type,"FLOAT")==0){
+             if($1.value.fval==$3.value.fval){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
+        }
+          if(strcmp($1.type,"CHAR")==0){
+             if($1.value.cval==$3.value.cval){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
+        }
+    
     }
     |
     LPAREN expressionlogic RPAREN {
@@ -474,6 +496,7 @@ expression EQUAL expression{
         $$.type = $2.type;
         $$.variables = $2.variables;
         $$.count = $2.count;
+        $$.value=$2.value;
     }
     | expression LT expression {
         if (strcmp($1.type, $3.type) != 0) {
@@ -481,36 +504,126 @@ expression EQUAL expression{
             return 0;
         }
         $$.type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
-    }
+        if(strcmp($1.type,"INTEGER")==0){
+             if($1.value.ival<$3.value.ival){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
+        }
+          if(strcmp($1.type,"FLOAT")==0){
+             if($1.value.fval<$3.value.fval){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
+        }
+          if(strcmp($1.type,"CHAR")==0){
+             if($1.value.cval<$3.value.cval){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
+        }}
+    
     | expression LTE expression {
         if (strcmp($1.type, $3.type) != 0) {
             yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
             return 0;
         }
-        $$.type = "BOOLEAN";
+        $$.type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
+        if(strcmp($1.type,"INTEGER")==0){
+             if($1.value.ival<=$3.value.ival){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
+        }
+          if(strcmp($1.type,"FLOAT")==0){
+             if($1.value.fval<=$3.value.fval){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
+        }
+          if(strcmp($1.type,"CHAR")==0){
+             if($1.value.cval<=$3.value.cval){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
+        }
     }
-    | expression GT expression {
-        if (strcmp($1.type, $3.type) != 0) {
+    
+    | expression GT expression
+    {  if (strcmp($1.type, $3.type) != 0) {
             yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
             return 0;
         }
-        $$.type = "BOOLEAN";
+        $$.type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
+        if(strcmp($1.type,"INTEGER")==0){
+             if($1.value.ival>$3.value.ival){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
+        }
+          if(strcmp($1.type,"FLOAT")==0){
+             if($1.value.fval>$3.value.fval){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
+        }
+          if(strcmp($1.type,"CHAR")==0){
+             if($1.value.cval>$3.value.cval){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
+          }
     }
     | expression GTE expression {
         if (strcmp($1.type, $3.type) != 0) {
             yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
             return 0;
         }
-        $$.type = "BOOLEAN";
+        $$.type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
+        if(strcmp($1.type,"INTEGER")==0){
+             if($1.value.ival>=$3.value.ival){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
+        }
+          if(strcmp($1.type,"FLOAT")==0){
+             if($1.value.fval>=$3.value.fval){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
+        }
+          if(strcmp($1.type,"CHAR")==0){
+             if($1.value.cval>=$3.value.cval){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
+        }
     }
     
-    | expressionlogic AND expressionlogic {
+    |expressionlogic AND expressionlogic {
         // Vérification que les deux opérandes sont booléens
         if (strcmp($1.type, "BOOLEAN") != 0 || strcmp($3.type, "BOOLEAN") != 0) {
             yyerror("Opérandes incompatibles pour l'opérateur logique AND.");
             return 0;
         }
         $$.type = "BOOLEAN";
+            if($1.value&&$3.value){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
     }
     | expressionlogic OR expressionlogic {
         if (strcmp($1.type, "BOOLEAN") != 0 || strcmp($3.type, "BOOLEAN") != 0) {
@@ -518,6 +631,11 @@ expression EQUAL expression{
             return 0;
         }
         $$.type = "BOOLEAN";
+          if($1.value||$3.value){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
     }
     | NOT expressionlogic {
         if (strcmp($2.type, "BOOLEAN") != 0) {
@@ -525,6 +643,11 @@ expression EQUAL expression{
             return 0;
         }
         $$.type = "BOOLEAN";
+          if(!$2.value){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
     }
 ;
 

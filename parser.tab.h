@@ -138,6 +138,7 @@ union YYSTYPE
         char* type;    // Le type de l'expression (par exemple: "int", "float")
         char** variables; 
         int count; 
+        int value;
     } exprlog;    
 
     struct {
@@ -150,7 +151,7 @@ union YYSTYPE
     
 
 
-#line 154 "parser.tab.h"
+#line 155 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
