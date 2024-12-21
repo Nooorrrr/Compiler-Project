@@ -116,6 +116,9 @@ declaration:
         } else {
             inserer($3.nom, $2, $5, scope, 0, 0, 1);  // Insérer la constante entière
         }
+         char tempVar2[20];
+        sprintf(tempVar2,"%d",  $5);
+        generer("=",tempVar2, "", $3.nom);
     }
     | CONST type IDENTIFIER ASSIGN NUMBERFLOAT SEMICOLON {
         if (rechercher($3.nom) != NULL) {
@@ -124,6 +127,10 @@ declaration:
         } else {
             inserer($3.nom, $2, $5, scope, 0, 0, 1);  // Insérer la constante flottante
         }
+         char tempVar2[20];
+        sprintf(tempVar2,"%f",  $5);
+        generer("=",tempVar2, "", $3.nom);
+        
     }
     | CONST type IDENTIFIER ASSIGN CARACTERE SEMICOLON {
         if (rechercher($3.nom) != NULL) {
@@ -132,6 +139,9 @@ declaration:
         } else {
             inserer($3.nom, $2, $5, scope, 0, 0, 1);  // Insérer la constante flottante
         }
+             char tempVar2[20];
+        sprintf(tempVar2,"%d",  $5);
+        generer("=",tempVar2, "", $3.nom);
     }
     | type IDENTIFIER LBRACKET NUMBERINTPOS RBRACKET SEMICOLON {
         if (rechercher($2.nom) != NULL) {
@@ -196,24 +206,25 @@ affectation:
             varEntry->val.ival = $3.value.ival;  // Affecter un entier
             char tempVar2[20];
          sprintf(tempVar2,"%d",  $3.value.ival);
-            generer("=",tempVar2, "", varEntry->nom);
+            generer("=",tempVar2, "", varEntry->name);
         } else if (strcmp(varEntry->type, "FLOAT") == 0) {
             varEntry->val.fval = $3.value.fval;  // Affecter un flottant
             if(strcmp($3.type,"INTEGER") == 0){
                  char tempVar2[20];
-                sprintf(tempVar2,"%d",  $3.value.fval);
-                generer("=",tempVar2, "", varEntry->nom);
+                sprintf(tempVar2,"%f",  $3.value.fval);
+                generer("=",tempVar2, "", varEntry->name);
                 varEntry->val.fval = (float) $3.value.fval;
             }
         } else if (strcmp(varEntry->type, "CHAR") == 0) {
-            generer("=",$3.value.cval, "", varEntry->nom);
+             char tempVar2[20];
+                sprintf(tempVar2,"%c",  $3.value.cval);
+            generer("=",tempVar2, "", varEntry->name);
             varEntry->val.cval = $3.value.cval;  // Affecter un caractère
         } else {
             yyerror("Type inconnu pour l'affectation.4");
             return 0;
-        }
-         
-            generer("=", tempVar2, "", tempVar);
+        } 
+    
     }
 ;
 
@@ -238,6 +249,7 @@ expression:
             yyerror("Type inconnu pour l'expression.");
             return 0;
         }
+      
     }
     | NUMBERINT {  // Cas où l'expression est un entier
         $$.type = "INTEGER";
@@ -431,41 +443,6 @@ type:
 
 
 
-expressionlogic:
-    LPAREN expressionlogic RPAREN {
-        // Copier le contenu de la sous-expression dans l'expression actuelle
-        $$.type = $2.type;
-        $$.variables = $2.variables;
-        $$.count = $2.count;
-    }
-    | expressionlogic OPERA expressionlogic {
-        if (strcmp($1.type, "BOOLEAN") != 0 || strcmp($3.type, "BOOLEAN") != 0) {
-            yyerror("Opérandes incompatibles pour l'opérateur logique OR.");
-            return 0;
-        }
-        $$.type = "BOOLEAN";
-    }
-    | NOT expressionlogic {
-        if (strcmp($2.type, "BOOLEAN") != 0) {
-            yyerror("L'opérande de NOT doit être de type BOOLEAN.");
-            return 0;
-        }
-        $$.type = "BOOLEAN";
-    }
-OPERA:
-AND|OR|GTE|GT|LTE|LT|EQUAL;
-
-init_for:
-    IDENTIFIER ASSIGN expression {
-        TableEntry *varEntry = rechercher($1.nom);
-        if (varEntry == NULL) {
-            yyerror("Variable non déclarée.");
-            return 0;
-        }
-        $$ = $3;  // Pass the expression value up
-    }
-    ;
-
 statements:
     statement
     | statements statement
@@ -501,6 +478,87 @@ statement:
         // Vérification que l'expression à écrire est valide
     }
 ;
+
+expressionlogic:
+
+expression EQUAL expression{
+        if (strcmp($1.type, $3.type) != 0) {
+            yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
+            return 0;
+        }
+        $$.type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
+    }
+    |
+    LPAREN expressionlogic RPAREN {
+        // Copier le contenu de la sous-expression dans l'expression actuelle
+        $$.type = $2.type;
+        $$.variables = $2.variables;
+        $$.count = $2.count;
+    }
+    | expression LT expression {
+        if (strcmp($1.type, $3.type) != 0) {
+            yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
+            return 0;
+        }
+        $$.type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
+    }
+    | expression LTE expression {
+        if (strcmp($1.type, $3.type) != 0) {
+            yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
+            return 0;
+        }
+        $$.type = "BOOLEAN";
+    }
+    | expression GT expression {
+        if (strcmp($1.type, $3.type) != 0) {
+            yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
+            return 0;
+        }
+        $$.type = "BOOLEAN";
+    }
+    | expression GTE expression {
+        if (strcmp($1.type, $3.type) != 0) {
+            yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
+            return 0;
+        }
+        $$.type = "BOOLEAN";
+    }
+    
+    | expressionlogic AND expressionlogic {
+        // Vérification que les deux opérandes sont booléens
+        if (strcmp($1.type, "BOOLEAN") != 0 || strcmp($3.type, "BOOLEAN") != 0) {
+            yyerror("Opérandes incompatibles pour l'opérateur logique AND.");
+            return 0;
+        }
+        $$.type = "BOOLEAN";
+    }
+    | expressionlogic OR expressionlogic {
+        if (strcmp($1.type, "BOOLEAN") != 0 || strcmp($3.type, "BOOLEAN") != 0) {
+            yyerror("Opérandes incompatibles pour l'opérateur logique OR.");
+            return 0;
+        }
+        $$.type = "BOOLEAN";
+    }
+    | NOT expressionlogic {
+        if (strcmp($2.type, "BOOLEAN") != 0) {
+            yyerror("L'opérande de NOT doit être de type BOOLEAN.");
+            return 0;
+        }
+        $$.type = "BOOLEAN";
+    }
+;
+
+init_for:
+    IDENTIFIER ASSIGN expression {
+        TableEntry *varEntry = rechercher($1.nom);
+        if (varEntry == NULL) {
+            yyerror("Variable non déclarée.");
+            return 0;
+        }
+        $$ = $3;  // Pass the expression value up
+    }
+    ;
+
 
 expressionwrite:
     IDENTIFIER {

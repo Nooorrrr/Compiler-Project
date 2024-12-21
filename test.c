@@ -1,6 +1,6 @@
 VAR_GLOBAL {
     INTEGER A;
-    CONST FLOAT Pi = 3; %%(=,3, ,pi)
+    CONST FLOAT Pi = 3.14; %%(=,3, ,pi)
     CHAR C;
     INTEGER Q;  
     FLOAT Y;
