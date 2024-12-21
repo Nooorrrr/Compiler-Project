@@ -1,40 +1,29 @@
 VAR_GLOBAL {
-    INTEGER A;
-    CONST FLOAT Pi = 3.14; %%(=,3, ,pi)
-    CHAR C;
+    INTEGER A,B,C;
     INTEGER Q;  
-    FLOAT Y;
-    CONST INTEGER Max= 100;
-    CONST CHAR D = 'X';
+    FLOAT X,L;
+    CONST INTEGER Z = 3;
+    
 }
 
-DECLARATION { %% local variables
-   INTEGER N,I;
-   CONST INTEGER Min = 3;
-   CHAR Z;
+DECLARATION { %%affectations
+   CONST INTEGER N= 6;
+   INTEGER I;
 }
 
 INSTRUCTION {
+     C = 1;
      
-    A = Max - 1;
-    
-    N=Max/3;
-    Y=4*A;
-    
-    IF ((A > Min) ) {
-        Q = A + Max;
-        Y = Y / 2;
+    IF ((A > B) && (A > B)){
+        C = A + 1;
+         C = A- 1;
     } ELSE {
-        Q = Min * 2;
-        Y = Pi+ 5;
+        C = A + 2 ;
+         C = A- 1;
     }
+ FOR ( I = 0 : 1 : 10) {
+    X = X + 1;
+}
 
-    FOR (I = 0 : 2 : 20) {
-        Y = Y + Y;
-        IF (I + 2 == 0) {
-            A = A + I;
-        }
-    }
-    
-    
+N = 32767 ;
 }

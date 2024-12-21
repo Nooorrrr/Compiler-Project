@@ -44,6 +44,7 @@ void yyerror(const char *s);  // Déclaration de la fonction d'erreur
         char* type;    // Le type de l'expression (par exemple: "int", "float")
         char** variables; 
         int count; 
+        int value;
     } exprlog;    
 
     struct {
@@ -253,19 +254,22 @@ expression:
     | NUMBERINT {  // Cas où l'expression est un entier
         $$.type = "INTEGER";
         $$.value.ival = $1;  // La valeur entière
-
         // Générer un quadruplet pour l'entier
         char val[20];
         sprintf(val, "%d", $1);
          $$.name=val;
+          
+      
+         
     }
     | NUMBERFLOAT {  // Cas où l'expression est un flottant
         $$.type = "FLOAT";
         $$.value.fval = $1;  // La valeur flottante
 
+
         // Générer un quadruplet pour le flottant
        char val[20];
-        sprintf(val, "\n\n\n%f\n\n\n", $1);
+        sprintf(val, "f", $1);
          $$.name=val;
          printf("%s",val);
     }
@@ -291,6 +295,7 @@ expression:
             char tempVar[20];
             sprintf(tempVar, "t%d", tempCount++);
             generer("+", $1.name,$3.name, tempVar);
+                $$.name=tempVar;
         } else if (strcmp($1.type, "FLOAT") == 0) {
             $$.type = "FLOAT";
             $$.value.fval = $1.value.fval + $3.value.fval;
@@ -298,13 +303,13 @@ expression:
             // Générer un quadruplet pour l'addition flottante
             char tempVar[20];
             sprintf(tempVar, "t%d", tempCount++);
-         
             generer("+",$1.name,$3.name, tempVar);
             $$.name=tempVar;
         } else {
             yyerror("Addition non supportée pour ce type.");
             return 0;
         }
+      
     }
     | expression MINUS expression {  // Soustraction
         if (strcmp($1.type, $3.type) != 0) {
@@ -347,6 +352,7 @@ expression:
 
             // Générer un quadruplet pour la multiplication
             char tempVar[20];
+                
             sprintf(tempVar, "t%d", tempCount++);
             generer("*", $1.name,$3.name, tempVar);
             $$.name=tempVar;
@@ -357,6 +363,8 @@ expression:
             // Générer un quadruplet pour la multiplication flottante
             char tempVar[20];
             sprintf(tempVar, "t%d", tempCount++);
+               printf("\n\n\n\n%s\n\n\n\n", $1.name);
+                     printf("\n\n\n\n%s\n\n\n\n", $3.name);
             generer("*", $1.name,$3.name, tempVar);
             $$.name=tempVar;
         } else {
@@ -429,6 +437,7 @@ statement:
     affectation
     | IF LPAREN expressionslogic RPAREN LBRACE statements RBRACE ELSE LBRACE statements RBRACE {
         // Vérifier que la condition dans IF est de type booléen
+
         if (strcmp($3.type, "BOOLEAN") != 0) {
             yyerror("La condition de l'instruction IF doit être de type BOOLEAN.");
             return 0;
@@ -459,6 +468,28 @@ expression EQUAL expression{
             return 0;
         }
         $$.type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
+        if(strcmp($1.type,"INTEGER")==0){
+             if($1.value.ival==$3.value.ival){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
+        }
+          if(strcmp($1.type,"FLOAT")==0){
+             if($1.value.fval==$3.value.fval){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
+        }
+          if(strcmp($1.type,"CHAR")==0){
+             if($1.value.cval==$3.value.cval){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
+        }
+    
     }
     |
     LPAREN expressionlogic RPAREN {
@@ -466,6 +497,7 @@ expression EQUAL expression{
         $$.type = $2.type;
         $$.variables = $2.variables;
         $$.count = $2.count;
+        $$.value=$2.value;
     }
     | expression LT expression {
         if (strcmp($1.type, $3.type) != 0) {
@@ -473,36 +505,126 @@ expression EQUAL expression{
             return 0;
         }
         $$.type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
-    }
+        if(strcmp($1.type,"INTEGER")==0){
+             if($1.value.ival<$3.value.ival){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
+        }
+          if(strcmp($1.type,"FLOAT")==0){
+             if($1.value.fval<$3.value.fval){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
+        }
+          if(strcmp($1.type,"CHAR")==0){
+             if($1.value.cval<$3.value.cval){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
+        }}
+    
     | expression LTE expression {
         if (strcmp($1.type, $3.type) != 0) {
             yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
             return 0;
         }
-        $$.type = "BOOLEAN";
+        $$.type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
+        if(strcmp($1.type,"INTEGER")==0){
+             if($1.value.ival<=$3.value.ival){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
+        }
+          if(strcmp($1.type,"FLOAT")==0){
+             if($1.value.fval<=$3.value.fval){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
+        }
+          if(strcmp($1.type,"CHAR")==0){
+             if($1.value.cval<=$3.value.cval){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
+        }
     }
-    | expression GT expression {
-        if (strcmp($1.type, $3.type) != 0) {
+    
+    | expression GT expression
+    {  if (strcmp($1.type, $3.type) != 0) {
             yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
             return 0;
         }
-        $$.type = "BOOLEAN";
+        $$.type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
+        if(strcmp($1.type,"INTEGER")==0){
+             if($1.value.ival>$3.value.ival){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
+        }
+          if(strcmp($1.type,"FLOAT")==0){
+             if($1.value.fval>$3.value.fval){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
+        }
+          if(strcmp($1.type,"CHAR")==0){
+             if($1.value.cval>$3.value.cval){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
+          }
     }
     | expression GTE expression {
         if (strcmp($1.type, $3.type) != 0) {
             yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
             return 0;
         }
-        $$.type = "BOOLEAN";
+        $$.type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
+        if(strcmp($1.type,"INTEGER")==0){
+             if($1.value.ival>=$3.value.ival){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
+        }
+          if(strcmp($1.type,"FLOAT")==0){
+             if($1.value.fval>=$3.value.fval){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
+        }
+          if(strcmp($1.type,"CHAR")==0){
+             if($1.value.cval>=$3.value.cval){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
+        }
     }
     
-    | expressionlogic AND expressionlogic {
+    |expressionlogic AND expressionlogic {
         // Vérification que les deux opérandes sont booléens
         if (strcmp($1.type, "BOOLEAN") != 0 || strcmp($3.type, "BOOLEAN") != 0) {
             yyerror("Opérandes incompatibles pour l'opérateur logique AND.");
             return 0;
         }
         $$.type = "BOOLEAN";
+            if($1.value&&$3.value){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
     }
     | expressionlogic OR expressionlogic {
         if (strcmp($1.type, "BOOLEAN") != 0 || strcmp($3.type, "BOOLEAN") != 0) {
@@ -510,6 +632,11 @@ expression EQUAL expression{
             return 0;
         }
         $$.type = "BOOLEAN";
+          if($1.value||$3.value){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
     }
     | NOT expressionlogic {
         if (strcmp($2.type, "BOOLEAN") != 0) {
@@ -517,6 +644,11 @@ expression EQUAL expression{
             return 0;
         }
         $$.type = "BOOLEAN";
+          if(!$2.value){
+              $$.value=1;
+        }else{
+            $$.value=0;
+        }
     }
 ;
 
