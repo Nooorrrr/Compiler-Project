@@ -194,17 +194,26 @@ affectation:
         // Modification de la valeur en fonction du type
         if (strcmp(varEntry->type, "INTEGER") == 0) {
             varEntry->val.ival = $3.value.ival;  // Affecter un entier
+            char tempVar2[20];
+         sprintf(tempVar2,"%d",  $3.value.ival);
+            generer("=",tempVar2, "", varEntry->nom);
         } else if (strcmp(varEntry->type, "FLOAT") == 0) {
             varEntry->val.fval = $3.value.fval;  // Affecter un flottant
             if(strcmp($3.type,"INTEGER") == 0){
-                varEntry->val.fval = (float) $3.value.ival;
+                 char tempVar2[20];
+                sprintf(tempVar2,"%d",  $3.value.fval);
+                generer("=",tempVar2, "", varEntry->nom);
+                varEntry->val.fval = (float) $3.value.fval;
             }
         } else if (strcmp(varEntry->type, "CHAR") == 0) {
+            generer("=",$3.value.cval, "", varEntry->nom);
             varEntry->val.cval = $3.value.cval;  // Affecter un caractère
         } else {
             yyerror("Type inconnu pour l'affectation.4");
             return 0;
         }
+         
+            generer("=", tempVar2, "", tempVar);
     }
 ;
 
@@ -420,60 +429,16 @@ type:
     | CHAR { $$ = "CHAR"; }
     ;
 
-expressionlogic:
 
-expression EQUAL expression{
-        if (strcmp($1.type, $3.type) != 0) {
-            yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
-            return 0;
-        }
-        $$.type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
-    }
-    |
+
+expressionlogic:
     LPAREN expressionlogic RPAREN {
         // Copier le contenu de la sous-expression dans l'expression actuelle
         $$.type = $2.type;
         $$.variables = $2.variables;
         $$.count = $2.count;
     }
-    | expression LT expression {
-        if (strcmp($1.type, $3.type) != 0) {
-            yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
-            return 0;
-        }
-        $$.type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
-    }
-    | expression LTE expression {
-        if (strcmp($1.type, $3.type) != 0) {
-            yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
-            return 0;
-        }
-        $$.type = "BOOLEAN";
-    }
-    | expression GT expression {
-        if (strcmp($1.type, $3.type) != 0) {
-            yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
-            return 0;
-        }
-        $$.type = "BOOLEAN";
-    }
-    | expression GTE expression {
-        if (strcmp($1.type, $3.type) != 0) {
-            yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
-            return 0;
-        }
-        $$.type = "BOOLEAN";
-    }
-    
-    | expressionlogic AND expressionlogic {
-        // Vérification que les deux opérandes sont booléens
-        if (strcmp($1.type, "BOOLEAN") != 0 || strcmp($3.type, "BOOLEAN") != 0) {
-            yyerror("Opérandes incompatibles pour l'opérateur logique AND.");
-            return 0;
-        }
-        $$.type = "BOOLEAN";
-    }
-    | expressionlogic OR expressionlogic {
+    | expressionlogic OPERA expressionlogic {
         if (strcmp($1.type, "BOOLEAN") != 0 || strcmp($3.type, "BOOLEAN") != 0) {
             yyerror("Opérandes incompatibles pour l'opérateur logique OR.");
             return 0;
@@ -487,7 +452,8 @@ expression EQUAL expression{
         }
         $$.type = "BOOLEAN";
     }
-;
+OPERA:
+AND|OR|GTE|GT|LTE|LT|EQUAL;
 
 init_for:
     IDENTIFIER ASSIGN expression {
@@ -570,4 +536,72 @@ NUMBERFLOAT:
 void yyerror(const char *s) {
     extern int yylineno;
     fprintf(stderr, "Erreur à la ligne %d: %s\n", yylineno, s);
-}
+}/*
+expressionlogic:
+
+expression EQUAL expression{
+        if (strcmp($1.type, $3.type) != 0) {
+            yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
+            return 0;
+        }
+        $$.type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
+    }
+    |
+    LPAREN expressionlogic RPAREN {
+        // Copier le contenu de la sous-expression dans l'expression actuelle
+        $$.type = $2.type;
+        $$.variables = $2.variables;
+        $$.count = $2.count;
+    }
+    | expression LT expression {
+        if (strcmp($1.type, $3.type) != 0) {
+            yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
+            return 0;
+        }
+        $$.type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
+    }
+    | expression LTE expression {
+        if (strcmp($1.type, $3.type) != 0) {
+            yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
+            return 0;
+        }
+        $$.type = "BOOLEAN";
+    }
+    | expression GT expression {
+        if (strcmp($1.type, $3.type) != 0) {
+            yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
+            return 0;
+        }
+        $$.type = "BOOLEAN";
+    }
+    | expression GTE expression {
+        if (strcmp($1.type, $3.type) != 0) {
+            yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
+            return 0;
+        }
+        $$.type = "BOOLEAN";
+    }
+    
+    | expressionlogic AND expressionlogic {
+        // Vérification que les deux opérandes sont booléens
+        if (strcmp($1.type, "BOOLEAN") != 0 || strcmp($3.type, "BOOLEAN") != 0) {
+            yyerror("Opérandes incompatibles pour l'opérateur logique AND.");
+            return 0;
+        }
+        $$.type = "BOOLEAN";
+    }
+    | expressionlogic OPERA expressionlogic {
+        if (strcmp($1.type, "BOOLEAN") != 0 || strcmp($3.type, "BOOLEAN") != 0) {
+            yyerror("Opérandes incompatibles pour l'opérateur logique OR.");
+            return 0;
+        }
+        $$.type = "BOOLEAN";
+    }
+    | NOT expressionlogic {
+        if (strcmp($2.type, "BOOLEAN") != 0) {
+            yyerror("L'opérande de NOT doit être de type BOOLEAN.");
+            return 0;
+        }
+        $$.type = "BOOLEAN";
+    }
+;*/
