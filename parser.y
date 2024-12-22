@@ -10,7 +10,6 @@ extern TableEntry Tab[1000];  // Table des identifiants et constantes
 int scope = 0;  // Initialisation de scope
 void yyerror(const char *s);  // Déclaration de la fonction d'erreur
 %}
-
 %union {
     int entier;        // Pour les entiers
     float flottant;    // Pour les namebres flottants
@@ -29,7 +28,7 @@ void yyerror(const char *s);  // Déclaration de la fonction d'erreur
     } Value;  // Union pour stocker la valeur
 
     struct {
-         char* name;       
+        char* name;       
         char* type;    // Le type de l'expression (par exemple: "int", "float")
         char** variables; 
         int count; 
@@ -40,7 +39,8 @@ void yyerror(const char *s);  // Déclaration de la fonction d'erreur
         } value;
     } exprari;
 
-    struct { 
+    struct {
+        char* name;  // Add this line to define the name field
         char* type;    // Le type de l'expression (par exemple: "int", "float")
         char** variables; 
         int count; 
@@ -52,10 +52,6 @@ void yyerror(const char *s);  // Déclaration de la fonction d'erreur
         char** variables; // Tableau de chaînes de caractères
         int count;        // namebre d'éléments dans le tableau
     } id;
-    
-    
-    
-
 }
 
 %token <entier> NUMBERINTPOS NUMBERINTNEG 
@@ -269,7 +265,7 @@ expression:
 
         // Générer un quadruplet pour le flottant
        char val[20];
-        sprintf(val, "f", $1);
+        sprintf(val, "%f", $1);  // Corrected format specifier
          $$.name=val;
          printf("%s",val);
     }
@@ -442,12 +438,69 @@ statement:
             yyerror("La condition de l'instruction IF doit être de type BOOLEAN.");
             return 0;
         }
+    // Generate unique labels for jumps
+    char* else_label = malloc(20);
+    char* end_label = malloc(20);
+    sprintf(else_label, "L%d", tempCount++);
+    sprintf(end_label, "L%d", tempCount++);
+    
+    // If expression is false (0), jump to else
+    generer("BZ", $3.name, "", else_label);
+    
+    // If-block code was already generated in statements
+    
+    // Jump to end after if block
+    generer("BR", end_label, "", "");
+    
+    // Place else label
+    generer("LABEL", else_label, "", "");
+    
+    // Else-block code was already generated in statements
+    
+    // Place end label
+    generer("LABEL", end_label, "", "");
+    
+    free(else_label);
+    free(end_label);
+
     }
     | FOR LPAREN init_for BOUCLESEPARATOR expression BOUCLESEPARATOR expression RPAREN LBRACE statements RBRACE {
       if (strcmp($5.type, "INTEGER") != 0||strcmp($7.type, "INTEGER") != 0) {
         yyerror("Le pas de la boucle doit être un entier.");
         return 0;
     }
+
+    // Generate unique labels
+    char* start_label = malloc(20);
+    char* end_label = malloc(20);
+    sprintf(start_label, "L%d", tempCount++);
+    sprintf(end_label, "L%d", tempCount++);
+    
+    // Place start label
+    generer("LABEL", start_label, "", "");
+    
+    // Generate comparison result
+    char* temp = malloc(20);
+    sprintf(temp, "t%d", tempCount++);
+    generer("-", $3.name, $5.name, temp);  // temp = counter - limit
+    
+    // If temp >= 0 (counter >= limit), exit loop
+    generer("BGE", temp, "", end_label);
+    
+    // Loop body code was already generated in statements
+    
+    // Increment counter
+    generer("+", $3.name, $7.name, $3.name);
+    
+    // Jump back to start
+    generer("BR", start_label, "", "");
+    
+    // Place end label
+    generer("LABEL", end_label, "", "");
+    
+    free(start_label);
+    free(end_label);
+    free(temp);
     }
     | READ LPAREN IDENTIFIER RPAREN SEMICOLON {
         if (rechercher($3.name) == NULL) {
@@ -468,6 +521,28 @@ expression EQUAL expression{
             return 0;
         }
         $$.type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
+         char* temp = malloc(20);
+        sprintf(temp, "t%d", tempCount++);
+        char* true_label = malloc(20);
+        char* end_label = malloc(20);
+        sprintf(true_label, "L%d", tempCount++);
+        sprintf(end_label, "L%d", tempCount++);
+        
+        // Compare values
+        generer("-", $1.name, $3.name, temp);
+        
+        // If difference is 0, values are equal
+        generer("BZ", temp, "", true_label);
+        generer("=", "0", "", temp);  // Set result to false
+        generer("BR", end_label, "", "");
+        generer("LABEL", true_label, "", "");
+        generer("=", "1", "", temp);  // Set result to true
+        generer("LABEL", end_label, "", "");
+        
+        $$.name = temp;
+        free(true_label);
+        free(end_label);
+
         if(strcmp($1.type,"INTEGER")==0){
              if($1.value.ival==$3.value.ival){
               $$.value=1;
@@ -533,6 +608,28 @@ expression EQUAL expression{
             return 0;
         }
         $$.type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
+         char* temp = malloc(20);
+        sprintf(temp, "t%d", tempCount++);
+        char* true_label = malloc(20);
+        char* end_label = malloc(20);
+        sprintf(true_label, "L%d", tempCount++);
+        sprintf(end_label, "L%d", tempCount++);
+        
+        // Compare values
+        generer("-", $1.name, $3.name, temp);
+        
+        // If difference is negative, first value is less
+        generer("BL", temp, "", true_label);
+        generer("=", "0", "", temp);  // Set result to false
+        generer("BR", end_label, "", "");
+        generer("LABEL", true_label, "", "");
+        generer("=", "1", "", temp);  // Set result to true
+        generer("LABEL", end_label, "", "");
+        
+        $$.name = temp;
+        free(true_label);
+        free(end_label);
+
         if(strcmp($1.type,"INTEGER")==0){
              if($1.value.ival<=$3.value.ival){
               $$.value=1;
@@ -620,6 +717,29 @@ expression EQUAL expression{
             return 0;
         }
         $$.type = "BOOLEAN";
+        char* temp = malloc(20);
+        sprintf(temp, "t%d", tempCount++);
+        char* false_label = malloc(20);
+        char* end_label = malloc(20);
+        sprintf(false_label, "L%d", tempCount++);
+        sprintf(end_label, "L%d", tempCount++);
+        
+        // If first expression is false, result is false
+        generer("BZ", $1.name, "", false_label);
+        // If second expression is false, result is false
+        generer("BZ", $3.name, "", false_label);
+        // Both true, set result to true
+        generer("=", "1", "", temp);
+        generer("BR", end_label, "", "");
+        // False case
+        generer("LABEL", false_label, "", "");
+        generer("=", "0", "", temp);
+        generer("LABEL", end_label, "", "");
+        
+        $$.name = temp;
+        free(false_label);
+        free(end_label);
+
             if($1.value&&$3.value){
               $$.value=1;
         }else{
@@ -632,6 +752,30 @@ expression EQUAL expression{
             return 0;
         }
         $$.type = "BOOLEAN";
+
+         char* temp = malloc(20);
+        sprintf(temp, "t%d", tempCount++);
+        char* true_label = malloc(20);
+        char* end_label = malloc(20);
+        sprintf(true_label, "L%d", tempCount++);
+        sprintf(end_label, "L%d", tempCount++);
+        
+        // If first expression is true, result is true
+        generer("BNZ", $1.name, "", true_label);
+        // If second expression is true, result is true
+        generer("BNZ", $3.name, "", true_label);
+        // Both false, set result to false
+        generer("=", "0", "", temp);
+        generer("BR", end_label, "", "");
+        // True case
+        generer("LABEL", true_label, "", "");
+        generer("=", "1", "", temp);
+        generer("LABEL", end_label, "", "");
+        
+        $$.name = temp;
+        free(true_label);
+        free(end_label);
+
           if($1.value||$3.value){
               $$.value=1;
         }else{
@@ -644,6 +788,24 @@ expression EQUAL expression{
             return 0;
         }
         $$.type = "BOOLEAN";
+        char* temp = malloc(20);
+        sprintf(temp, "t%d", tempCount++);
+        char* true_label = malloc(20);
+        char* end_label = malloc(20);
+        sprintf(true_label, "L%d", tempCount++);
+        sprintf(end_label, "L%d", tempCount++);
+        
+        // If expression is false, result is true
+        generer("BZ", $2.name, "", true_label);
+        generer("=", "0", "", temp);
+        generer("BR", end_label, "", "");
+        generer("LABEL", true_label, "", "");
+        generer("=", "1", "", temp);
+        generer("LABEL", end_label, "", "");
+        
+        $$.name = temp;
+        free(true_label);
+        free(end_label);
           if(!$2.value){
               $$.value=1;
         }else{

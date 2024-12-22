@@ -1,6 +1,6 @@
 VAR_GLOBAL {
     INTEGER A,B,C;
-    INTEGER Q;  
+    INTEGER Q,I;  
     FLOAT X,L;
     CONST INTEGER Z = 3;
     
@@ -8,22 +8,21 @@ VAR_GLOBAL {
 
 DECLARATION { %%affectations
    CONST INTEGER N= 6;
-   INTEGER I;
+  %% CHAR Y[8] = "hello";
 }
 
 INSTRUCTION {
      C = 1;
-     
-    IF ((A > B) && (A > B)){
+     A =5;
+     B=3;
+    IF (A > B){
         C = A + 1;
          C = A- 1;
     } ELSE {
-        C = A + 2 ;
+        C = A- 1;
          C = A- 1;
     }
- FOR ( I = 0 : 1 : 10) {
-    X = X + 1;
+ FOR (I = 0 : 1 : 10) {
+    Q = Q + 1;
 }
-
-N = 32767 ;
 }

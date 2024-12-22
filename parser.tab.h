@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.7.4.  */
+/* A Bison parser, made by GNU Bison 3.8.2.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -104,7 +104,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 14 "parser.y"
+#line 13 "parser.y"
 
     int entier;        // Pour les entiers
     float flottant;    // Pour les namebres flottants
@@ -123,7 +123,7 @@ union YYSTYPE
     } Value;  // Union pour stocker la valeur
 
     struct {
-         char* name;       
+        char* name;       
         char* type;    // Le type de l'expression (par exemple: "int", "float")
         char** variables; 
         int count; 
@@ -134,7 +134,8 @@ union YYSTYPE
         } value;
     } exprari;
 
-    struct { 
+    struct {
+        char* name;  // Add this line to define the name field
         char* type;    // Le type de l'expression (par exemple: "int", "float")
         char** variables; 
         int count; 
@@ -146,12 +147,8 @@ union YYSTYPE
         char** variables; // Tableau de chaînes de caractères
         int count;        // namebre d'éléments dans le tableau
     } id;
-    
-    
-    
 
-
-#line 155 "parser.tab.h"
+#line 152 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -162,6 +159,8 @@ typedef union YYSTYPE YYSTYPE;
 
 extern YYSTYPE yylval;
 
+
 int yyparse (void);
+
 
 #endif /* !YY_YY_PARSER_TAB_H_INCLUDED  */
