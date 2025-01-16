@@ -7,7 +7,7 @@ VAR_GLOBAL {
     INTEGER M;
     CHAR Y[9];
     INTEGER G;
-    
+    INTEGER O;
 }
 
 DECLARATION { %%affectations
