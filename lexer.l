@@ -33,10 +33,11 @@
     yylval.car = yytext[1]; // Le caractère encapsulé (sans les guillemets simples)
     return CARACTERE;
 }
-[+]?[0-9]+              { yylval.entier = atoi(yytext); return NUMBERINTPOS; }
-"-"[0-9]+              { yylval.entier = atoi(yytext); return NUMBERINTNEG; }
 [+]?[0-9]+\.[0-9]+      { yylval.flottant = strtod(yytext, NULL); return NUMBERFLOATPOS; }
 "-"[0-9]+\.[0-9]+      { yylval.flottant = strtod(yytext, NULL); return NUMBERFLOATNEG; }
+[+]?[0-9]+              { yylval.entier = atoi(yytext); return NUMBERINTPOS; }
+"-"[0-9]+              { yylval.entier = atoi(yytext); return NUMBERINTNEG; }
+
 
 "&&"                 { return AND; }
 "\|\|"               { return OR; }

@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.8.2.  */
+/* A Bison parser, made by GNU Bison 3.7.4.  */
 
 /* Bison implementation for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -46,10 +46,10 @@
    USER NAME SPACE" below.  */
 
 /* Identify Bison output, and Bison version.  */
-#define YYBISON 30802
+#define YYBISON 30704
 
 /* Bison version string.  */
-#define YYBISON_VERSION "3.8.2"
+#define YYBISON_VERSION "3.7.4"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -257,18 +257,6 @@ typedef int_least16_t yytype_int16;
 typedef short yytype_int16;
 #endif
 
-/* Work around bug in HP-UX 11.23, which defines these macros
-   incorrectly for preprocessor constants.  This workaround can likely
-   be removed in 2023, as HPE has promised support for HP-UX 11.23
-   (aka HP-UX 11i v2) only through the end of 2022; see Table 2 of
-   <https://h20195.www2.hpe.com/V2/getpdf.aspx/4AA4-7673ENW.pdf>.  */
-#ifdef __hpux
-# undef UINT_LEAST8_MAX
-# undef UINT_LEAST16_MAX
-# define UINT_LEAST8_MAX 255
-# define UINT_LEAST16_MAX 65535
-#endif
-
 #if defined __UINT_LEAST8_MAX__ && __UINT_LEAST8_MAX__ <= __INT_MAX__
 typedef __UINT_LEAST8_TYPE__ yytype_uint8;
 #elif (!defined __UINT_LEAST8_MAX__ && defined YY_STDINT_H \
@@ -366,23 +354,17 @@ typedef int yy_state_fast_t;
 
 /* Suppress unused-variable warnings by "using" E.  */
 #if ! defined lint || defined __GNUC__
-# define YY_USE(E) ((void) (E))
+# define YYUSE(E) ((void) (E))
 #else
-# define YY_USE(E) /* empty */
+# define YYUSE(E) /* empty */
 #endif
 
+#if defined __GNUC__ && ! defined __ICC && 407 <= __GNUC__ * 100 + __GNUC_MINOR__
 /* Suppress an incorrect diagnostic about yylval being uninitialized.  */
-#if defined __GNUC__ && ! defined __ICC && 406 <= __GNUC__ * 100 + __GNUC_MINOR__
-# if __GNUC__ * 100 + __GNUC_MINOR__ < 407
-#  define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                           \
-    _Pragma ("GCC diagnostic push")                                     \
-    _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")
-# else
-#  define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                           \
+# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                            \
     _Pragma ("GCC diagnostic push")                                     \
     _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")              \
     _Pragma ("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
-# endif
 # define YY_IGNORE_MAYBE_UNINITIALIZED_END      \
     _Pragma ("GCC diagnostic pop")
 #else
@@ -600,15 +582,15 @@ static const yytype_int8 yytranslate[] =
 };
 
 #if YYDEBUG
-/* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
+  /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   125,   125,   129,   130,   134,   150,   161,   173,   184,
-     195,   201,   208,   265,   288,   299,   310,   319,   356,   392,
-     432,   476,   483,   484,   485,   491,   492,   496,   497,   501,
-     514,   522,   532,   557,   558,   569,   577,   583,   587,   599,
-     605,   616,   627,   637,   649,   684,   710,   739,   752,   759,
-     760,   761,   771,   772,   776,   777
+       0,    85,    85,    89,    90,    94,   110,   121,   133,   144,
+     155,   161,   168,   225,   248,   259,   270,   279,   316,   352,
+     392,   436,   443,   444,   445,   451,   452,   456,   457,   461,
+     462,   495,   533,   539,   546,   598,   605,   633,   684,   712,
+     741,   777,   813,   846,   858,   865,   866,   867,   877,   878,
+     882,   883
 };
 #endif
 
@@ -645,6 +627,19 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 }
 #endif
 
+#ifdef YYPRINT
+/* YYTOKNUM[NUM] -- (External) token number corresponding to the
+   (internal) symbol number NUM (which must be that of a token).  */
+static const yytype_int16 yytoknum[] =
+{
+       0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
+     265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
+     275,   276,   277,   278,   279,   280,   281,   282,   283,   284,
+     285,   286,   287,   288,   289,   290,   291,   292,   293,   294,
+     295,   296,   297,   298,   299
+};
+#endif
+
 #define YYPACT_NINF (-79)
 
 #define yypact_value_is_default(Yyn) \
@@ -655,8 +650,8 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 #define yytable_value_is_error(Yyn) \
   0
 
-/* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
-   STATE-NUM.  */
+  /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
+     STATE-NUM.  */
 static const yytype_int16 yypact[] =
 {
        4,   -14,    23,   -79,   -79,    -7,   -79,   -79,   -79,    13,
@@ -675,9 +670,9 @@ static const yytype_int16 yypact[] =
      -79,   107,   -79
 };
 
-/* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
-   Performed when YYTABLE does not specify something else to do.  Zero
-   means the default is an error.  */
+  /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
+     Performed when YYTABLE does not specify something else to do.  Zero
+     means the default is an error.  */
 static const yytype_int8 yydefact[] =
 {
        0,     0,     0,     4,     1,     0,    22,    23,    24,     0,
@@ -696,23 +691,23 @@ static const yytype_int8 yydefact[] =
       34,     0,    32
 };
 
-/* YYPGOTO[NTERM-NUM].  */
+  /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int16 yypgoto[] =
 {
      -79,   -79,   169,   -79,   -79,   -79,   -48,   179,   -56,   -79,
      -79,   -79,   -79,   -79,   -46,   -78,   -79,    27,   170,   171
 };
 
-/* YYDEFGOTO[NTERM-NUM].  */
+  /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-       0,     2,     5,    11,    16,    45,    91,    12,    46,    92,
-      47,    48,    59,    49,    50,    93,    68,    72,    65,    66
+       0,     2,     5,    11,    16,    46,    64,    12,    47,    65,
+      48,    66,    68,    72,    60,    61
 };
 
-/* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
-   positive, shift that token.  If negative, reduce the rule whose
-   number is the opposite.  If YYTABLE_NINF, syntax error.  */
+  /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
+     positive, shift that token.  If negative, reduce the rule whose
+     number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_uint8 yytable[] =
 {
       56,    70,    74,    64,    76,     6,     7,     8,     9,    20,
@@ -761,8 +756,8 @@ static const yytype_int8 yycheck[] =
       -1,    -1,    22,    22
 };
 
-/* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
-   state STATE-NUM.  */
+  /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
+     symbol of state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
        0,     9,    46,    30,     0,    47,    12,    13,    14,    15,
@@ -781,7 +776,7 @@ static const yytype_int8 yystos[] =
       31,    51,    33
 };
 
-/* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
+  /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_int8 yyr1[] =
 {
        0,    45,    46,    47,    47,    48,    48,    48,    48,    48,
@@ -792,7 +787,7 @@ static const yytype_int8 yyr1[] =
       62,    62,    63,    63,    64,    64
 };
 
-/* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
+  /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_int8 yyr2[] =
 {
        0,     2,    12,     2,     0,     3,     6,     6,     6,     6,
@@ -812,7 +807,6 @@ enum { YYENOMEM = -2 };
 #define YYACCEPT        goto yyacceptlab
 #define YYABORT         goto yyabortlab
 #define YYERROR         goto yyerrorlab
-#define YYNOMEM         goto yyexhaustedlab
 
 
 #define YYRECOVERING()  (!!yyerrstatus)
@@ -853,7 +847,10 @@ do {                                            \
     YYFPRINTF Args;                             \
 } while (0)
 
-
+/* This macro is provided for backward compatibility. */
+# ifndef YY_LOCATION_PRINT
+#  define YY_LOCATION_PRINT(File, Loc) ((void) 0)
+# endif
 
 
 # define YY_SYMBOL_PRINT(Title, Kind, Value, Location)                    \
@@ -877,11 +874,15 @@ yy_symbol_value_print (FILE *yyo,
                        yysymbol_kind_t yykind, YYSTYPE const * const yyvaluep)
 {
   FILE *yyoutput = yyo;
-  YY_USE (yyoutput);
+  YYUSE (yyoutput);
   if (!yyvaluep)
     return;
+# ifdef YYPRINT
+  if (yykind < YYNTOKENS)
+    YYPRINT (yyo, yytoknum[yykind], *yyvaluep);
+# endif
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-  YY_USE (yykind);
+  YYUSE (yykind);
   YY_IGNORE_MAYBE_UNINITIALIZED_END
 }
 
@@ -995,13 +996,13 @@ static void
 yydestruct (const char *yymsg,
             yysymbol_kind_t yykind, YYSTYPE *yyvaluep)
 {
-  YY_USE (yyvaluep);
+  YYUSE (yyvaluep);
   if (!yymsg)
     yymsg = "Deleting";
   YY_SYMBOL_PRINT (yymsg, yykind, yyvaluep, yylocationp);
 
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-  YY_USE (yykind);
+  YYUSE (yykind);
   YY_IGNORE_MAYBE_UNINITIALIZED_END
 }
 
@@ -1064,7 +1065,6 @@ yyparse (void)
   YYDPRINTF ((stderr, "Starting parse\n"));
 
   yychar = YYEMPTY; /* Cause a token to be read.  */
-
   goto yysetstate;
 
 
@@ -1090,7 +1090,7 @@ yysetstate:
 
   if (yyss + yystacksize - 1 <= yyssp)
 #if !defined yyoverflow && !defined YYSTACK_RELOCATE
-    YYNOMEM;
+    goto yyexhaustedlab;
 #else
     {
       /* Get the current used size of the three stacks, in elements.  */
@@ -1118,7 +1118,7 @@ yysetstate:
 # else /* defined YYSTACK_RELOCATE */
       /* Extend the stack our own way.  */
       if (YYMAXDEPTH <= yystacksize)
-        YYNOMEM;
+        goto yyexhaustedlab;
       yystacksize *= 2;
       if (YYMAXDEPTH < yystacksize)
         yystacksize = YYMAXDEPTH;
@@ -1129,7 +1129,7 @@ yysetstate:
           YY_CAST (union yyalloc *,
                    YYSTACK_ALLOC (YY_CAST (YYSIZE_T, YYSTACK_BYTES (yystacksize))));
         if (! yyptr)
-          YYNOMEM;
+          goto yyexhaustedlab;
         YYSTACK_RELOCATE (yyss_alloc, yyss);
         YYSTACK_RELOCATE (yyvs_alloc, yyvs);
 #  undef YYSTACK_RELOCATE
@@ -1150,7 +1150,6 @@ yysetstate:
         YYABORT;
     }
 #endif /* !defined yyoverflow && !defined YYSTACK_RELOCATE */
-
 
   if (yystate == YYFINAL)
     YYACCEPT;
@@ -1281,7 +1280,7 @@ yyreduce:
             }
         }
     }
-#line 1285 "parser.tab.c"
+#line 1236 "parser.tab.c"
     break;
 
   case 6: /* declaration: CONST type IDENTIFIER ASSIGN NUMBERINT SEMICOLON  */
@@ -1297,7 +1296,7 @@ yyreduce:
         sprintf(var2,"%d",  (yyvsp[-1].entier));
         generer("=",var2, "", (yyvsp[-3].id).name);
     }
-#line 1301 "parser.tab.c"
+#line 1252 "parser.tab.c"
     break;
 
   case 7: /* declaration: CONST type IDENTIFIER ASSIGN NUMBERFLOAT SEMICOLON  */
@@ -1314,7 +1313,7 @@ yyreduce:
         generer("=",var2, "", (yyvsp[-3].id).name);
         
     }
-#line 1318 "parser.tab.c"
+#line 1269 "parser.tab.c"
     break;
 
   case 8: /* declaration: CONST type IDENTIFIER ASSIGN CARACTERE SEMICOLON  */
@@ -1330,7 +1329,7 @@ yyreduce:
         sprintf(var2,"%c",  (yyvsp[-1].car));
         generer("=",var2, "", (yyvsp[-3].id).name);
     }
-#line 1334 "parser.tab.c"
+#line 1285 "parser.tab.c"
     break;
 
   case 9: /* declaration: type IDENTIFIER LBRACKET NUMBERINTPOS RBRACKET SEMICOLON  */
@@ -1343,7 +1342,7 @@ yyreduce:
             inserer((yyvsp[-4].id).name, (yyvsp[-5].chaine), 0, scope, 0, (yyvsp[-2].entier), 1);
         }
     }
-#line 1347 "parser.tab.c"
+#line 1298 "parser.tab.c"
     break;
 
   case 10: /* listevariable: listevariable COMMA IDENTIFIER  */
@@ -1354,7 +1353,7 @@ yyreduce:
         (yyval.varList).variables = realloc((yyval.varList).variables, sizeof(char*) * (yyval.varList).count);
         (yyval.varList).variables[(yyval.varList).count - 1] = (yyvsp[0].id).name;  // Ajouter la nouvelle variable
     }
-#line 1358 "parser.tab.c"
+#line 1309 "parser.tab.c"
     break;
 
   case 11: /* listevariable: IDENTIFIER  */
@@ -1364,7 +1363,7 @@ yyreduce:
         (yyval.varList).variables = malloc(sizeof(char*));
         (yyval.varList).variables[0] = (yyvsp[0].id).name;
     }
-#line 1368 "parser.tab.c"
+#line 1319 "parser.tab.c"
     break;
 
   case 12: /* affectation: IDENTIFIER ASSIGN expression SEMICOLON  */
@@ -1423,11 +1422,11 @@ yyreduce:
         } 
     
     }
-#line 1427 "parser.tab.c"
+#line 1380 "parser.tab.c"
     break;
 
   case 13: /* expression: IDENTIFIER  */
-#line 265 "parser.y"
+#line 227 "parser.y"
                {  // Cas où l'expression est une variable
         TableEntry *entry = rechercher((yyvsp[0].id).name);
         if (entry == NULL) {
@@ -1451,11 +1450,11 @@ yyreduce:
         (yyval.exprari).name=(yyvsp[0].id).name;
       
     }
-#line 1455 "parser.tab.c"
+#line 1408 "parser.tab.c"
     break;
 
   case 14: /* expression: NUMBERINT  */
-#line 288 "parser.y"
+#line 250 "parser.y"
                 {  // Cas où l'expression est un entier
         (yyval.exprari).type = "INTEGER";
         (yyval.exprari).value.ival = (yyvsp[0].entier);  // La valeur entière
@@ -1467,11 +1466,11 @@ yyreduce:
       
          
     }
-#line 1471 "parser.tab.c"
+#line 1424 "parser.tab.c"
     break;
 
   case 15: /* expression: NUMBERFLOAT  */
-#line 299 "parser.y"
+#line 261 "parser.y"
                   {  // Cas où l'expression est un flottant
         (yyval.exprari).type = "FLOAT";
         (yyval.exprari).value.fval = (yyvsp[0].flottant);  // La valeur flottante
@@ -1483,11 +1482,11 @@ yyreduce:
          (yyval.exprari).name=val;
         
     }
-#line 1487 "parser.tab.c"
+#line 1440 "parser.tab.c"
     break;
 
   case 16: /* expression: CARACTERE  */
-#line 310 "parser.y"
+#line 272 "parser.y"
                 {  // Cas où l'expression est un caractère
         (yyval.exprari).type = "CHAR";
         (yyval.exprari).value.cval = (yyvsp[0].car);  // La valeur caractère
@@ -1497,11 +1496,11 @@ yyreduce:
          (yyval.exprari).name=val;
 
     }
-#line 1501 "parser.tab.c"
+#line 1454 "parser.tab.c"
     break;
 
   case 17: /* expression: expression PLUS expression  */
-#line 319 "parser.y"
+#line 281 "parser.y"
                                  {  // Addition
      if (strcmp((yyvsp[-2].exprari).type,"INTEGER")==0 && strcmp((yyvsp[0].exprari).type,"INTEGER")==0) {
        (yyval.exprari).type = "INTEGER";
@@ -1539,11 +1538,11 @@ yyreduce:
 
 
     }
-#line 1543 "parser.tab.c"
+#line 1488 "parser.tab.c"
     break;
 
   case 18: /* expression: expression MINUS expression  */
-#line 356 "parser.y"
+#line 310 "parser.y"
                                   {  // Soustraction
         if (strcmp((yyvsp[-2].exprari).type,"INTEGER")==0 && strcmp((yyvsp[0].exprari).type,"INTEGER")==0) {
        (yyval.exprari).type = "INTEGER";
@@ -1552,23 +1551,14 @@ yyreduce:
             // Générer un quadruplet pour l'addition
             char tempVar[20];
             sprintf(tempVar, "t%d", tempCount++);
-            generer("-", (yyvsp[-2].exprari).name,(yyvsp[0].exprari).name, tempVar);
-                (yyval.exprari).name=tempVar;
-    } else if (strcmp((yyvsp[-2].exprari).type,"FLOAT")==0|| strcmp((yyvsp[0].exprari).type,"FLOAT")==0) {
-        // Si l'un des opérandes est un FLOAT
-        if (strcmp((yyvsp[-2].exprari).type,"INTEGER")==0) {
-            (yyvsp[-2].exprari).type = "FLOAT";
-            (yyvsp[-2].exprari).value.fval = (float) (yyvsp[-2].exprari).value.ival;
-        }
-        if (strcmp((yyvsp[0].exprari).type,"INTEGER")==0) {
-            (yyvsp[0].exprari).type = "FLOAT";
-            (yyvsp[0].exprari).value.fval = (float) (yyvsp[0].exprari).value.ival;
-        }
-     //   printf("var1 :\n%f\n",$1.value.ival);
-       // printf("var2 :\n%f\n",$3.value.ival);
-        (yyval.exprari).type = "FLOAT";
-        (yyval.exprari).value.fval = (yyvsp[-2].exprari).value.fval - (yyvsp[0].exprari).value.fval;
-           // Générer un quadruplet pour l'addition flottante
+             
+            generer("-",(yyvsp[-2].exprari).name,(yyvsp[0].exprari).name, tempVar);
+            (yyval.exprari).name=tempVar;
+        } else if (strcmp((yyvsp[-2].exprari).type, "FLOAT") == 0) {
+            (yyval.exprari).type = "FLOAT";
+            (yyval.exprari).value.fval = (yyvsp[-2].exprari).value.fval - (yyvsp[0].exprari).value.fval;
+
+            // Générer un quadruplet pour la soustraction flottante
             char tempVar[20];
             sprintf(tempVar, "t%d", tempCount++);
             generer("-",(yyvsp[-2].exprari).name,(yyvsp[0].exprari).name, tempVar);
@@ -1580,11 +1570,11 @@ yyreduce:
     }
 
     }
-#line 1584 "parser.tab.c"
+#line 1523 "parser.tab.c"
     break;
 
   case 19: /* expression: expression MULT expression  */
-#line 392 "parser.y"
+#line 340 "parser.y"
                                  {  // Multiplication
   
       
@@ -1625,11 +1615,11 @@ yyreduce:
     }
 
     }
-#line 1629 "parser.tab.c"
+#line 1559 "parser.tab.c"
     break;
 
   case 20: /* expression: expression DIV expression  */
-#line 432 "parser.y"
+#line 371 "parser.y"
                                 {  // Division
 
         if (strcmp((yyvsp[-2].exprari).type,"INTEGER")==0 && strcmp((yyvsp[0].exprari).type,"INTEGER")==0) {
@@ -1674,41 +1664,41 @@ yyreduce:
     }
 
     }
-#line 1678 "parser.tab.c"
+#line 1601 "parser.tab.c"
     break;
 
   case 21: /* expression: LPAREN expression RPAREN  */
-#line 476 "parser.y"
+#line 408 "parser.y"
                                {  // Parenthèses pour prioriser les opérations
         (yyval.exprari).type = (yyvsp[-1].exprari).type;
         (yyval.exprari).value = (yyvsp[-1].exprari).value;
         (yyval.exprari).name=(yyvsp[-1].exprari).name;
     }
-#line 1688 "parser.tab.c"
+#line 1611 "parser.tab.c"
     break;
 
   case 22: /* type: INTEGER  */
-#line 483 "parser.y"
+#line 415 "parser.y"
             { (yyval.chaine) = "INTEGER"; }
-#line 1694 "parser.tab.c"
+#line 1617 "parser.tab.c"
     break;
 
   case 23: /* type: FLOAT  */
-#line 484 "parser.y"
+#line 416 "parser.y"
             { (yyval.chaine) = "FLOAT"; }
-#line 1700 "parser.tab.c"
+#line 1623 "parser.tab.c"
     break;
 
   case 24: /* type: CHAR  */
-#line 485 "parser.y"
+#line 417 "parser.y"
            { (yyval.chaine) = "CHAR"; }
-#line 1706 "parser.tab.c"
+#line 1629 "parser.tab.c"
     break;
 
-  case 29: /* ifstart: %empty  */
-#line 501 "parser.y"
-     {
-       
+  case 30: /* statement: IF LPAREN expressionslogic RPAREN LBRACE statements RBRACE ELSE LBRACE statements RBRACE  */
+#line 434 "parser.y"
+                                                                                               {
+        // Vérifier que la condition dans IF est de type booléen
 
         char else_label[20], end_label[20];
         sprintf(else_label, "L%d", tempCount++);
@@ -1741,16 +1731,16 @@ yyreduce:
         generer("BR", current_end_label, "", "");
         generer("LABEL", current_else_label, "", "");
     }
-#line 1745 "parser.tab.c"
+#line 1667 "parser.tab.c"
     break;
 
-  case 32: /* forcond: FOR LPAREN init_for BOUCLESEPARATOR expression BOUCLESEPARATOR expression RPAREN  */
-#line 532 "parser.y"
-                                                                                     {
-        if (strcmp((yyvsp[-3].exprari).type, "INTEGER") != 0 || strcmp((yyvsp[-1].exprari).type, "INTEGER") != 0) {
-            yyerror("Le pas de la boucle doit être un entier.");
-            return 0;
-        }
+  case 31: /* statement: FOR LPAREN init_for BOUCLESEPARATOR expression BOUCLESEPARATOR expression RPAREN LBRACE statements RBRACE  */
+#line 467 "parser.y"
+                                                                                                                {
+      if (strcmp((yyvsp[-6].exprari).type, "INTEGER") != 0||strcmp((yyvsp[-4].exprari).type, "INTEGER") != 0) {
+        yyerror("Le pas de la boucle doit être un entier.");
+        return 0;
+    }
 
         // Générer des labels uniques
         char start_label[20],end_label[20];
@@ -1796,22 +1786,30 @@ yyreduce:
         free(current_start_label);
         free(current_end_label);
     }
-#line 1800 "parser.tab.c"
+#line 1710 "parser.tab.c"
     break;
 
-  case 36: /* statement: READ LPAREN IDENTIFIER RPAREN SEMICOLON  */
-#line 577 "parser.y"
+  case 32: /* statement: READ LPAREN IDENTIFIER RPAREN SEMICOLON  */
+#line 505 "parser.y"
                                               {
         if (rechercher((yyvsp[-2].id).name) == NULL) {
             yyerror("Variable non déclarée.");
             return 0;
         }
     }
-#line 1811 "parser.tab.c"
+#line 1721 "parser.tab.c"
     break;
 
-  case 38: /* expressionlogic: expression EQUAL expression  */
-#line 587 "parser.y"
+  case 33: /* statement: WRITE LPAREN expressionwrite RPAREN SEMICOLON  */
+#line 511 "parser.y"
+                                                    {
+        // Vérification que l'expression à écrire est valide
+    }
+#line 1729 "parser.tab.c"
+    break;
+
+  case 34: /* expressionlogic: expression EQUAL expression  */
+#line 518 "parser.y"
                            {
         if (strcmp((yyvsp[-2].exprari).type, (yyvsp[0].exprari).type) != 0) {
             yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
@@ -1823,36 +1821,54 @@ yyreduce:
 
 
     }
-#line 1827 "parser.tab.c"
+#line 1785 "parser.tab.c"
     break;
 
-  case 39: /* expressionlogic: LPAREN expressionlogic RPAREN  */
-#line 599 "parser.y"
+  case 35: /* expressionlogic: LPAREN expressionlogic RPAREN  */
+#line 570 "parser.y"
                                   {
         // Copier le contenu de la sous-expression dans l'expression actuelle
         (yyval.exprlog).type = (yyvsp[-1].exprlog).type;
         (yyval.exprlog).count = (yyvsp[-1].exprlog).count;
         (yyval.exprlog).value=(yyvsp[-1].exprlog).value;
     }
-#line 1838 "parser.tab.c"
+#line 1797 "parser.tab.c"
     break;
 
-  case 40: /* expressionlogic: expression LT expression  */
-#line 605 "parser.y"
+  case 36: /* expressionlogic: expression LT expression  */
+#line 577 "parser.y"
                                {
         if (strcmp((yyvsp[-2].exprari).type, (yyvsp[0].exprari).type) != 0) {
             yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
             return 0;
         }
         (yyval.exprlog).type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
-        char* current_else_label = top(else_label_stack);
-        generer("BGE",current_else_label,(yyvsp[-2].exprari).name,(yyvsp[0].exprari).name);
+        if(strcmp((yyvsp[-2].exprari).type,"INTEGER")==0){
+             if((yyvsp[-2].exprari).value.ival<(yyvsp[0].exprari).value.ival){
+              (yyval.exprlog).value=1;
+        }else{
+            (yyval.exprlog).value=0;
         }
-#line 1852 "parser.tab.c"
+        }
+          if(strcmp((yyvsp[-2].exprari).type,"FLOAT")==0){
+             if((yyvsp[-2].exprari).value.fval<(yyvsp[0].exprari).value.fval){
+              (yyval.exprlog).value=1;
+        }else{
+            (yyval.exprlog).value=0;
+        }
+        }
+          if(strcmp((yyvsp[-2].exprari).type,"CHAR")==0){
+             if((yyvsp[-2].exprari).value.cval<(yyvsp[0].exprari).value.cval){
+              (yyval.exprlog).value=1;
+        }else{
+            (yyval.exprlog).value=0;
+        }
+        }}
+#line 1829 "parser.tab.c"
     break;
 
-  case 41: /* expressionlogic: expression LTE expression  */
-#line 616 "parser.y"
+  case 37: /* expressionlogic: expression LTE expression  */
+#line 605 "parser.y"
                                 {
         if (strcmp((yyvsp[-2].exprari).type, (yyvsp[0].exprari).type) != 0) {
             yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
@@ -1863,11 +1879,11 @@ yyreduce:
         generer("BG",current_else_label,(yyvsp[-2].exprari).name,(yyvsp[0].exprari).name);
 
     }
-#line 1867 "parser.tab.c"
+#line 1884 "parser.tab.c"
     break;
 
-  case 42: /* expressionlogic: expression GT expression  */
-#line 628 "parser.y"
+  case 38: /* expressionlogic: expression GT expression  */
+#line 657 "parser.y"
     {  if (strcmp((yyvsp[-2].exprari).type, (yyvsp[0].exprari).type) != 0) {
             yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
             return 0;
@@ -1877,11 +1893,11 @@ yyreduce:
         generer("BLE",current_else_label,(yyvsp[-2].exprari).name,(yyvsp[0].exprari).name);
     
     }
-#line 1881 "parser.tab.c"
+#line 1916 "parser.tab.c"
     break;
 
-  case 43: /* expressionlogic: expression GTE expression  */
-#line 637 "parser.y"
+  case 39: /* expressionlogic: expression GTE expression  */
+#line 684 "parser.y"
                                 {
         if (strcmp((yyvsp[-2].exprari).type, (yyvsp[0].exprari).type) != 0) {
             yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
@@ -1893,13 +1909,13 @@ yyreduce:
 
 
     }
-#line 1897 "parser.tab.c"
+#line 1949 "parser.tab.c"
     break;
 
-  case 44: /* expressionlogic: expressionlogic AND expressionlogic  */
-#line 649 "parser.y"
-                                          {
-        // Vérification que les opérandes sont du type booléen
+  case 40: /* expressionlogic: expressionlogic AND expressionlogic  */
+#line 713 "parser.y"
+                                         {
+        // Vérification que les deux opérandes sont booléens
         if (strcmp((yyvsp[-2].exprlog).type, "BOOLEAN") != 0 || strcmp((yyvsp[0].exprlog).type, "BOOLEAN") != 0) {
             yyerror("Opérandes incompatibles pour l'opérateur logique AND.");
             return 0;
@@ -1932,13 +1948,12 @@ yyreduce:
         free(current_else_label);
         free(current_end_label);
     }
-#line 1936 "parser.tab.c"
+#line 1990 "parser.tab.c"
     break;
 
-  case 45: /* expressionlogic: expressionlogic OR expressionlogic  */
-#line 684 "parser.y"
-                                             {
-        // Vérifier que les deux opérandes sont du type booléen
+  case 41: /* expressionlogic: expressionlogic OR expressionlogic  */
+#line 749 "parser.y"
+                                         {
         if (strcmp((yyvsp[-2].exprlog).type, "BOOLEAN") != 0 || strcmp((yyvsp[0].exprlog).type, "BOOLEAN") != 0) {
             yyerror("Opérandes incompatibles pour l'opérateur logique OR.");
             return 0;
@@ -1962,13 +1977,12 @@ yyreduce:
         // Libérer la mémoire allouée pour le label de fin
         free(current_end_label);
     }
-#line 1966 "parser.tab.c"
+#line 2031 "parser.tab.c"
     break;
 
-  case 46: /* expressionlogic: NOT expressionlogic  */
-#line 710 "parser.y"
-                        {
-        // Vérifier que l'opérande est de type booléen
+  case 42: /* expressionlogic: NOT expressionlogic  */
+#line 785 "parser.y"
+                          {
         if (strcmp((yyvsp[0].exprlog).type, "BOOLEAN") != 0) {
             yyerror("L'opérande de NOT doit être de type BOOLEAN.");
             return 0;
@@ -1991,11 +2005,11 @@ yyreduce:
         // Libérer la mémoire allouée pour le label de fin
         free(current_end_label);
     }
-#line 1995 "parser.tab.c"
+#line 2066 "parser.tab.c"
     break;
 
-  case 47: /* init_for: IDENTIFIER ASSIGN expression  */
-#line 739 "parser.y"
+  case 43: /* init_for: IDENTIFIER ASSIGN expression  */
+#line 818 "parser.y"
                                  {
         TableEntry *varEntry = rechercher((yyvsp[-2].id).name);
         if (varEntry == NULL) {
@@ -2005,11 +2019,11 @@ yyreduce:
         (yyval.exprari) = (yyvsp[0].exprari);  // Pass the expression value up
         (yyval.exprari).name=(yyvsp[-2].id).name;
     }
-#line 2009 "parser.tab.c"
+#line 2079 "parser.tab.c"
     break;
 
-  case 48: /* expressionwrite: IDENTIFIER  */
-#line 752 "parser.y"
+  case 44: /* expressionwrite: IDENTIFIER  */
+#line 830 "parser.y"
                {
         TableEntry *varEntry = rechercher((yyvsp[0].id).name);
         if (varEntry == NULL) {
@@ -2017,11 +2031,11 @@ yyreduce:
             return 0;
         }
     }
-#line 2021 "parser.tab.c"
+#line 2091 "parser.tab.c"
     break;
 
-  case 51: /* expressionwrite: IDENTIFIER COMMA expressionwrite  */
-#line 761 "parser.y"
+  case 47: /* expressionwrite: IDENTIFIER COMMA expressionwrite  */
+#line 839 "parser.y"
                                        {
         TableEntry *varEntry = rechercher((yyvsp[-2].id).name);
         if (varEntry == NULL) {
@@ -2029,11 +2043,11 @@ yyreduce:
             return 0;
         }
     }
-#line 2033 "parser.tab.c"
+#line 2103 "parser.tab.c"
     break;
 
 
-#line 2037 "parser.tab.c"
+#line 2107 "parser.tab.c"
 
       default: break;
     }
@@ -2115,7 +2129,6 @@ yyerrorlab:
      label yyerrorlab therefore never appears in user code.  */
   if (0)
     YYERROR;
-  ++yynerrs;
 
   /* Do not reclaim the symbols of the rule whose action triggered
      this YYERROR.  */
@@ -2176,7 +2189,7 @@ yyerrlab1:
 `-------------------------------------*/
 yyacceptlab:
   yyresult = 0;
-  goto yyreturnlab;
+  goto yyreturn;
 
 
 /*-----------------------------------.
@@ -2184,22 +2197,24 @@ yyacceptlab:
 `-----------------------------------*/
 yyabortlab:
   yyresult = 1;
-  goto yyreturnlab;
+  goto yyreturn;
 
 
-/*-----------------------------------------------------------.
-| yyexhaustedlab -- YYNOMEM (memory exhaustion) comes here.  |
-`-----------------------------------------------------------*/
+#if !defined yyoverflow
+/*-------------------------------------------------.
+| yyexhaustedlab -- memory exhaustion comes here.  |
+`-------------------------------------------------*/
 yyexhaustedlab:
   yyerror (YY_("memory exhausted"));
   yyresult = 2;
-  goto yyreturnlab;
+  goto yyreturn;
+#endif
 
 
-/*----------------------------------------------------------.
-| yyreturnlab -- parsing is finished, clean up and return.  |
-`----------------------------------------------------------*/
-yyreturnlab:
+/*-------------------------------------------------------.
+| yyreturn -- parsing is finished, clean up and return.  |
+`-------------------------------------------------------*/
+yyreturn:
   if (yychar != YYEMPTY)
     {
       /* Make sure we have latest lookahead translation.  See comments at
@@ -2226,7 +2241,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 780 "parser.y"
+#line 858 "parser.y"
 
 
 void yyerror(const char *s) {

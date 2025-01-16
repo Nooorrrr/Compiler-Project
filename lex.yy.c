@@ -1,5 +1,5 @@
 
-#line 3 "lex.yy.c"
+#line 2 "lex.yy.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -366,14 +366,14 @@ struct yy_trans_info
 static const flex_int16_t yy_accept[125] =
     {   0,
         0,    0,   49,   47,   45,   46,   23,   47,   47,   47,
-       47,   37,   38,   32,   30,   42,   31,   33,   17,   34,
+       47,   37,   38,   32,   30,   42,   31,   33,   19,   34,
        41,   29,   43,   28,   14,   14,   14,   14,   14,   14,
        14,   14,   14,   39,   40,   35,   47,   36,   25,    0,
-       44,    0,   13,   21,    0,   17,   18,    0,   27,   24,
+       44,    0,   13,   21,    0,   19,   20,    0,   27,   24,
        26,   14,    0,    0,    0,    0,    0,    0,    8,    0,
-        0,    0,    0,   22,   16,   13,   15,    0,   19,   14,
+        0,    0,    0,   22,   16,   13,   15,    0,   17,   14,
         0,    0,    0,    0,    0,   10,    0,    0,    0,    0,
-        0,   20,   14,    6,    0,    0,    9,    0,    0,    0,
+        0,   18,   14,    6,    0,    0,    9,    0,    0,    0,
        11,    0,    0,   14,    7,    0,    5,    0,    0,    0,
 
        12,   14,    0,    0,    0,    0,   14,    0,    0,    4,
@@ -545,8 +545,8 @@ char *yytext;
 #include <stdio.h>
 #include <stdlib.h>
 #include "parser.tab.h" 
+#line 548 "lex.yy.c"
 #line 549 "lex.yy.c"
-#line 550 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -557,7 +557,7 @@ char *yytext;
  */
 #include <unistd.h>
 #endif
-
+    
 #ifndef YY_EXTRA_TYPE
 #define YY_EXTRA_TYPE void *
 #endif
@@ -766,7 +766,7 @@ YY_DECL
 #line 10 "lexer.l"
 
 
-#line 770 "lex.yy.c"
+#line 769 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -912,165 +912,165 @@ YY_RULE_SETUP
 case 17:
 YY_RULE_SETUP
 #line 36 "lexer.l"
-{ yylval.entier = atoi(yytext); return NUMBERINTPOS; }
+{ yylval.flottant = strtod(yytext, NULL); return NUMBERFLOATPOS; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
 #line 37 "lexer.l"
-{ yylval.entier = atoi(yytext); return NUMBERINTNEG; }
+{ yylval.flottant = strtod(yytext, NULL); return NUMBERFLOATNEG; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
 #line 38 "lexer.l"
-{ yylval.flottant = strtod(yytext, NULL); return NUMBERFLOATPOS; }
+{ yylval.entier = atoi(yytext); return NUMBERINTPOS; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
 #line 39 "lexer.l"
-{ yylval.flottant = strtod(yytext, NULL); return NUMBERFLOATNEG; }
+{ yylval.entier = atoi(yytext); return NUMBERINTNEG; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 41 "lexer.l"
+#line 42 "lexer.l"
 { return AND; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 42 "lexer.l"
+#line 43 "lexer.l"
 { return OR; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 43 "lexer.l"
+#line 44 "lexer.l"
 { return NOT; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 44 "lexer.l"
+#line 45 "lexer.l"
 { return EQUAL; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 45 "lexer.l"
+#line 46 "lexer.l"
 { return NEQ; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 46 "lexer.l"
+#line 47 "lexer.l"
 { return GTE; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 47 "lexer.l"
+#line 48 "lexer.l"
 { return LTE; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 48 "lexer.l"
+#line 49 "lexer.l"
 { return GT; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 49 "lexer.l"
+#line 50 "lexer.l"
 { return LT; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 51 "lexer.l"
+#line 52 "lexer.l"
 { return PLUS; }   
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 52 "lexer.l"
+#line 53 "lexer.l"
 { return MINUS; } 
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 53 "lexer.l"
+#line 54 "lexer.l"
 { return MULT; }   
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 54 "lexer.l"
+#line 55 "lexer.l"
 { return DIV; }   
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 55 "lexer.l"
+#line 56 "lexer.l"
 { return BOUCLESEPARATOR; } 
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 57 "lexer.l"
+#line 58 "lexer.l"
 { return LBRACE; }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 58 "lexer.l"
+#line 59 "lexer.l"
 { return RBRACE; }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 59 "lexer.l"
+#line 60 "lexer.l"
 { return LPAREN; }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 60 "lexer.l"
+#line 61 "lexer.l"
 { return RPAREN; }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 61 "lexer.l"
+#line 62 "lexer.l"
 { return LBRACKET; }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 62 "lexer.l"
+#line 63 "lexer.l"
 { return RBRACKET; }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 63 "lexer.l"
+#line 64 "lexer.l"
 { return SEMICOLON; }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 65 "lexer.l"
+#line 66 "lexer.l"
 { return COMMA; }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 66 "lexer.l"
+#line 67 "lexer.l"
 { return ASSIGN; }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 67 "lexer.l"
+#line 68 "lexer.l"
 { return TEXT; }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 69 "lexer.l"
+#line 70 "lexer.l"
 { /* Ignorer les espaces et les tabulations */ }
 	YY_BREAK
 case 46:
 /* rule 46 can match eol */
 YY_RULE_SETUP
-#line 70 "lexer.l"
+#line 71 "lexer.l"
 { yylineno++; }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 71 "lexer.l"
+#line 72 "lexer.l"
 { printf("Erreur lexical à la ligne %d: entite inconnu: %s\n", yylineno, yytext); exit(1); }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 73 "lexer.l"
+#line 74 "lexer.l"
 ECHO;
 	YY_BREAK
-#line 1074 "lex.yy.c"
+#line 1073 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2075,5 +2075,5 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 73 "lexer.l"
+#line 74 "lexer.l"
 
