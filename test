@@ -3,26 +3,33 @@ VAR_GLOBAL {
     INTEGER Q,I;  
     FLOAT X,L;
     CONST INTEGER Z = 3;
+    INTEGER W;
+    INTEGER M;
+    CHAR Y[9];
+    INTEGER G;
     
 }
 
 DECLARATION { %%affectations
    CONST INTEGER N= 6;
-  %% CHAR Y[8] = "hello";
 }
 
 INSTRUCTION {
      C = 1;
-     A =5;
+     A =2;
      B=3;
     IF (A > B){
         C = A + 1;
-         C = A- 1;
     } ELSE {
-        C = A- 1;
-         C = A- 1;
-    }
- FOR (I = 0 : 1 : 10) {
-    Q = Q + 1;
+        C=A + 2;
+         FOR (I = 0 : 1 : 10) {
+        G = G + 1;
 }
+    }
+
+
+    W = 32767;
+    M = -32767;
+    W = Z - M;
+    M = W * Z;
 }

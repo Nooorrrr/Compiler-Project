@@ -57,7 +57,7 @@ void print_quadruplet(const Quadruplet* quad) {
 
 // Fonction pour générer un quadruplet
 void generer(char* a, char* b, char* c, char* d) {
-printf("%s     %s      %s     %s",a,b,c,d);
+//printf("%s     %s      %s     %s",a,b,c,d);
     if (!a ) {
         fprintf(stderr, "Invalid argument(s) passed to generer: NULL\n");
         exit(EXIT_FAILURE);
@@ -74,7 +74,8 @@ printf("%s     %s      %s     %s",a,b,c,d);
         exit(EXIT_FAILURE);
     }
 
-    printf("Generating quadruplet: (%s, %s, %s, %s)\n", a, b, c, d);
+   //printf("\n");
+   // printf("Generating quadruplet: (%s, %s, %s, %s)\n", a, b, c, d);
 
     if (quadruplet_count >= MAX_QUADRUPLETS) {
         fprintf(stderr, "Quadruplet limit exceeded\n");

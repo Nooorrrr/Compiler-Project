@@ -104,7 +104,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 13 "parser.y"
+#line 54 "parser.y"
 
     int entier;        // Pour les entiers
     float flottant;    // Pour les namebres flottants
@@ -137,9 +137,8 @@ union YYSTYPE
     struct {
         char* name;  // Add this line to define the name field
         char* type;    // Le type de l'expression (par exemple: "int", "float")
-        char** variables; 
         int count; 
-        int value;
+        char* value;
     } exprlog;    
 
     struct {
@@ -148,7 +147,7 @@ union YYSTYPE
         int count;        // namebre d'éléments dans le tableau
     } id;
 
-#line 152 "parser.tab.h"
+#line 151 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

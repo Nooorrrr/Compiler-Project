@@ -8,6 +8,47 @@ extern int tempCount;
 extern int scope;  // Déclaration de la variable scope
 extern TableEntry Tab[1000];  // Table des identifiants et constantes
 int scope = 0;  // Initialisation de scope
+// Structure pour un nœud de pile
+typedef struct StackNode {
+    char* data;
+    struct StackNode* next;
+} StackNode;
+
+// Pointeur vers le sommet de la pile
+StackNode* else_label_stack = NULL;
+StackNode* end_label_stack = NULL;
+StackNode* start_label_stack = NULL;
+
+
+// Fonction pour empiler
+void push(StackNode** stack, const char* value) {
+    StackNode* new_node = (StackNode*)malloc(sizeof(StackNode));
+    new_node->data = strdup(value); // Copier la chaîne
+    new_node->next = *stack;
+    *stack = new_node;
+}
+
+// Fonction pour dépiler
+char* pop(StackNode** stack) {
+    if (*stack == NULL) {
+        fprintf(stderr, "Erreur : pile vide\n");
+        return NULL;
+    }
+    StackNode* temp = *stack;
+    char* value = temp->data;
+    *stack = (*stack)->next;
+    free(temp);
+    return value;
+}
+
+// Fonction pour obtenir le sommet sans dépiler
+char* top(StackNode* stack) {
+    if (stack == NULL) {
+        fprintf(stderr, "Erreur : pile vide\n");
+        return NULL;
+    }
+    return stack->data;
+}
 void yyerror(const char *s);  // Déclaration de la fonction d'erreur
 %}
 %union {
@@ -42,9 +83,8 @@ void yyerror(const char *s);  // Déclaration de la fonction d'erreur
     struct {
         char* name;  // Add this line to define the name field
         char* type;    // Le type de l'expression (par exemple: "int", "float")
-        char** variables; 
         int count; 
-        int value;
+        char* value;
     } exprlog;    
 
     struct {
@@ -206,10 +246,8 @@ affectation:
         } else if (strcmp(varEntry->type, "FLOAT") == 0) {
             varEntry->val.fval = $3.value.fval;  // Affecter un flottant
             if(strcmp($3.type,"INTEGER") == 0){
-            
-               
                 generer("=",$3.name, "", varEntry->name);
-                varEntry->val.fval = (float) $3.value.fval;
+                varEntry->val.fval = (float) $3.value.ival;
             }
         } else if (strcmp(varEntry->type, "CHAR") == 0) {
        
@@ -267,7 +305,7 @@ expression:
        char val[20];
         sprintf(val, "%f", $1);  // Corrected format specifier
          $$.name=val;
-         printf("%s",val);
+        
     }
     | CARACTERE {  // Cas où l'expression est un caractère
         $$.type = "CHAR";
@@ -279,12 +317,8 @@ expression:
 
     }
     | expression PLUS expression {  // Addition
-        if (strcmp($1.type, $3.type) != 0) {
-            yyerror("Opérandes incompatibles pour l'addition.");
-            return 0;
-        }
-        if (strcmp($1.type, "INTEGER") == 0) {
-            $$.type = "INTEGER";
+     if (strcmp($1.type,"INTEGER")==0 && strcmp($3.type,"INTEGER")==0) {
+       $$.type = "INTEGER";
             $$.value.ival = $1.value.ival + $3.value.ival;
 
             // Générer un quadruplet pour l'addition
@@ -292,118 +326,152 @@ expression:
             sprintf(tempVar, "t%d", tempCount++);
             generer("+", $1.name,$3.name, tempVar);
                 $$.name=tempVar;
-        } else if (strcmp($1.type, "FLOAT") == 0) {
-            $$.type = "FLOAT";
-            $$.value.fval = $1.value.fval + $3.value.fval;
-
-            // Générer un quadruplet pour l'addition flottante
+    } else if (strcmp($1.type,"FLOAT")==0|| strcmp($3.type,"FLOAT")==0) {
+        // Si l'un des opérandes est un FLOAT
+        if (strcmp($1.type,"INTEGER")==0) {
+            $1.type = "FLOAT";
+            $1.value.fval = (float) $1.value.ival;
+          
+        }
+        if (strcmp($3.type,"INTEGER")==0) {
+            $3.type = "FLOAT";
+            $3.value.fval = (float) $3.value.ival;
+      
+        }
+        $$.type = "FLOAT";
+        $$.value.fval = $1.value.fval + $3.value.fval;
+           // Générer un quadruplet pour l'addition flottante
             char tempVar[20];
             sprintf(tempVar, "t%d", tempCount++);
             generer("+",$1.name,$3.name, tempVar);
             $$.name=tempVar;
-        } else {
-            yyerror("Addition non supportée pour ce type.");
-            return 0;
-        }
-      
+    } else {
+        // Si les types sont incompatibles
+        yyerror("Opérandes de types incompatibles pour l'addition.");
+        return 0;
+    }
+
+
     }
     | expression MINUS expression {  // Soustraction
-        if (strcmp($1.type, $3.type) != 0) {
-            yyerror("Opérandes incompatibles pour la soustraction.");
-            return 0;
-        }
-        if (strcmp($1.type, "INTEGER") == 0) {
-            $$.type = "INTEGER";
+        if (strcmp($1.type,"INTEGER")==0 && strcmp($3.type,"INTEGER")==0) {
+       $$.type = "INTEGER";
             $$.value.ival = $1.value.ival - $3.value.ival;
 
-            // Générer un quadruplet pour la soustraction
+            // Générer un quadruplet pour l'addition
             char tempVar[20];
             sprintf(tempVar, "t%d", tempCount++);
-             
+            generer("-", $1.name,$3.name, tempVar);
+                $$.name=tempVar;
+    } else if (strcmp($1.type,"FLOAT")==0|| strcmp($3.type,"FLOAT")==0) {
+        // Si l'un des opérandes est un FLOAT
+        if (strcmp($1.type,"INTEGER")==0) {
+            $1.type = "FLOAT";
+            $1.value.fval = (float) $1.value.ival;
+        }
+        if (strcmp($3.type,"INTEGER")==0) {
+            $3.type = "FLOAT";
+            $3.value.fval = (float) $3.value.ival;
+        }
+     //   printf("var1 :\n%f\n",$1.value.ival);
+       // printf("var2 :\n%f\n",$3.value.ival);
+        $$.type = "FLOAT";
+        $$.value.fval = $1.value.fval - $3.value.fval;
+           // Générer un quadruplet pour l'addition flottante
+            char tempVar[20];
+            sprintf(tempVar, "t%d", tempCount++);
             generer("-",$1.name,$3.name, tempVar);
             $$.name=tempVar;
-        } else if (strcmp($1.type, "FLOAT") == 0) {
-            $$.type = "FLOAT";
-            $$.value.fval = $1.value.fval - $3.value.fval;
+    } else {
+        // Si les types sont incompatibles
+        yyerror("Opérandes de types incompatibles pour la soustraction.");
+        return 0;
+    }
 
-            // Générer un quadruplet pour la soustraction flottante
-            char tempVar[20];
-            sprintf(tempVar, "t%d", tempCount++);
-            generer("-",$1.name,$3.name, tempVar);
-                $$.name=tempVar;
-            
-        } else {
-            yyerror("Soustraction non supportée pour ce type.");
-            return 0;
-        }
     }
     | expression MULT expression {  // Multiplication
-        if (strcmp($1.type, $3.type) != 0) {
-            yyerror("Opérandes incompatibles pour la multiplication.");
-            return 0;
-        }
-        if (strcmp($1.type, "INTEGER") == 0) {
-            $$.type = "INTEGER";
+  
+      
+         if (strcmp($1.type,"INTEGER")==0 && strcmp($3.type,"INTEGER")==0) {
+       $$.type = "INTEGER";
             $$.value.ival = $1.value.ival * $3.value.ival;
 
-            // Générer un quadruplet pour la multiplication
-            char tempVar[20];
-                
-            sprintf(tempVar, "t%d", tempCount++);
-            generer("*", $1.name,$3.name, tempVar);
-            $$.name=tempVar;
-        } else if (strcmp($1.type, "FLOAT") == 0) {
-            $$.type = "FLOAT";
-            $$.value.fval = $1.value.fval * $3.value.fval;
-
-            // Générer un quadruplet pour la multiplication flottante
+            // Générer un quadruplet pour l'addition
             char tempVar[20];
             sprintf(tempVar, "t%d", tempCount++);
-               printf("\n\n\n\n%s\n\n\n\n", $1.name);
-                     printf("\n\n\n\n%s\n\n\n\n", $3.name);
             generer("*", $1.name,$3.name, tempVar);
-            $$.name=tempVar;
-        } else {
-            yyerror("Multiplication non supportée pour ce type.");
-            return 0;
+                $$.name=tempVar;
+    } else if (strcmp($1.type,"FLOAT")==0|| strcmp($3.type,"FLOAT")==0) {
+        // Si l'un des opérandes est un FLOAT
+        if (strcmp($1.type,"INTEGER")==0) {
+            $1.type = "FLOAT";
+            $1.value.fval = (float) $1.value.ival;
         }
+        if (strcmp($3.type,"INTEGER")==0) {
+            $3.type = "FLOAT";
+          
+            $3.value.fval = (float) $3.value.ival;
+          
+        }
+           
+
+        $$.type = "FLOAT";
+        $$.value.fval = $1.value.fval * $3.value.fval;
+           // Générer un quadruplet pour l'addition flottante
+            char tempVar[20];
+            sprintf(tempVar, "t%d", tempCount++);
+            generer("*",$1.name,$3.name, tempVar);
+            $$.name=tempVar;
+    } else {
+        // Si les types sont incompatibles
+        yyerror("Opérandes de types incompatibles pour la multiplication.");
+        return 0;
+    }
+
     }
     | expression DIV expression {  // Division
-        if (strcmp($1.type, $3.type) != 0) {
-            yyerror("Opérandes incompatibles pour la division.");
-            return 0;
-        }
-        if (strcmp($1.type, "INTEGER") == 0) {
-            if ($3.value.ival == 0) {
-                yyerror("Division par zéro.");
-                return 0;
-            }
-            $$.type = "INTEGER";
-            $$.value.ival = $1.value.ival / $3.value.ival;
 
-            // Générer un quadruplet pour la division
+        if (strcmp($1.type,"INTEGER")==0 && strcmp($3.type,"INTEGER")==0) {
+             $$.type = "INTEGER";
+               if($3.value.fval==0){
+              yyerror("division sur 0 impossible.");
+                }else{  
+             $$.value.ival = $1.value.ival/ $3.value.ival;
+
+            // Générer un quadruplet pour l'addition
+            char tempVar[20];
+            sprintf(tempVar, "t%d", tempCount++);
+            generer("/", $1.name,$3.name, tempVar);
+                $$.name=tempVar;
+             }
+           
+    } else if (strcmp($1.type,"FLOAT")==0|| strcmp($3.type,"FLOAT")==0) {
+        // Si l'un des opérandes est un FLOAT
+        if (strcmp($1.type,"INTEGER")==0) {
+            $1.type = "FLOAT";
+            $1.value.fval = (float) $1.value.ival;
+        }
+        if (strcmp($3.type,"INTEGER")==0) {
+            $3.type = "FLOAT";
+            $3.value.fval = (float) $3.value.ival;
+        }
+        $$.type = "FLOAT";
+          if($3.value.fval==0){
+              yyerror("division sur 0 impossible.");
+                }else{ 
+        $$.value.fval = $1.value.fval / $3.value.fval;
+           // Générer un quadruplet pour l'addition flottante
             char tempVar[20];
             sprintf(tempVar, "t%d", tempCount++);
             generer("/",$1.name,$3.name, tempVar);
             $$.name=tempVar;
-        } else if (strcmp($1.type, "FLOAT") == 0) {
-            if ($3.value.fval == 0.0f) {
-                yyerror("Division par zéro.");
-                return 0;
-            }
-            $$.type = "FLOAT";
-            $$.value.fval = $1.value.fval / $3.value.fval;
+                }
+    } else {
+        // Si les types sont incompatibles
+        yyerror("Opérandes de types incompatibles pour la division.");
+        return 0;
+    }
 
-            // Générer un quadruplet pour la division flottante
-            char tempVar[20];
-               sprintf(tempVar, "t%d", tempCount++);
-    
-            generer("/", $1.name,$3.name, tempVar);
-                $$.name=tempVar;
-        } else {
-            yyerror("Division non supportée pour ce type.");
-            return 0;
-        }
     }
     | LPAREN expression RPAREN {  // Parenthèses pour prioriser les opérations
         $$.type = $2.type;
@@ -429,78 +497,82 @@ expressionslogic:
     | expressionslogic expressionlogic
 ;
 
-statement:
-    affectation
-    | IF LPAREN expressionslogic RPAREN LBRACE statements RBRACE ELSE LBRACE statements RBRACE {
-        // Vérifier que la condition dans IF est de type booléen
+ifstart:
+     {
+       
 
-        if (strcmp($3.type, "BOOLEAN") != 0) {
+        char else_label[20], end_label[20];
+        sprintf(else_label, "L%d", tempCount++);
+        sprintf(end_label, "L%d", tempCount++);
+        push(&else_label_stack, else_label);
+        push(&end_label_stack, end_label);
+
+
+    }
+;
+ifcond:
+    ifstart IF LPAREN expressionslogic RPAREN {
+         if (strcmp($4.type, "BOOLEAN") != 0) {
             yyerror("La condition de l'instruction IF doit être de type BOOLEAN.");
             return 0;
         }
-    // Generate unique labels for jumps
-    char* else_label = malloc(20);
-    char* end_label = malloc(20);
-    sprintf(else_label, "L%d", tempCount++);
-    sprintf(end_label, "L%d", tempCount++);
-    
-    // If expression is false (0), jump to else
-    generer("BZ", $3.name, "", else_label);
-    
-    // If-block code was already generated in statements
-    
-    // Jump to end after if block
-    generer("BR", end_label, "", "");
-    
-    // Place else label
-    generer("LABEL", else_label, "", "");
-    
-    // Else-block code was already generated in statements
-    
-    // Place end label
-    generer("LABEL", end_label, "", "");
-    
-    free(else_label);
-    free(end_label);
+    };
+;
+ifstate:
+    LBRACE statements RBRACE {
+        char* current_else_label = top(else_label_stack);
+        char* current_end_label = top(end_label_stack);
 
+        generer("BR", current_end_label, "", "");
+        generer("LABEL", current_else_label, "", "");
     }
-    | FOR LPAREN init_for BOUCLESEPARATOR expression BOUCLESEPARATOR expression RPAREN LBRACE statements RBRACE {
-      if (strcmp($5.type, "INTEGER") != 0||strcmp($7.type, "INTEGER") != 0) {
-        yyerror("Le pas de la boucle doit être un entier.");
-        return 0;
+;
+
+forcond:
+    FOR LPAREN init_for BOUCLESEPARATOR expression BOUCLESEPARATOR expression RPAREN {
+        if (strcmp($5.type, "INTEGER") != 0 || strcmp($7.type, "INTEGER") != 0) {
+            yyerror("Le pas de la boucle doit être un entier.");
+            return 0;
+        }
+
+        // Générer des labels uniques
+        char start_label[20],end_label[20];
+        sprintf(start_label, "L%d", tempCount++);
+        sprintf(end_label, "L%d", tempCount++);
+
+        // Empiler les labels
+        push(&start_label_stack, start_label);
+        push(&end_label_stack, end_label);
+
+        generer("LABEL", start_label, "", "");
+        char temp[20];
+        sprintf(temp, "t%d", tempCount++);
+        generer("-", $7.name, $3.name, temp); 
+        generer("BPE", temp, "", end_label);
+        generer("+", $3.name, $7.name, $3.name);
+    }
+;
+
+statement:
+    affectation
+    | ifcond ifstate ELSE LBRACE statements RBRACE {
+        char* current_end_label = pop(&end_label_stack);
+        char* current_else_label = pop(&else_label_stack);
+
+        generer("LABEL", current_end_label, "", "");
+
+        // Libérer la mémoire
+        free(current_else_label);
+        free(current_end_label);
     }
 
-    // Generate unique labels
-    char* start_label = malloc(20);
-    char* end_label = malloc(20);
-    sprintf(start_label, "L%d", tempCount++);
-    sprintf(end_label, "L%d", tempCount++);
-    
-    // Place start label
-    generer("LABEL", start_label, "", "");
-    
-    // Generate comparison result
-    char* temp = malloc(20);
-    sprintf(temp, "t%d", tempCount++);
-    generer("-", $3.name, $5.name, temp);  // temp = counter - limit
-    
-    // If temp >= 0 (counter >= limit), exit loop
-    generer("BGE", temp, "", end_label);
-    
-    // Loop body code was already generated in statements
-    
-    // Increment counter
-    generer("+", $3.name, $7.name, $3.name);
-    
-    // Jump back to start
-    generer("BR", start_label, "", "");
-    
-    // Place end label
-    generer("LABEL", end_label, "", "");
-    
-    free(start_label);
-    free(end_label);
-    free(temp);
+    |forcond LBRACE statements RBRACE {
+        char* current_start_label = pop(&start_label_stack);
+        char* current_end_label = pop(&end_label_stack);
+        generer("BR", current_start_label, "", "");
+        generer("LABEL", current_end_label, "", "");
+        free(current_start_label);
+        free(current_end_label);
     }
     | READ LPAREN IDENTIFIER RPAREN SEMICOLON {
         if (rechercher($3.name) == NULL) {
@@ -508,69 +580,25 @@ statement:
             return 0;
         }
     }
-    | WRITE LPAREN expressionwrite RPAREN SEMICOLON {
-        // Vérification que l'expression à écrire est valide
-    }
+    | WRITE LPAREN expressionwrite RPAREN SEMICOLON
 ;
 
 expressionlogic:
-
 expression EQUAL expression{
         if (strcmp($1.type, $3.type) != 0) {
             yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
             return 0;
         }
         $$.type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
-         char* temp = malloc(20);
-        sprintf(temp, "t%d", tempCount++);
-        char* true_label = malloc(20);
-        char* end_label = malloc(20);
-        sprintf(true_label, "L%d", tempCount++);
-        sprintf(end_label, "L%d", tempCount++);
-        
-        // Compare values
-        generer("-", $1.name, $3.name, temp);
-        
-        // If difference is 0, values are equal
-        generer("BZ", temp, "", true_label);
-        generer("=", "0", "", temp);  // Set result to false
-        generer("BR", end_label, "", "");
-        generer("LABEL", true_label, "", "");
-        generer("=", "1", "", temp);  // Set result to true
-        generer("LABEL", end_label, "", "");
-        
-        $$.name = temp;
-        free(true_label);
-        free(end_label);
+        char* current_else_label = top(else_label_stack);
+        generer("BNE",current_else_label,$1.name,$3.name);
 
-        if(strcmp($1.type,"INTEGER")==0){
-             if($1.value.ival==$3.value.ival){
-              $$.value=1;
-        }else{
-            $$.value=0;
-        }
-        }
-          if(strcmp($1.type,"FLOAT")==0){
-             if($1.value.fval==$3.value.fval){
-              $$.value=1;
-        }else{
-            $$.value=0;
-        }
-        }
-          if(strcmp($1.type,"CHAR")==0){
-             if($1.value.cval==$3.value.cval){
-              $$.value=1;
-        }else{
-            $$.value=0;
-        }
-        }
-    
+
     }
     |
     LPAREN expressionlogic RPAREN {
         // Copier le contenu de la sous-expression dans l'expression actuelle
         $$.type = $2.type;
-        $$.variables = $2.variables;
         $$.count = $2.count;
         $$.value=$2.value;
     }
@@ -580,27 +608,10 @@ expression EQUAL expression{
             return 0;
         }
         $$.type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
-        if(strcmp($1.type,"INTEGER")==0){
-             if($1.value.ival<$3.value.ival){
-              $$.value=1;
-        }else{
-            $$.value=0;
+        char* current_else_label = top(else_label_stack);
+        generer("BGE",current_else_label,$1.name,$3.name);
         }
-        }
-          if(strcmp($1.type,"FLOAT")==0){
-             if($1.value.fval<$3.value.fval){
-              $$.value=1;
-        }else{
-            $$.value=0;
-        }
-        }
-          if(strcmp($1.type,"CHAR")==0){
-             if($1.value.cval<$3.value.cval){
-              $$.value=1;
-        }else{
-            $$.value=0;
-        }
-        }}
+    
     
     | expression LTE expression {
         if (strcmp($1.type, $3.type) != 0) {
@@ -608,49 +619,9 @@ expression EQUAL expression{
             return 0;
         }
         $$.type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
-         char* temp = malloc(20);
-        sprintf(temp, "t%d", tempCount++);
-        char* true_label = malloc(20);
-        char* end_label = malloc(20);
-        sprintf(true_label, "L%d", tempCount++);
-        sprintf(end_label, "L%d", tempCount++);
-        
-        // Compare values
-        generer("-", $1.name, $3.name, temp);
-        
-        // If difference is negative, first value is less
-        generer("BL", temp, "", true_label);
-        generer("=", "0", "", temp);  // Set result to false
-        generer("BR", end_label, "", "");
-        generer("LABEL", true_label, "", "");
-        generer("=", "1", "", temp);  // Set result to true
-        generer("LABEL", end_label, "", "");
-        
-        $$.name = temp;
-        free(true_label);
-        free(end_label);
+        char* current_else_label = top(else_label_stack);
+        generer("BG",current_else_label,$1.name,$3.name);
 
-        if(strcmp($1.type,"INTEGER")==0){
-             if($1.value.ival<=$3.value.ival){
-              $$.value=1;
-        }else{
-            $$.value=0;
-        }
-        }
-          if(strcmp($1.type,"FLOAT")==0){
-             if($1.value.fval<=$3.value.fval){
-              $$.value=1;
-        }else{
-            $$.value=0;
-        }
-        }
-          if(strcmp($1.type,"CHAR")==0){
-             if($1.value.cval<=$3.value.cval){
-              $$.value=1;
-        }else{
-            $$.value=0;
-        }
-        }
     }
     
     | expression GT expression
@@ -659,27 +630,9 @@ expression EQUAL expression{
             return 0;
         }
         $$.type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
-        if(strcmp($1.type,"INTEGER")==0){
-             if($1.value.ival>$3.value.ival){
-              $$.value=1;
-        }else{
-            $$.value=0;
-        }
-        }
-          if(strcmp($1.type,"FLOAT")==0){
-             if($1.value.fval>$3.value.fval){
-              $$.value=1;
-        }else{
-            $$.value=0;
-        }
-        }
-          if(strcmp($1.type,"CHAR")==0){
-             if($1.value.cval>$3.value.cval){
-              $$.value=1;
-        }else{
-            $$.value=0;
-        }
-          }
+        char* current_else_label = top(else_label_stack);
+        generer("BLE",current_else_label,$1.name,$3.name);
+    
     }
     | expression GTE expression {
         if (strcmp($1.type, $3.type) != 0) {
@@ -687,131 +640,99 @@ expression EQUAL expression{
             return 0;
         }
         $$.type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
-        if(strcmp($1.type,"INTEGER")==0){
-             if($1.value.ival>=$3.value.ival){
-              $$.value=1;
-        }else{
-            $$.value=0;
-        }
-        }
-          if(strcmp($1.type,"FLOAT")==0){
-             if($1.value.fval>=$3.value.fval){
-              $$.value=1;
-        }else{
-            $$.value=0;
-        }
-        }
-          if(strcmp($1.type,"CHAR")==0){
-             if($1.value.cval>=$3.value.cval){
-              $$.value=1;
-        }else{
-            $$.value=0;
-        }
-        }
+        char* current_else_label = top(else_label_stack);
+        generer("BL",current_else_label,$1.name,$3.name);
+
+
     }
     
-    |expressionlogic AND expressionlogic {
-        // Vérification que les deux opérandes sont booléens
+    | expressionlogic AND expressionlogic {
+        // Vérification que les opérandes sont du type booléen
         if (strcmp($1.type, "BOOLEAN") != 0 || strcmp($3.type, "BOOLEAN") != 0) {
             yyerror("Opérandes incompatibles pour l'opérateur logique AND.");
             return 0;
         }
-        $$.type = "BOOLEAN";
-        char* temp = malloc(20);
-        sprintf(temp, "t%d", tempCount++);
-        char* false_label = malloc(20);
-        char* end_label = malloc(20);
-        sprintf(false_label, "L%d", tempCount++);
-        sprintf(end_label, "L%d", tempCount++);
-        
-        // If first expression is false, result is false
-        generer("BZ", $1.name, "", false_label);
-        // If second expression is false, result is false
-        generer("BZ", $3.name, "", false_label);
-        // Both true, set result to true
-        generer("=", "1", "", temp);
-        generer("BR", end_label, "", "");
-        // False case
-        generer("LABEL", false_label, "", "");
-        generer("=", "0", "", temp);
-        generer("LABEL", end_label, "", "");
-        
-        $$.name = temp;
-        free(false_label);
-        free(end_label);
 
-            if($1.value&&$3.value){
-              $$.value=1;
-        }else{
-            $$.value=0;
-        }
+        // Résultat de l'opération logique AND est de type booléen
+        $$.type = "BOOLEAN";
+
+        // Création des labels pour gérer les sauts conditionnels
+        char* current_else_label = malloc(20);
+        char* current_end_label = malloc(20);
+        sprintf(current_else_label, "L%d", tempCount++);
+        sprintf(current_end_label, "L%d", tempCount++);
+
+        // Génération des instructions pour le test logique
+        generer("JZ", $1.name, "", current_else_label);  // Si $1 est false, sauter à current_else_label
+        generer("JZ", $3.name, "", current_else_label);  // Si $3 est false, sauter à current_else_label
+
+        // Si les deux opérandes sont vrais, on continue l'exécution normale
+        generer("BR", current_end_label, "", "");  // Sauter à current_end_label à la fin
+
+        // Générer le label pour l'instruction ELSE
+        generer("LABEL", current_else_label, "", "");
+        generer("FALSE", "", "", "");  // Pour indiquer que l'opération a échoué
+
+        // Générer le label de fin
+        generer("LABEL", current_end_label, "", "");
+
+        // Libérer la mémoire des labels
+        free(current_else_label);
+        free(current_end_label);
     }
-    | expressionlogic OR expressionlogic {
+;
+    |   expressionlogic  OR  expressionlogic {
+        // Vérifier que les deux opérandes sont du type booléen
         if (strcmp($1.type, "BOOLEAN") != 0 || strcmp($3.type, "BOOLEAN") != 0) {
             yyerror("Opérandes incompatibles pour l'opérateur logique OR.");
             return 0;
         }
-        $$.type = "BOOLEAN";
+        $$.type = "BOOLEAN"; // Le résultat est de type booléen
 
-         char* temp = malloc(20);
-        sprintf(temp, "t%d", tempCount++);
-        char* true_label = malloc(20);
-        char* end_label = malloc(20);
-        sprintf(true_label, "L%d", tempCount++);
-        sprintf(end_label, "L%d", tempCount++);
-        
-        // If first expression is true, result is true
-        generer("BNZ", $1.name, "", true_label);
-        // If second expression is true, result is true
-        generer("BNZ", $3.name, "", true_label);
-        // Both false, set result to false
-        generer("=", "0", "", temp);
-        generer("BR", end_label, "", "");
-        // True case
-        generer("LABEL", true_label, "", "");
-        generer("=", "1", "", temp);
-        generer("LABEL", end_label, "", "");
-        
-        $$.name = temp;
-        free(true_label);
-        free(end_label);
+        // Créer des labels pour gérer le flux d'exécution
+        char* current_end_label = malloc(20);
+        sprintf(current_end_label, "L%d", tempCount++);
 
-          if($1.value||$3.value){
-              $$.value=1;
-        }else{
-            $$.value=0;
-        }
+        // Si l'un des opérandes est vrai, sauter au label de fin
+        generer("JNZ", $1.name, "", current_end_label);  // Si $1 est vrai, sauter
+        generer("JNZ", $3.name, "", current_end_label);  // Si $3 est vrai, sauter
+
+        // Si aucune des expressions n'est vraie, on considère que l'OR est faux
+        generer("FALSE", "", "", "");  // Sinon, FALSE
+
+        // Générer le label de fin
+        generer("LABEL", current_end_label, "", "");
+
+        // Libérer la mémoire allouée pour le label de fin
+        free(current_end_label);
     }
-    | NOT expressionlogic {
+;expressionlogic:
+    NOT expressionlogic {
+        // Vérifier que l'opérande est de type booléen
         if (strcmp($2.type, "BOOLEAN") != 0) {
             yyerror("L'opérande de NOT doit être de type BOOLEAN.");
             return 0;
         }
-        $$.type = "BOOLEAN";
-        char* temp = malloc(20);
-        sprintf(temp, "t%d", tempCount++);
-        char* true_label = malloc(20);
-        char* end_label = malloc(20);
-        sprintf(true_label, "L%d", tempCount++);
-        sprintf(end_label, "L%d", tempCount++);
-        
-        // If expression is false, result is true
-        generer("BZ", $2.name, "", true_label);
-        generer("=", "0", "", temp);
-        generer("BR", end_label, "", "");
-        generer("LABEL", true_label, "", "");
-        generer("=", "1", "", temp);
-        generer("LABEL", end_label, "", "");
-        
-        $$.name = temp;
-        free(true_label);
-        free(end_label);
-          if(!$2.value){
-              $$.value=1;
-        }else{
-            $$.value=0;
-        }
+        $$.type = "BOOLEAN";  // Le résultat est de type booléen
+
+        // Créer un label pour gérer le flux d'exécution
+        char* current_end_label = malloc(20);
+        sprintf(current_end_label, "L%d", tempCount++);
+
+        // Si l'opérande est faux, le résultat sera vrai
+        generer("JZ", $2.name, "", current_end_label);  // Si $2 est faux, sauter
+
+        // Sinon, le résultat sera faux
+        generer("TRUE", "", "", "");
+
+        // Générer le label de fin
+        generer("LABEL", current_end_label, "", "");
+
+        // Libérer la mémoire allouée pour le label de fin
+        free(current_end_label);
     }
+;
+
 ;
 
 init_for:
@@ -822,6 +743,7 @@ init_for:
             return 0;
         }
         $$ = $3;  // Pass the expression value up
+        $$.name=$1.name;
     }
     ;
 
@@ -860,72 +782,4 @@ NUMBERFLOAT:
 void yyerror(const char *s) {
     extern int yylineno;
     fprintf(stderr, "Erreur à la ligne %d: %s\n", yylineno, s);
-}/*
-expressionlogic:
-
-expression EQUAL expression{
-        if (strcmp($1.type, $3.type) != 0) {
-            yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
-            return 0;
-        }
-        $$.type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
-    }
-    |
-    LPAREN expressionlogic RPAREN {
-        // Copier le contenu de la sous-expression dans l'expression actuelle
-        $$.type = $2.type;
-        $$.variables = $2.variables;
-        $$.count = $2.count;
-    }
-    | expression LT expression {
-        if (strcmp($1.type, $3.type) != 0) {
-            yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
-            return 0;
-        }
-        $$.type = "BOOLEAN";  // Le résultat de la comparaison est de type booléen
-    }
-    | expression LTE expression {
-        if (strcmp($1.type, $3.type) != 0) {
-            yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
-            return 0;
-        }
-        $$.type = "BOOLEAN";
-    }
-    | expression GT expression {
-        if (strcmp($1.type, $3.type) != 0) {
-            yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
-            return 0;
-        }
-        $$.type = "BOOLEAN";
-    }
-    | expression GTE expression {
-        if (strcmp($1.type, $3.type) != 0) {
-            yyerror("Opérandes de types incompatibles pour l'opération de comparaison.");
-            return 0;
-        }
-        $$.type = "BOOLEAN";
-    }
-    
-    | expressionlogic AND expressionlogic {
-        // Vérification que les deux opérandes sont booléens
-        if (strcmp($1.type, "BOOLEAN") != 0 || strcmp($3.type, "BOOLEAN") != 0) {
-            yyerror("Opérandes incompatibles pour l'opérateur logique AND.");
-            return 0;
-        }
-        $$.type = "BOOLEAN";
-    }
-    | expressionlogic OPERA expressionlogic {
-        if (strcmp($1.type, "BOOLEAN") != 0 || strcmp($3.type, "BOOLEAN") != 0) {
-            yyerror("Opérandes incompatibles pour l'opérateur logique OR.");
-            return 0;
-        }
-        $$.type = "BOOLEAN";
-    }
-    | NOT expressionlogic {
-        if (strcmp($2.type, "BOOLEAN") != 0) {
-            yyerror("L'opérande de NOT doit être de type BOOLEAN.");
-            return 0;
-        }
-        $$.type = "BOOLEAN";
-    }
-;*/
+}
